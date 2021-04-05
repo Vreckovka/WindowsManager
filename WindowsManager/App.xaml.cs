@@ -11,6 +11,7 @@ using Ninject;
 using Prism.Ioc;
 using Prism.Ninject;
 using Prism.Regions;
+using SoundManagement;
 using VCore.Modularity.NinjectModules;
 using VCore.Standard.Modularity.NinjectModules;
 
@@ -58,6 +59,13 @@ namespace WindowsManager
       }
 #endif
 
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+      AudioDeviceManager.Instance.Dispose();
+
+      base.OnExit(e);
     }
   }
 }
