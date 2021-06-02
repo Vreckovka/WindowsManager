@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:WindowsManager.Views"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:soundManagement="clr-namespace:SoundManagement;assembly=SoundManagement"
              d:DesignHeight="450"
              d:DesignWidth="800"
              mc:Ignorable="d">
@@ -13,37 +14,73 @@
 
     <HeaderedContentControl Header="Output device">
         <HeaderedContentControl.Content>
-            <StackPanel>
-                <ComboBox VerticalAlignment="Top"
-                          DisplayMemberPath="Description"
-                          ItemsSource="{Binding SoundDevices}"
-                          SelectedItem="{Binding SelectedSoundDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Margin="5" DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}">
+                    <ComboBox VerticalAlignment="Top"
+                              DisplayMemberPath="Description"
+                              ItemsSource="{Binding SoundDevices}"
+                              SelectedItem="{Binding SelectedSoundDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <StackPanel>
-                    <TextBlock Margin="5"
-                               HorizontalAlignment="Left"
-                               FontSize="17"
-                               Foreground="#858585">
-                        <Run Text="Volume" />
-                        <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
-                    </TextBlock>
+                    <StackPanel>
+                        <TextBlock Margin="5"
+                                   HorizontalAlignment="Left"
+                                   FontSize="17"
+                                   Foreground="#858585">
+                            <Run Text="Volume" />
+                            <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
+                        </TextBlock>
 
-                    <CheckBox Margin="5"
-                              Content="Is muted"
-                              Foreground="#ccc"
-                              IsChecked="{Binding IsActualMuted}" />
+                        <CheckBox Margin="5"
+                                  Content="Is muted"
+                                  Foreground="#ccc"
+                                  IsChecked="{Binding IsActualMuted}" />
 
-                    <CheckBox Margin="5"
-                              Content="Is default"
-                              DataContext="{Binding DataContext.DefaultDevice, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}"
-                              Foreground="#ccc"
-                              IsChecked="{Binding IsDefault}"
-                              ToolTip="Once is Active it will be selected as Default device" />
+                    </StackPanel>
+
 
                 </StackPanel>
 
-                <Slider Maximum="100" Value="{Binding ActualVolume}" />
-            </StackPanel>
+                <ListView Name="KnowDevicesListView"
+                          Grid.Row="0"
+                          Grid.Column="1"
+                          Margin="5"
+                          ItemsSource="{Binding KnownSoundDevices}">
+                    <ListView.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource ListViewItemStyle}" TargetType="ListViewItem">
+                            <Setter Property="AllowDrop" Value="True" />
+                            <Setter Property="Foreground" Value="White" />
+                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="s_PreviewMouseLeftButtonDown"/>
+                            <EventSetter Event="Drop" Handler="listbox1_Drop"/>
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Grid>
+                                            <TextBlock FontSize="12" Text="{Binding Description}" />
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+
+                <Slider Grid.Row="1"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
+                        Maximum="100"
+                        Value="{Binding ActualVolume}" />
+            </Grid>
+
 
         </HeaderedContentControl.Content>
     </HeaderedContentControl>

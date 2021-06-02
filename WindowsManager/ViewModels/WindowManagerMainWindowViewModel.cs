@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,62 +30,52 @@ namespace WindowsManager.ViewModels
     {
     }
 
+    public int Order { get; set; }
+  }
 
-    #region IsDefault
+  public class SoundManagerViewModel : ViewModel
+  {
+    private const string knowDevicesPath = "KnownDevices.txt";
 
-    private bool isDefault;
-
-    public bool IsDefault
+    public SoundManagerViewModel()
     {
-      get { return isDefault; }
+      AudioDeviceManager.Instance.ObservePropertyChange(x => x.SelectedSoundDevice).Subscribe(OnSelectedSoundDevice).DisposeWith(this);
+      AudioDeviceManager.Instance.SoundDevices.CollectionChanged += SoundDevices_CollectionChanged;
+
+      KnownSoundDevices.CollectionChanged += KnownSoundDevices_CollectionChanged;
+    }
+
+    private void KnownSoundDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+      for (int i = 0; i < KnownSoundDevices.Count; i++)
+      {
+        KnownSoundDevices[i].Priority = i;
+      }
+
+      SaveKnownDevices();
+    }
+
+    #region Properties
+
+    #region KnownSoundDevices
+
+    private ObservableCollection<BlankSoundDevice> knownSoundDevices = new ObservableCollection<BlankSoundDevice>();
+
+    public ObservableCollection<BlankSoundDevice> KnownSoundDevices
+    {
+      get { return knownSoundDevices; }
       set
       {
-        if (value != isDefault)
+        if (value != knownSoundDevices)
         {
-          isDefault = value;
-
-          if (value)
-          {
-            WindowManagerMainWindowViewModel.SaveDefaultDevice(Model.ID);
-          }
-          else
-          {
-            WindowManagerMainWindowViewModel.SaveDefaultDevice(null);
-          }
-
+          knownSoundDevices = value;
           RaisePropertyChanged();
         }
       }
     }
 
+
     #endregion
-
-  }
-
-  public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
-  {
-    private const string defaultDevicePath = "DefaultDevice.txt";
-    private static string defaultDeviceKey = null;
-
-    public WindowManagerMainWindowViewModel(
-      ScreensManagementViewModel screensManagementViewModel,
-      TurnOffViewModel turnOffViewModel)
-    {
-      ScreensManagementViewModel = screensManagementViewModel;
-      TurnOffViewModel = turnOffViewModel;
-
-      AudioDeviceManager.Instance.ObservePropertyChange(x => x.SelectedSoundDevice).Subscribe(OnSelectedSoundDevice).DisposeWith(this);
-      AudioDeviceManager.Instance.SoundDevices.CollectionChanged += SoundDevices_CollectionChanged;
-
-      defaultDeviceKey = LoadDefaultDevice(defaultDevicePath);
-    }
-
-    #region Properties
-
-    public override string Title => "Window manager";
-    public ScreensManagementViewModel ScreensManagementViewModel { get; set; }
-    public TurnOffViewModel TurnOffViewModel { get; set; }
-
 
     #region DefaultDevice
 
@@ -103,6 +96,133 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #endregion
+
+    #region Methods
+
+    public override void Initialize()
+    {
+      base.Initialize();
+
+      var json = LoadKnownDevices(knowDevicesPath);
+
+      if (!string.IsNullOrEmpty(json))
+      {
+        var soundDevices = JsonSerializer.Deserialize<IEnumerable<BlankSoundDevice>>(json);
+
+        foreach (var soundDevice in soundDevices)
+        {
+          KnownSoundDevices.Add(soundDevice);
+        }
+      }
+    }
+
+    #region SoundDevices_CollectionChanged
+
+    private void SoundDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+      if (e.NewItems != null)
+      {
+        foreach (var device in e.NewItems.OfType<SoundDevice>())
+        {
+          var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Id == device.ID);
+
+          if (newlyConnectedDevice != null)
+          {
+            if (AudioDeviceManager.Instance.SelectedSoundDevice != null && AudioDeviceManager.Instance.SelectedSoundDevice.ID != newlyConnectedDevice.Id)
+            {
+              var actualDevice = KnownSoundDevices.Single(x => x.Id == AudioDeviceManager.Instance.SelectedSoundDevice.ID);
+
+              if (newlyConnectedDevice.Priority < actualDevice.Priority)
+              {
+                AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
+              }
+            }
+          }
+          else
+          {
+            KnownSoundDevices.Add(new BlankSoundDevice()
+            {
+              Description = device.Description,
+              Id = device.ID,
+              Priority = KnownSoundDevices.Count
+            });
+
+            SaveKnownDevices();
+          }
+        }
+      }
+    }
+
+    #endregion
+
+    private void SaveKnownDevices()
+    {
+      var json = JsonSerializer.Serialize(KnownSoundDevices.OrderBy(x => x.Priority));
+
+      if (!File.Exists(knowDevicesPath))
+      {
+        var stream = File.Create(knowDevicesPath);
+        stream.Flush();
+        stream.Close();
+      }
+
+      File.WriteAllText(knowDevicesPath, json);
+    }
+
+    #region OnSelectedSoundDevice
+
+    private void OnSelectedSoundDevice(SoundDevice soundDevice)
+    {
+      DefaultDevice = new SoundDeviceViewModel(soundDevice);
+
+    }
+
+    #endregion
+
+    #region LoadDefaultDevice
+
+    private string LoadKnownDevices(string path)
+    {
+      if (File.Exists(path))
+      {
+        return File.ReadAllText(path);
+      }
+
+      return null;
+    }
+
+    #endregion
+
+    #endregion
+  }
+
+  public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
+  {
+
+
+    public WindowManagerMainWindowViewModel(
+      ScreensManagementViewModel screensManagementViewModel,
+      TurnOffViewModel turnOffViewModel,
+      SoundManagerViewModel soundManagerViewModel)
+    {
+      ScreensManagementViewModel = screensManagementViewModel;
+      TurnOffViewModel = turnOffViewModel;
+      SoundManagerViewModel = soundManagerViewModel;
+
+
+
+    }
+
+    #region Properties
+
+    public override string Title => "Window manager";
+    public ScreensManagementViewModel ScreensManagementViewModel { get; set; }
+    public TurnOffViewModel TurnOffViewModel { get; set; }
+
+    public SoundManagerViewModel SoundManagerViewModel { get; set; }
+
+
 
     #endregion
 
@@ -114,37 +234,6 @@ namespace WindowsManager.ViewModels
 
     #region Methods
 
-    #region SoundDevices_CollectionChanged
-
-    private void SoundDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-    {
-      if (e.NewItems != null)
-      {
-        var device = e.NewItems.OfType<SoundDevice>().SingleOrDefault(x => x.ID == defaultDeviceKey);
-
-        if (device != null)
-        {
-          AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
-        }
-         
-      }
-    }
-
-    #endregion
-
-    #region OnSelectedSoundDevice
-
-    private void OnSelectedSoundDevice(SoundDevice soundDevice)
-    {
-      DefaultDevice = new SoundDeviceViewModel(soundDevice);
-
-      if (soundDevice.ID == defaultDeviceKey)
-      {
-        DefaultDevice.IsDefault = true;
-      }
-    }
-
-    #endregion
 
     #region OnClose
 
@@ -155,33 +244,7 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    #region SaveDefaultDevice
 
-    internal static void SaveDefaultDevice(string defaultDeviceID)
-    {
-      if (defaultDeviceKey != defaultDeviceID)
-      {
-        File.WriteAllText(defaultDevicePath, defaultDeviceID);
-
-        defaultDeviceKey = defaultDeviceID;
-      }
-    }
-
-    #endregion
-
-    #region LoadDefaultDevice
-
-    private string LoadDefaultDevice(string path)
-    {
-      if (File.Exists(path))
-      {
-        return File.ReadAllText(path);
-      }
-
-      return null;
-    }
-
-    #endregion
 
     #region SwitchScreenCommand
 
