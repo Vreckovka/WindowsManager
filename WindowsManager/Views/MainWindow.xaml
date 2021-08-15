@@ -29,7 +29,7 @@
             </TaskbarItemInfo.ThumbButtonInfos>
         </TaskbarItemInfo>
     </Window.TaskbarItemInfo>
-    <Grid>
+    <Grid Background="#03ffffff">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="*" />

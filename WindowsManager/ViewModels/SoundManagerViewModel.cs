@@ -66,7 +66,24 @@ namespace WindowsManager.ViewModels
       {
         if (value != defaultDevice)
         {
+          if (defaultDevice != null)
+          {
+            var lastSelected = KnownSoundDevices.SingleOrDefault(x => x.Model.Id == defaultDevice.Model.ID);
+
+            if (lastSelected != null)
+              lastSelected.IsDefault = false;
+          }
+
           defaultDevice = value;
+
+          if (defaultDevice != null)
+          {
+            var selected = KnownSoundDevices.SingleOrDefault(x => x.Model.Id == defaultDevice.Model.ID);
+
+            if (selected != null)
+              selected.IsDefault = true;
+          }
+
           RaisePropertyChanged();
         }
       }
@@ -126,7 +143,7 @@ namespace WindowsManager.ViewModels
           {
             AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
           }
-        
+
 
           var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Model.Id == device.ID);
 
@@ -191,6 +208,7 @@ namespace WindowsManager.ViewModels
     {
       DefaultDevice = new SoundDeviceViewModel(soundDevice);
 
+
     }
 
     #endregion
@@ -223,6 +241,8 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region RemoveKnownDevice
+
     private void RemoveKnownDevice(BlankSoundDeviceViewModel blankSoundDeviceViewModel)
     {
       KnownSoundDevices.Remove(blankSoundDeviceViewModel);
@@ -234,6 +254,8 @@ namespace WindowsManager.ViewModels
 
       SaveKnownDevices();
     }
+
+    #endregion
 
     #endregion
   }

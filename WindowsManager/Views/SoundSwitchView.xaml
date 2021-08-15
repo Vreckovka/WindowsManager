@@ -17,13 +17,14 @@
         <HeaderedContentControl.Content>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="300" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
+
                 <StackPanel Margin="0,10" DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}">
                     <ComboBox VerticalAlignment="Top"
                               DisplayMemberPath="Description"
@@ -31,23 +32,36 @@
                               SelectedItem="{Binding SelectedSoundDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                     <StackPanel>
-                        <CheckBox Margin="0,10"
-                                  Content="Is muted"
-                                  Foreground="#ccc"
-                                  IsChecked="{Binding IsActualMuted}" />
+                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <TextBlock Margin="0,10"
+                                       HorizontalAlignment="Center"
+                                       FontSize="17"
+                                       Foreground="#858585">
+                                <Run Text="Volume" />
+                                <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
+                            </TextBlock>
 
+                            <controls:PathButton Margin="10,10"
+                                                 IconDefaultColor="#ccc"
+                                                 IsChecked="{Binding IsActualMuted}"
+                                                 PathCheckedBrush="{StaticResource LightRedBrush}">
+                                <controls:PathButton.Style>
+                                    <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
+                                        <Setter Property="PathStyle" Value="{StaticResource Volume}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter Property="PathStyle" Value="{StaticResource VolumeOff}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </controls:PathButton.Style>
+                            </controls:PathButton>
+                        </StackPanel>
 
                         <Slider DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
                                 Maximum="100"
                                 Value="{Binding ActualVolume}" />
 
-                        <TextBlock Margin="0,10"
-                                   HorizontalAlignment="Center"
-                                   FontSize="17"
-                                   Foreground="#858585">
-                            <Run Text="Volume" />
-                            <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
-                        </TextBlock>
                     </StackPanel>
 
 
@@ -124,9 +138,10 @@
                                                                          IconDefaultColor="Transparent"
                                                                          IconHeight="12"
                                                                          IconWidth="14"
-                                                                         IsChecked="{Binding IsSelected}"
+                                                                         IsChecked="{Binding IsDefault}"
                                                                          IsHitTestVisible="False"
                                                                          IsReadOnly="True"
+                                                                         Opacity="0.70"
                                                                          PathCheckedBrush="{StaticResource GreenBrush}"
                                                                          PathStyle="{StaticResource CheckMark}">
                                                         <controls:PathButton.Style>
