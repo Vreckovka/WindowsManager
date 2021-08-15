@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
@@ -10,21 +11,27 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using WindowsManager.Modularity;
+using WindowsManager.Views;
 using Microsoft.Win32;
 using VCore;
 using VCore.ItemsCollections;
+using VCore.Modularity.RegionProviders;
 using VCore.Standard;
 using VCore.Standard.Helpers;
+using VCore.ViewModels;
 
 namespace WindowsManager.ViewModels
 {
-  public class ScreensManagementViewModel : ViewModel
+  public class ScreensManagementViewModel : RegionViewModel<ScreensManagementView>
   {
-   
 
-    public ScreensManagementViewModel()
+    private string folderPath = "Data\\Monitors";
+
+    public ScreensManagementViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
-     
+      if (!Directory.Exists(folderPath))
+        Directory.CreateDirectory(folderPath);
     }
 
     #region Properties
@@ -94,19 +101,24 @@ namespace WindowsManager.ViewModels
 
     #region Methods
 
+   
+
     #region Initialize
 
     public override void Initialize()
     {
       base.Initialize();
 
-      var screensArry = System.Windows.Forms.Screen.AllScreens;
+      var screensArry = System.Windows.Forms.Screen.AllScreens.ToList();
 
-      var scresnsVm = screensArry.Select(x => new ScreenViewModel(x));
+      var scresnsVm = screensArry.Select(x => new ScreenViewModel(x, folderPath + "\\Monitor_" + screensArry.IndexOf(x) + ".txt"));
 
       Screens.AddRange(scresnsVm);
 
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Subscribe(x => OnDimmedChanged()).DisposeWith(this);
+      if (Screens.Count > 0)
+        Screens[0].IsSelected = true;
+
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
 
 
       foreach (var screen in Screens)
@@ -119,8 +131,6 @@ namespace WindowsManager.ViewModels
       Observable.Interval(TimeSpan.FromSeconds(0.2)).Subscribe(x => UpdateActualScreen()).DisposeWith(this);
 
       Application.Current.MainWindow.Closing += MainWindow_Closing;
-
-     
     }
 
     #region MainWindow_Closing
@@ -164,12 +174,22 @@ namespace WindowsManager.ViewModels
 
     #region OnDimmedChanged
 
-    private void OnDimmedChanged()
+    private void OnDimmedChanged(ScreenViewModel screenViewModel)
     {
       var isAllBlack = Screens.Where(x => x != actualScreen).All(x => x.IsDimmed);
 
       Application.Current.Dispatcher.Invoke(() =>
       {
+        if (Screens.IndexOf(screenViewModel) == 0)
+        {
+          var screen = Screens[1];
+
+          if (screen.IsDimmed != screenViewModel.IsDimmed)
+          {
+            screen.DimmOrUnDimm();
+          }
+        }
+
         if (isAllBlack)
         {
           IsTurnOffScreensButActive = true;
@@ -251,9 +271,13 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-   
+
 
     #endregion
+
+    public override string RegionName { get; protected set; } = RegionNames.MainContent;
+
+    public override string Header => "Screens";
   }
 
 

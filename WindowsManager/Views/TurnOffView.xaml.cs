@@ -10,13 +10,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VCore.Standard.Modularity.Interfaces;
 
 namespace WindowsManager.Views
 {
   /// <summary>
   /// Interaction logic for TurnOff.xaml
   /// </summary>
-  public partial class TurnOffView : UserControl
+  public partial class TurnOffView : UserControl, IView
   {
     public TurnOffView()
     {

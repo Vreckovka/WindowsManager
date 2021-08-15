@@ -5,12 +5,16 @@ using System.Text;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
+using WindowsManager.Modularity;
+using WindowsManager.Views;
 using VCore;
+using VCore.Modularity.RegionProviders;
 using VCore.Standard;
+using VCore.ViewModels;
 
 namespace WindowsManager.ViewModels.TurnOff
 {
-  public class TurnOffViewModel : ViewModel
+  public class TurnOffViewModel : RegionViewModel<TurnOffView>
   {
     #region Fields
 
@@ -20,7 +24,7 @@ namespace WindowsManager.ViewModels.TurnOff
 
     #region Constructors
 
-    public TurnOffViewModel()
+    public TurnOffViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
       InitilizeTimeCollections();
     }
@@ -28,6 +32,10 @@ namespace WindowsManager.ViewModels.TurnOff
     #endregion
 
     #region Properties
+
+    public override string RegionName { get; protected set; } = RegionNames.MainContent;
+
+    public override string Header => "Shut down";
 
     #region TimeLeft
 
@@ -330,5 +338,7 @@ namespace WindowsManager.ViewModels.TurnOff
     #endregion
 
     #endregion
+
+    
   }
 }

@@ -10,13 +10,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using VCore.Standard.Modularity.Interfaces;
 
 namespace WindowsManager.Views
 {
   /// <summary>
   /// Interaction logic for ScreensManagementView.xaml
   /// </summary>
-  public partial class ScreensManagementView : UserControl
+  public partial class ScreensManagementView : UserControl, IView
   {
     public ScreensManagementView()
     {

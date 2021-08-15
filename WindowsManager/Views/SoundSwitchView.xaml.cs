@@ -12,13 +12,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SoundManagement;
+using VCore.Standard.Modularity.Interfaces;
 
 namespace WindowsManager.Views
 {
   /// <summary>
   /// Interaction logic for SoundSwitchView.xaml
   /// </summary>
-  public partial class SoundSwitchView : UserControl
+  public partial class SoundSwitchView : UserControl, IView
   {
     public SoundSwitchView()
     {

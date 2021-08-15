@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -17,9 +21,13 @@ namespace WindowsManager.ViewModels
     private BrightnessController brightnessController;
     private ReplaySubject<int> brightnessSubject = new ReplaySubject<int>(1);
 
-    public ScreenViewModel(Screen model) : base(model)
+    private string filePath;
+
+    public ScreenViewModel(Screen model, string fileName) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
+
+      filePath = fileName;
     }
 
     #region Properties
@@ -53,9 +61,43 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region TurnOffLimit
+
+    private double? turnOffLimit = null;
+
+    public double? TurnOffLimit
+    {
+      get { return turnOffLimit; }
+      set
+      {
+        if (value != turnOffLimit)
+        {
+          turnOffLimit = value;
+
+          if (turnOffLimit == 0)
+          {
+            TimeSinceActive = null;
+            isActiveSerialDisposable.Disposable?.Dispose();
+            File.Delete(filePath);
+          }
+          else
+          {
+            SetDimmTimer();
+
+            Save();
+          }
+
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
     #region IsActive
 
     private bool isActive;
+    private SerialDisposable isActiveSerialDisposable = new SerialDisposable();
 
     public bool IsActive
     {
@@ -65,6 +107,16 @@ namespace WindowsManager.ViewModels
         if (value != isActive)
         {
           isActive = value;
+
+          if (!isActive)
+            SetDimmTimer();
+          else
+          {
+            isActiveSerialDisposable.Disposable?.Dispose();
+            TimeSinceActive = null;
+            TimeTillTurnOff = null;
+          }
+
           RaisePropertyChanged();
         }
       }
@@ -94,6 +146,64 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region IsSelected
+
+    private bool isSelected;
+
+    public bool IsSelected
+    {
+      get { return isSelected; }
+      set
+      {
+        if (value != isSelected)
+        {
+          isSelected = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TimeSinceActive
+
+    private double? timeSinceActive;
+
+    public double? TimeSinceActive
+    {
+      get { return timeSinceActive; }
+      set
+      {
+        if (value != timeSinceActive)
+        {
+          timeSinceActive = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TimeTillTurnOff
+
+    private double? timeTillTurnOff;
+
+    public double? TimeTillTurnOff
+    {
+      get { return timeTillTurnOff; }
+      set
+      {
+        if (value != timeTillTurnOff)
+        {
+          timeTillTurnOff = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+
     #endregion
 
     #region TurnOffCommand
@@ -115,7 +225,7 @@ namespace WindowsManager.ViewModels
 
     #region Initialize
 
-    public override void Initialize()
+    public override async void Initialize()
     {
       base.Initialize();
 
@@ -125,10 +235,12 @@ namespace WindowsManager.ViewModels
 
       if (Brightness != null)
       {
-        brightnessController.SetBrightness(80);
+        Brightness = 80;
 
         brightnessSubject.Throttle(TimeSpan.FromSeconds(0.5)).Subscribe(x => { brightnessController.SetBrightness(x); }).DisposeWith(this);
       }
+
+      Load();
     }
 
     #endregion
@@ -212,6 +324,83 @@ namespace WindowsManager.ViewModels
     private void Dimmer_Closed(object sender, System.EventArgs e)
     {
       UnDimm();
+    }
+
+    #endregion
+
+    #region SetDimmTimer
+
+    private void SetDimmTimer()
+    {
+      if (TurnOffLimit != null)
+      {
+        TimeSinceActive = 0;
+      }
+
+      isActiveSerialDisposable.Disposable = Observable.Interval(TimeSpan.FromSeconds(0.5)).Subscribe(OnTimerDimm);
+    }
+
+    #endregion
+
+    #region OnTimerDimm
+
+    private Stopwatch stopWatch = new Stopwatch();
+
+    private void OnTimerDimm(long index)
+    {
+      stopWatch.Stop();
+    
+
+      if (TurnOffLimit != null)
+      {
+        if (TimeSinceActive == null)
+        {
+          TimeSinceActive = 0;
+        }
+
+        TimeSinceActive += stopWatch.ElapsedMilliseconds / 1000.0 / 60.0;
+        TimeTillTurnOff = TurnOffLimit - TimeSinceActive;
+
+        if (TimeSinceActive > TurnOffLimit)
+        {
+          System.Windows.Application.Current.Dispatcher.Invoke(() =>
+          {
+            if (!IsDimmed)
+            {
+              Dimm();
+            }
+          });
+        }
+      }
+
+      stopWatch.Reset();
+      stopWatch.Start();
+    }
+
+    #endregion
+
+    private void Save()
+    {
+      File.WriteAllText(filePath, TurnOffLimit.ToString());
+    }
+
+    private void Load()
+    {
+      if (File.Exists(filePath))
+      {
+        var data = File.ReadAllText(filePath);
+
+        TurnOffLimit = double.Parse(data);
+      }
+    }
+
+    #region Dispose
+
+    public override void Dispose()
+    {
+      base.Dispose();
+
+      isActiveSerialDisposable?.Dispose();
     }
 
     #endregion
