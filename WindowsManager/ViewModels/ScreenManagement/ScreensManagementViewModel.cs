@@ -81,6 +81,10 @@ namespace WindowsManager.ViewModels
       MonitorStateStandBy = 1
     }
 
+    public override string RegionName { get; protected set; } = RegionNames.MainContent;
+
+    public override string Header => "Screens";
+
 
     #endregion
 
@@ -101,7 +105,7 @@ namespace WindowsManager.ViewModels
 
     #region Methods
 
-   
+
 
     #region Initialize
 
@@ -119,7 +123,7 @@ namespace WindowsManager.ViewModels
         Screens[0].IsSelected = true;
 
       Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
-
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
 
       foreach (var screen in Screens)
       {
@@ -190,6 +194,7 @@ namespace WindowsManager.ViewModels
           }
         }
 
+
         if (isAllBlack)
         {
           IsTurnOffScreensButActive = true;
@@ -197,6 +202,23 @@ namespace WindowsManager.ViewModels
         else
         {
           IsTurnOffScreensButActive = false;
+        }
+      });
+    }
+
+    #endregion
+
+    #region OnActiveChanged
+
+    private void OnActiveChanged(ScreenViewModel screenViewModel)
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Screens.IndexOf(screenViewModel) == 1 && screenViewModel.IsActive)
+        {
+          var screen = Screens[0];
+
+          screen.StopTurnOffTimer();
         }
       });
     }
@@ -271,22 +293,7 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-
-
     #endregion
 
-    public override string RegionName { get; protected set; } = RegionNames.MainContent;
-
-    public override string Header => "Screens";
-  }
-
-
-  [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-  public struct PHYSICAL_MONITOR
-  {
-    public IntPtr hPhysicalMonitor;
-
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-    public string szPhysicalMonitorDescription;
   }
 }

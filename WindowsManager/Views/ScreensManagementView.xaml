@@ -318,7 +318,7 @@
 
                         <TextBlock Grid.Row="1"
                                    Style="{StaticResource HeaderText}"
-                                   Text="Turn off timer " />
+                                   Text="Off timer - time" />
 
                         <TextBox Grid.Row="1"
                                  Grid.Column="1"
@@ -336,7 +336,7 @@
 
                         <TextBlock Grid.Row="2"
                                    Style="{StaticResource HeaderText}"
-                                   Text="Turn off timer  " />
+                                   Text="Off timer - elapsed  " />
 
 
                         <TextBlock Grid.Row="2"

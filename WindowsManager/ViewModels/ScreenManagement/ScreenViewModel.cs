@@ -76,8 +76,8 @@ namespace WindowsManager.ViewModels
 
           if (turnOffLimit == 0)
           {
-            TimeSinceActive = null;
-            isActiveSerialDisposable.Disposable?.Dispose();
+            StopTurnOffTimer();
+
             File.Delete(filePath);
           }
           else
@@ -112,9 +112,7 @@ namespace WindowsManager.ViewModels
             SetDimmTimer();
           else
           {
-            isActiveSerialDisposable.Disposable?.Dispose();
-            TimeSinceActive = null;
-            TimeTillTurnOff = null;
+            StopTurnOffTimer();
           }
 
           RaisePropertyChanged();
@@ -378,6 +376,13 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
+
+    public void StopTurnOffTimer()
+    {
+      isActiveSerialDisposable.Disposable?.Dispose();
+      TimeSinceActive = null;
+      TimeTillTurnOff = null;
+    }
 
     private void Save()
     {
