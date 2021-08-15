@@ -36,7 +36,7 @@
         </Grid.ColumnDefinitions>
 
 
-        <ListView Width="220"
+        <ListView Width="180"
                   Background="#05ffffff"
                   BorderThickness="0"
                   ItemsSource="{Binding MainMenu.Items}"

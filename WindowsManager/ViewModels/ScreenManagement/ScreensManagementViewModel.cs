@@ -83,7 +83,7 @@ namespace WindowsManager.ViewModels
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
 
-    public override string Header => "Screens";
+    public override string Header => "Monitors";
 
 
     #endregion

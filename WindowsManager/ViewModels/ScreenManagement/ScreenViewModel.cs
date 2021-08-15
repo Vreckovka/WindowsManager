@@ -44,6 +44,14 @@ namespace WindowsManager.ViewModels
         if (value != isDimmed)
         {
           isDimmed = value;
+
+          StopTurnOffTimer();
+
+          if (!isDimmed && !IsActive)
+          {
+            SetDimmTimer();
+          }
+
           RaisePropertyChanged();
         }
       }
@@ -108,11 +116,18 @@ namespace WindowsManager.ViewModels
         {
           isActive = value;
 
-          if (!isActive)
+          if (!isActive && !IsDimmed)
+          {
             SetDimmTimer();
-          else
+          }
+          else if(!IsDimmed)
           {
             StopTurnOffTimer();
+          }
+
+          if (isActive)
+          {
+            TimeSinceActive = 0;
           }
 
           RaisePropertyChanged();
@@ -359,11 +374,16 @@ namespace WindowsManager.ViewModels
         TimeSinceActive += stopWatch.ElapsedMilliseconds / 1000.0 / 60.0;
         TimeTillTurnOff = TurnOffLimit - TimeSinceActive;
 
+        if (TimeTillTurnOff < 0)
+        {
+          TimeTillTurnOff = TimeTillTurnOff * -1;
+        }
+
         if (TimeSinceActive > TurnOffLimit)
         {
           System.Windows.Application.Current.Dispatcher.Invoke(() =>
           {
-            if (!IsDimmed)
+            if (!IsDimmed && !IsActive)
             {
               Dimm();
             }
@@ -382,6 +402,7 @@ namespace WindowsManager.ViewModels
       isActiveSerialDisposable.Disposable?.Dispose();
       TimeSinceActive = null;
       TimeTillTurnOff = null;
+      stopWatch.Reset();
     }
 
     private void Save()

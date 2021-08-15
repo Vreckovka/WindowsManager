@@ -4,9 +4,11 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Windows.Input;
 using WindowsManager.Modularity;
 using WindowsManager.Views;
 using SoundManagement;
+using VCore;
 using VCore.Helpers;
 using VCore.Modularity.RegionProviders;
 using VCore.Standard;
@@ -31,13 +33,13 @@ namespace WindowsManager.ViewModels
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
 
-    public override string Header => "Output devices"; 
+    public override string Header => "Output devices";
 
     #region KnownSoundDevices
 
-    private ObservableCollection<BlankSoundDevice> knownSoundDevices = new ObservableCollection<BlankSoundDevice>();
+    private ObservableCollection<BlankSoundDeviceViewModel> knownSoundDevices = new ObservableCollection<BlankSoundDeviceViewModel>();
 
-    public ObservableCollection<BlankSoundDevice> KnownSoundDevices
+    public ObservableCollection<BlankSoundDeviceViewModel> KnownSoundDevices
     {
       get { return knownSoundDevices; }
       set
@@ -74,7 +76,24 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region RemoveItem
+
+    private ActionCommand<BlankSoundDeviceViewModel> removeItem;
+
+    public ICommand RemoveItem
+    {
+      get
+      {
+        return removeItem ??= new ActionCommand<BlankSoundDeviceViewModel>(RemoveKnownDevice);
+      }
+    }
+
+
+    #endregion
+
     #region Methods
+
+    #region Initialize
 
     public override void Initialize()
     {
@@ -88,10 +107,12 @@ namespace WindowsManager.ViewModels
 
         foreach (var soundDevice in soundDevices)
         {
-          KnownSoundDevices.Add(soundDevice);
+          KnownSoundDevices.Add(new BlankSoundDeviceViewModel(soundDevice));
         }
       }
     }
+
+    #endregion
 
     #region SoundDevices_CollectionChanged
 
@@ -101,40 +122,56 @@ namespace WindowsManager.ViewModels
       {
         foreach (var device in e.NewItems.OfType<SoundDevice>())
         {
-          var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Id == device.ID);
-
-          if (newlyConnectedDevice != null)
+          if (AudioDeviceManager.Instance.WasLoaded)
           {
-            if (AudioDeviceManager.Instance.SelectedSoundDevice != null && AudioDeviceManager.Instance.SelectedSoundDevice.ID != newlyConnectedDevice.Id)
-            {
-              var actualDevice = KnownSoundDevices.Single(x => x.Id == AudioDeviceManager.Instance.SelectedSoundDevice.ID);
-
-              if (newlyConnectedDevice.Priority < actualDevice.Priority)
-              {
-                AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
-              }
-            }
+            AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
           }
-          else
+        
+
+          var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Model.Id == device.ID);
+
+          if (newlyConnectedDevice == null)
           {
-            KnownSoundDevices.Add(new BlankSoundDevice()
+            KnownSoundDevices.Add(new BlankSoundDeviceViewModel(new BlankSoundDevice()
             {
               Description = device.Description,
               Id = device.ID,
               Priority = KnownSoundDevices.Count
-            });
-
-            SaveKnownDevices();
+            }));
           }
         }
       }
+      else if (e.OldItems != null)
+      {
+        foreach (var device in e.OldItems.OfType<SoundDevice>())
+        {
+          var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Model.Id == device.ID);
+
+          if (newlyConnectedDevice != null)
+          {
+            BlankSoundDeviceViewModel newDefaultDevice = null;
+
+            newDefaultDevice = KnownSoundDevices.OrderBy(x => x.Priority).FirstOrDefault(x => AudioDeviceManager.Instance.SoundDevices.SingleOrDefault(y => y.ID == x.Model.Id) != null);
+
+            if (newDefaultDevice != null && AudioDeviceManager.Instance.SelectedSoundDevice.ID == device.ID)
+            {
+              AudioDeviceManager.Instance.SetSelectedSoundDevice(AudioDeviceManager.Instance.SoundDevices.SingleOrDefault(y => y.ID == newDefaultDevice.Model.Id), false);
+            }
+          }
+        }
+      }
+
+
+      SaveKnownDevices();
     }
 
     #endregion
 
+    #region SaveKnownDevices
+
     private void SaveKnownDevices()
     {
-      var json = JsonSerializer.Serialize(KnownSoundDevices.OrderBy(x => x.Priority));
+      var json = JsonSerializer.Serialize(KnownSoundDevices.OrderBy(x => x.Priority).Select(x => x.Model));
 
       if (!File.Exists(knowDevicesPath))
       {
@@ -145,6 +182,8 @@ namespace WindowsManager.ViewModels
 
       File.WriteAllText(knowDevicesPath, json);
     }
+
+    #endregion
 
     #region OnSelectedSoundDevice
 
@@ -170,8 +209,24 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region KnownSoundDevices_CollectionChanged
+
     private void KnownSoundDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+      for (int i = 0; i < KnownSoundDevices.Count; i++)
+      {
+        KnownSoundDevices[i].Priority = i;
+      }
+
+      SaveKnownDevices();
+    }
+
+    #endregion
+
+    private void RemoveKnownDevice(BlankSoundDeviceViewModel blankSoundDeviceViewModel)
+    {
+      KnownSoundDevices.Remove(blankSoundDeviceViewModel);
+
       for (int i = 0; i < KnownSoundDevices.Count; i++)
       {
         KnownSoundDevices[i].Priority = i;

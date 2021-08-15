@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WindowsManager.ViewModels;
 using SoundManagement;
 using VCore.Standard.Modularity.Interfaces;
 
@@ -29,20 +30,22 @@ namespace WindowsManager.Views
 
     void s_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-      if (sender is ListViewItem)
+      if (sender is Grid grid)
       {
-        ListViewItem draggedItem = sender as ListViewItem;
-        DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
-        draggedItem.IsSelected = true;
+        DragDrop.DoDragDrop(grid, grid.DataContext, DragDropEffects.Move);
+
+        //draggedItem.IsSelected = true;
+
+        e.Handled = false;
       }
     }
 
     void listbox1_Drop(object sender, DragEventArgs e)
     {
-      var itemSource = (ObservableCollection<BlankSoundDevice>)KnowDevicesListView.ItemsSource;
+      var itemSource = (ObservableCollection<BlankSoundDeviceViewModel>)KnowDevicesListView.ItemsSource;
 
-      BlankSoundDevice droppedData = e.Data.GetData(typeof(BlankSoundDevice)) as BlankSoundDevice;
-      BlankSoundDevice target = ((ListViewItem)(sender)).DataContext as BlankSoundDevice;
+      BlankSoundDeviceViewModel droppedData = e.Data.GetData(typeof(BlankSoundDeviceViewModel)) as BlankSoundDeviceViewModel;
+      BlankSoundDeviceViewModel target = ((Border)(sender)).DataContext as BlankSoundDeviceViewModel;
 
       int removedIdx = KnowDevicesListView.Items.IndexOf(droppedData);
       int targetIdx = KnowDevicesListView.Items.IndexOf(target);
