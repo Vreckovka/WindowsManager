@@ -36,10 +36,11 @@
         </Grid.ColumnDefinitions>
 
 
-        <ListView Width="260"
+        <ListView Width="220"
                   Background="#05ffffff"
                   BorderThickness="0"
                   ItemsSource="{Binding MainMenu.Items}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   Style="{StaticResource ListView_MenuStyle}" />
 
         <Border Grid.Column="1" Padding="10">
