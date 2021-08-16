@@ -29,8 +29,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
                 <Grid.Resources>
@@ -60,21 +60,41 @@
                 </Grid.Resources>
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <Grid>
-                        <Path Width="55"
-                              Height="55"
-                              Fill="#252525"
-                              Style="{StaticResource Screen}" />
-
-                        <controls:PathButton Margin="15,0,0,10"
+                    <Border Cursor="Hand">
+                        <controls:PathButton Margin="0,10"
+                                             Padding="15"
                                              Command="{Binding TurnOffButActive}"
-                                             IconDefaultColor="#cc32a832"
-                                             IconHoverColor="#eb4242"
+                                             Content="Turn off inactive monitors"
+                                             FontSize="15"
+                                             FontWeight="Bold"
+                                             ForegroundDefaultColor="#20ffffff"
+                                             IconDefaultColor="{StaticResource GreenColor}"
+                                             IconHeight="35"
+                                             IconHoverColor="{StaticResource DefaultRedColor}"
+                                             IconWidth="35"
                                              IsChecked="{Binding IsTurnOffScreensButActive, Mode=OneWay}"
-                                             PathCheckedBrush="#cceb4242"
+                                             PathCheckedBrush="{StaticResource DefaultRedBrush}"
                                              PathStyle="{StaticResource TurnOff}"
-                                             ToolTip="Turn off inactive screens" />
-                    </Grid>
+                                             ToolTip="Will turn on/off all screens that are not currently active">
+                            <controls:PathButton.Style>
+                                <Style TargetType="controls:PathButton">
+                                    <Setter Property="Background" Value="#05ffffff" />
+                                    <Setter Property="BorderBrush" Value="#08ffffff" />
+                                    <Setter Property="BorderThickness" Value="2" />
+
+
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#10ffffff" />
+                                            <Setter Property="BorderBrush" Value="#20ffffff" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </controls:PathButton.Style>
+                        </controls:PathButton>
+
+
+                    </Border>
                 </StackPanel>
 
                 <Border Grid.Row="1"
@@ -87,7 +107,8 @@
                           Margin="0,8,0,0"
                           Background="Transparent"
                           Foreground="#bbb"
-                          ItemsSource="{Binding Screens}">
+                          ItemsSource="{Binding Screens}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
@@ -95,8 +116,8 @@
                     </ListView.ItemsPanel>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0" BorderThickness="2">
-                                <Grid Width="180" Height="120">
+                            <Border Margin="-5,0,5,0" BorderThickness="2">
+                                <Grid Width="200" Height="155">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="auto" />
                                         <RowDefinition Height="auto" />
@@ -105,13 +126,8 @@
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
 
-                                    <Grid Margin="0,5,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="auto" />
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-
-                                        <controls:PathButton Margin="7,5,0,0"
+                                    <Grid Margin="0,0,0,0" Background="#10ffffff">
+                                        <controls:PathButton Margin="7,0,0,0"
                                                              Padding="0"
                                                              IconHeight="15"
                                                              IconWidth="18"
@@ -130,65 +146,112 @@
                                             </controls:PathButton.Style>
                                         </controls:PathButton>
 
-                                        <TextBlock Grid.Column="1"
-                                                   Margin="-25,0,0,0"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Top"
-                                                   Text="{Binding Name}" />
+                                        <Border Margin="0,0,0,0"
+                                                Padding="0,5,0,5"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Top">
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       FontSize="17"
+                                                       FontWeight="DemiBold"
+                                                       Foreground="#ddd"
+                                                       Text="{Binding Name}" />
+                                        </Border>
+
                                     </Grid>
 
                                     <TextBlock Grid.Row="1"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
-                                               Foreground="#656565">
+                                               Foreground="#ccc">
                                         <Run Text="{Binding Model.Bounds.Width}" />
                                         <Run Text="x" />
                                         <Run Text="{Binding Model.Bounds.Height}" />
                                     </TextBlock>
 
-                                    <TextBlock Grid.Row="2"
-                                               Margin="0,0,0,0"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
+                                    <Border Grid.Row="2"
+                                            Margin="0,5,0,0"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            CornerRadius="3">
+                                        <TextBlock Padding="7,3"
+                                                   FontWeight="Bold"
+                                                   Foreground="White">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
+                                                            <Setter Property="Text" Value="Dimmed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
+                                                            <Setter Property="Text" Value="Online" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <Border.Style>
+                                            <Style TargetType="Border">
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
-                                                        <Setter Property="Text" Value="Dimmed" />
-                                                        <Setter Property="Foreground" Value="#cceb4242" />
+                                                        <Setter Property="Background" Value="{StaticResource DefaultRedBrush}" />
                                                     </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
-                                                        <Setter Property="Text" Value="Online" />
-                                                        <Setter Property="Foreground" Value="#cc32a832" />
+                                                        <Setter Property="Background" Value="{StaticResource GreenBrush}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                        </Border.Style>
+                                    </Border>
 
-                                    <TextBlock Grid.Row="3"
-                                               Margin="0,0,0,0"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               Text="{Binding ActualTimerTime, StringFormat={}{0:N2} min., Mode=OneWay}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{StaticResource DefaultRedBrush}" />
 
+                                    <Border Grid.Row="3"
+                                            Margin="0,7,0,0"
+                                            Padding="8,3"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            BorderThickness="0,0,0,1.5"
+                                            CornerRadius="5">
+                                        <TextBlock FontSize="14" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="White" />
+
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActualTimerTime}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+
+                                            <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ mm}, Mode=OneWay}" />
+                                            <Run FontSize="12"
+                                                 Foreground="#60ffffff"
+                                                 Text="(min)" />
+                                            <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ ss}, Mode=OneWay}" />
+                                            <Run FontSize="12"
+                                                 Foreground="#60ffffff"
+                                                 Text="(sec)" />
+                                        </TextBlock>
+
+                                        <Border.Style>
+                                            <Style TargetType="Border">
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ActualTimerTime}" Value="{x:Null}">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    <DataTrigger Binding="{Binding IsDimmed}" Value="true">
+                                                        <Setter Property="Background" Value="#20ffffff" />
+                                                        <Setter Property="BorderBrush" Value="{StaticResource DefaultRedBrush}" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                        </Border.Style>
+                                    </Border>
+
 
                                     <Grid Grid.Row="4" VerticalAlignment="Bottom">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto" />
-                                            <ColumnDefinition Width="auto" />
-                                            <ColumnDefinition Width="auto" />
+                                            <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
                                         <controls:PathButton Width="25"
@@ -197,15 +260,17 @@
                                                              HorizontalAlignment="Left"
                                                              Command="{Binding TurnOffCommand}"
                                                              IconDefaultColor="#353535"
-                                                             IconHoverColor="#eb4242"
+                                                             IconHoverColor="{StaticResource DefaultRedColor}"
                                                              IsChecked="{Binding IsDimmed, Mode=OneWay}"
-                                                             PathCheckedBrush="#eb4242"
+                                                             PathCheckedBrush="{StaticResource DefaultRedBrush}"
                                                              PathStyle="{StaticResource TurnOff}" />
 
-                                        <Grid Grid.Column="1" Margin="5,0,0,0">
+                                        <Grid Grid.Column="1"
+                                              Margin="5,0,0,0"
+                                              VerticalAlignment="Center">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" />
                                                 <ColumnDefinition />
+                                                <ColumnDefinition Width="auto" />
                                             </Grid.ColumnDefinitions>
 
                                             <Grid.Resources>
@@ -213,8 +278,9 @@
                                             </Grid.Resources>
 
                                             <Slider Grid.Column="0"
-                                                    Width="50"
                                                     Height="2"
+                                                    VerticalAlignment="Center"
+                                                    Foreground="#85ffffff"
                                                     IsSnapToTickEnabled="True"
                                                     Maximum="100"
                                                     Minimum="0"
@@ -229,9 +295,10 @@
                                             </Slider>
 
                                             <TextBlock Grid.Column="1"
-                                                       Margin="10,0,0,0"
+                                                       Margin="10,0"
                                                        VerticalAlignment="Center"
-                                                       Foreground="#656565"
+                                                       FontSize="17"
+                                                       Foreground="#65ffffff"
                                                        Text="{Binding Brightness}" />
 
 
@@ -274,7 +341,10 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <Border Grid.Row="3">
+                <Border Grid.Row="3"
+                        Padding="0,10,0,10"
+                        BorderBrush="#252525"
+                        BorderThickness="0,1,0,0">
                     <Grid Background="Transparent">
                         <Grid.Resources>
                             <Style TargetType="TextBlock">

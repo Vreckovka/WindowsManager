@@ -214,11 +214,11 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    #region TimeTillTurnOff
+    #region ActualTimerTime
 
-    private double? actualTimerTime;
+    private TimeSpan? actualTimerTime;
 
-    public double? ActualTimerTime
+    public TimeSpan? ActualTimerTime
     {
       get { return actualTimerTime; }
       set
@@ -395,7 +395,11 @@ namespace WindowsManager.ViewModels
       System.Windows.Application.Current.Dispatcher.Invoke(() =>
       {
         TimeSinceActive = automaticTurnOffTimer.ActualTime / 1000.0 / 60;
-        ActualTimerTime = TurnOffLimit - TimeSinceActive;
+
+        var milis = TurnOffLimit - TimeSinceActive;
+
+        if (milis != null)
+          ActualTimerTime = TimeSpan.FromMilliseconds(milis.Value);
 
 
         if (TimeSinceActive > TurnOffLimit)
@@ -418,7 +422,7 @@ namespace WindowsManager.ViewModels
 
     private void StartIsDimmedTimer()
     {
-      ActualTimerTime = 0;
+      ActualTimerTime = new TimeSpan(0);
 
       isDimmedDisposable.Disposable = dimmerTimer.OnTimerTick.Subscribe(OnIsDimmedTimerTick);
 
@@ -433,7 +437,7 @@ namespace WindowsManager.ViewModels
     public void StopIsDimmedTimer()
     {
       dimmerTimer.StopTimer();
-      
+
       ActualTimerTime = null;
     }
 
@@ -445,14 +449,14 @@ namespace WindowsManager.ViewModels
     {
       System.Windows.Application.Current.Dispatcher.Invoke(() =>
       {
-        ActualTimerTime = dimmerTimer.ActualTime / 1000.0 / 60;
+        if (dimmerTimer.ActualTime != null)
+          ActualTimerTime = TimeSpan.FromMilliseconds(dimmerTimer.ActualTime.Value);
       });
     }
 
     #endregion
 
     #endregion
-
 
     #region Save
 
