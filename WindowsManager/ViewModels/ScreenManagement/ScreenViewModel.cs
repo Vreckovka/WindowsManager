@@ -145,7 +145,7 @@ namespace WindowsManager.ViewModels
           }
           else
           {
-            if (!IsDimmed)
+            if (!IsDimmed && !IsActive)
               StartTurnOffTimer();
 
             Save();
