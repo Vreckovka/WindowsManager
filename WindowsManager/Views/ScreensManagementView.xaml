@@ -77,7 +77,7 @@
                                              PathStyle="{StaticResource TurnOff}"
                                              ToolTip="Will turn on/off all screens that are not currently active">
                             <controls:PathButton.Style>
-                                <Style TargetType="controls:PathButton">
+                                <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
                                     <Setter Property="Background" Value="#05ffffff" />
                                     <Setter Property="BorderBrush" Value="#08ffffff" />
                                     <Setter Property="BorderThickness" Value="2" />
@@ -224,6 +224,11 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
+
+                                            <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ hh}, Mode=OneWay}" />
+                                            <Run FontSize="12"
+                                                 Foreground="#60ffffff"
+                                                 Text="(hrs)" />
 
                                             <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ mm}, Mode=OneWay}" />
                                             <Run FontSize="12"
@@ -406,22 +411,12 @@
 
                         <TextBlock Grid.Row="2"
                                    Style="{StaticResource HeaderText}"
-                                   Text="Off timer - elapsed  " />
+                                   Text="Total time off" />
 
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
-                                   Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TimeSinceActive, StringFormat={}{0:N2} minutes}">
-                            <TextBlock.Style>
-                                <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=monitorsListView, Path=SelectedItem.TimeSinceActive}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
+                                   Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalDimmTime, Mode=OneWay, StringFormat={}{0:\\ dd\\:hh\\:mm\\:ss}}" />
 
 
                     </Grid>

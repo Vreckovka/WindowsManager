@@ -5,6 +5,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -26,6 +28,11 @@ namespace WindowsManager.ViewModels
     private ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
 
+    public ScreenViewModel() : base(null)
+    {
+
+    }
+
     public ScreenViewModel(Screen model, string fileName) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
@@ -38,11 +45,42 @@ namespace WindowsManager.ViewModels
 
     #region Properties
 
+    #region TotalDimmTime
+
+    private TimeSpan totalDimmTime;
+
+    [JsonIgnore]
+    public TimeSpan TotalDimmTime
+    {
+      get { return totalDimmTime; }
+      set
+      {
+        if (value != totalDimmTime)
+        {
+          totalDimmTime = value;
+          TotalDimmTimeTicks = totalDimmTime.Ticks;
+
+          if (((int)totalDimmTime.TotalSeconds) % 5 == 0)
+          {
+            Save();
+          }
+
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    public long TotalDimmTimeTicks { get; set; }
+
     #region IsDimmed
 
     private bool isDimmed;
 
     private SerialDisposable isDimmedDisposable = new SerialDisposable();
+
+    [JsonIgnore]
     public bool IsDimmed
     {
       get { return isDimmed; }
@@ -80,7 +118,7 @@ namespace WindowsManager.ViewModels
 
     public string Name
     {
-      get { return Model.DeviceName; }
+      get { return Model?.DeviceName; }
 
     }
 
@@ -107,7 +145,8 @@ namespace WindowsManager.ViewModels
           }
           else
           {
-            StartTurnOffTimer();
+            if (!IsDimmed)
+              StartTurnOffTimer();
 
             Save();
           }
@@ -124,6 +163,7 @@ namespace WindowsManager.ViewModels
     private bool isActive;
     private SerialDisposable isActiveSerialDisposable = new SerialDisposable();
 
+    [JsonIgnore]
     public bool IsActive
     {
       get { return isActive; }
@@ -157,6 +197,8 @@ namespace WindowsManager.ViewModels
     #region Brightness
 
     private int? brightness;
+
+    [JsonIgnore]
     public int? Brightness
     {
       get { return brightness; }
@@ -180,6 +222,7 @@ namespace WindowsManager.ViewModels
 
     private bool isSelected;
 
+    [JsonIgnore]
     public bool IsSelected
     {
       get { return isSelected; }
@@ -199,6 +242,7 @@ namespace WindowsManager.ViewModels
 
     private double? timeSinceActive;
 
+    [JsonIgnore]
     public double? TimeSinceActive
     {
       get { return timeSinceActive; }
@@ -218,6 +262,7 @@ namespace WindowsManager.ViewModels
 
     private TimeSpan? actualTimerTime;
 
+    [JsonIgnore]
     public TimeSpan? ActualTimerTime
     {
       get { return actualTimerTime; }
@@ -233,12 +278,16 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    [JsonIgnore]
+    public override Screen Model { get => base.Model; set => base.Model = value; }
+
     #endregion
 
     #region TurnOffCommand
 
     private ActionCommand turnOffCommand;
 
+    [JsonIgnore]
     public ICommand TurnOffCommand
     {
       get
@@ -358,13 +407,13 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    #region TurnOff
+    #region Turn Off Timer
 
     #region StartTurnOffTimer
 
     private void StartTurnOffTimer()
     {
-      if (TurnOffLimit != null)
+      if (TurnOffLimit != null && Model != null)
       {
         TimeSinceActive = 0;
 
@@ -394,15 +443,17 @@ namespace WindowsManager.ViewModels
     {
       System.Windows.Application.Current.Dispatcher.Invoke(() =>
       {
-        TimeSinceActive = automaticTurnOffTimer.ActualTime / 1000.0 / 60;
+        TimeSinceActive = automaticTurnOffTimer.ActualTime;
 
-        var milis = TurnOffLimit - TimeSinceActive;
+
+        var milsLimit = (TurnOffLimit * 60 * 1000);
+        var milis = milsLimit - TimeSinceActive;
 
         if (milis != null)
           ActualTimerTime = TimeSpan.FromMilliseconds(milis.Value);
 
 
-        if (TimeSinceActive > TurnOffLimit)
+        if (TimeSinceActive > milsLimit)
         {
           if (!IsDimmed && !IsActive)
           {
@@ -416,7 +467,7 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    #region IsDimmedTimer
+    #region Dimmed Timer
 
     #region StartIsDimmedTimer
 
@@ -450,7 +501,18 @@ namespace WindowsManager.ViewModels
       System.Windows.Application.Current.Dispatcher.Invoke(() =>
       {
         if (dimmerTimer.ActualTime != null)
+        {
+          var oldValue = ActualTimerTime;
+
           ActualTimerTime = TimeSpan.FromMilliseconds(dimmerTimer.ActualTime.Value);
+
+          var diff = ActualTimerTime - oldValue;
+
+          if (diff != null)
+          {
+            TotalDimmTime += diff.Value;
+          }
+        }
       });
     }
 
@@ -462,7 +524,10 @@ namespace WindowsManager.ViewModels
 
     private void Save()
     {
-      File.WriteAllText(filePath, TurnOffLimit.ToString());
+      var json = JsonSerializer.Serialize(this);
+
+      if (filePath != null)
+        File.WriteAllText(filePath, json);
     }
 
     #endregion
@@ -471,11 +536,24 @@ namespace WindowsManager.ViewModels
 
     private void Load()
     {
-      if (File.Exists(filePath))
+      try
       {
-        var data = File.ReadAllText(filePath);
+        if (File.Exists(filePath))
+        {
+          var data = File.ReadAllText(filePath);
 
-        TurnOffLimit = double.Parse(data);
+          var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
+
+          if (serialized != null)
+          {
+            TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
+            TurnOffLimit = serialized.TurnOffLimit;
+          }
+
+        }
+      }
+      catch (JsonException ex)
+      {
       }
     }
 
