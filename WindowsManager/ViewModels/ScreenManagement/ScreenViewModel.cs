@@ -23,9 +23,15 @@ namespace WindowsManager.ViewModels
 
     private string filePath;
 
+    private ActionTimer automaticTurnOffTimer;
+    private ActionTimer dimmerTimer;
+
     public ScreenViewModel(Screen model, string fileName) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
+
+      automaticTurnOffTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
+      dimmerTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
 
       filePath = fileName;
     }
@@ -36,6 +42,7 @@ namespace WindowsManager.ViewModels
 
     private bool isDimmed;
 
+    private SerialDisposable isDimmedDisposable = new SerialDisposable();
     public bool IsDimmed
     {
       get { return isDimmed; }
@@ -49,7 +56,17 @@ namespace WindowsManager.ViewModels
 
           if (!isDimmed && !IsActive)
           {
-            SetDimmTimer();
+            StartTurnOffTimer();
+          }
+
+
+          if (IsDimmed)
+          {
+            StartIsDimmedTimer();
+          }
+          else if (!IsDimmed)
+          {
+            StopIsDimmedTimer();
           }
 
           RaisePropertyChanged();
@@ -90,7 +107,7 @@ namespace WindowsManager.ViewModels
           }
           else
           {
-            SetDimmTimer();
+            StartTurnOffTimer();
 
             Save();
           }
@@ -118,9 +135,9 @@ namespace WindowsManager.ViewModels
 
           if (!isActive && !IsDimmed)
           {
-            SetDimmTimer();
+            StartTurnOffTimer();
           }
-          else if(!IsDimmed)
+          else if (!IsDimmed)
           {
             StopTurnOffTimer();
           }
@@ -199,23 +216,22 @@ namespace WindowsManager.ViewModels
 
     #region TimeTillTurnOff
 
-    private double? timeTillTurnOff;
+    private double? actualTimerTime;
 
-    public double? TimeTillTurnOff
+    public double? ActualTimerTime
     {
-      get { return timeTillTurnOff; }
+      get { return actualTimerTime; }
       set
       {
-        if (value != timeTillTurnOff)
+        if (value != actualTimerTime)
         {
-          timeTillTurnOff = value;
+          actualTimerTime = value;
           RaisePropertyChanged();
         }
       }
     }
 
     #endregion
-
 
     #endregion
 
@@ -297,6 +313,7 @@ namespace WindowsManager.ViewModels
 
       dimmer.Loaded += Dimmer_Loaded;
       dimmer.Closed += Dimmer_Closed;
+
       dimmer.Show();
     }
 
@@ -341,74 +358,112 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    #region SetDimmTimer
+    #region TurnOff
 
-    private void SetDimmTimer()
+    #region StartTurnOffTimer
+
+    private void StartTurnOffTimer()
     {
       if (TurnOffLimit != null)
       {
         TimeSinceActive = 0;
-      }
 
-      isActiveSerialDisposable.Disposable = Observable.Interval(TimeSpan.FromSeconds(0.5)).Subscribe(OnTimerDimm);
+        isActiveSerialDisposable.Disposable = automaticTurnOffTimer.OnTimerTick.Subscribe(OnTurnOffTimerTick);
+
+        automaticTurnOffTimer.StartTimer();
+      }
     }
 
     #endregion
 
-    #region OnTimerDimm
-
-    private Stopwatch stopWatch = new Stopwatch();
-
-    private void OnTimerDimm(long index)
-    {
-      stopWatch.Stop();
-    
-
-      if (TurnOffLimit != null)
-      {
-        if (TimeSinceActive == null)
-        {
-          TimeSinceActive = 0;
-        }
-
-        TimeSinceActive += stopWatch.ElapsedMilliseconds / 1000.0 / 60.0;
-        TimeTillTurnOff = TurnOffLimit - TimeSinceActive;
-
-        if (TimeTillTurnOff < 0)
-        {
-          TimeTillTurnOff = TimeTillTurnOff * -1;
-        }
-
-        if (TimeSinceActive > TurnOffLimit)
-        {
-          System.Windows.Application.Current.Dispatcher.Invoke(() =>
-          {
-            if (!IsDimmed && !IsActive)
-            {
-              Dimm();
-            }
-          });
-        }
-      }
-
-      stopWatch.Reset();
-      stopWatch.Start();
-    }
-
-    #endregion
+    #region StopTurnOffTimer
 
     public void StopTurnOffTimer()
     {
-      isActiveSerialDisposable.Disposable?.Dispose();
+      automaticTurnOffTimer.StopTimer();
+
       TimeSinceActive = null;
-      TimeTillTurnOff = null;
-      stopWatch.Reset();
+      ActualTimerTime = null;
     }
+
+    #endregion
+
+    #region OnTurnOffTimerTick
+
+    private void OnTurnOffTimerTick(long index)
+    {
+      System.Windows.Application.Current.Dispatcher.Invoke(() =>
+      {
+        TimeSinceActive = automaticTurnOffTimer.ActualTime / 1000.0 / 60;
+        ActualTimerTime = TurnOffLimit - TimeSinceActive;
+
+
+        if (TimeSinceActive > TurnOffLimit)
+        {
+          if (!IsDimmed && !IsActive)
+          {
+            Dimm();
+          }
+        }
+      });
+    }
+
+    #endregion
+
+    #endregion
+
+    #region IsDimmedTimer
+
+    #region StartIsDimmedTimer
+
+    private void StartIsDimmedTimer()
+    {
+      ActualTimerTime = 0;
+
+      isDimmedDisposable.Disposable = dimmerTimer.OnTimerTick.Subscribe(OnIsDimmedTimerTick);
+
+      dimmerTimer.StartTimer();
+
+    }
+
+    #endregion
+
+    #region StopIsDimmedTimer
+
+    public void StopIsDimmedTimer()
+    {
+      dimmerTimer.StopTimer();
+      
+      ActualTimerTime = null;
+    }
+
+    #endregion
+
+    #region OnTurnOffTimerTick
+
+    private void OnIsDimmedTimerTick(long index)
+    {
+      System.Windows.Application.Current.Dispatcher.Invoke(() =>
+      {
+        ActualTimerTime = dimmerTimer.ActualTime / 1000.0 / 60;
+      });
+    }
+
+    #endregion
+
+    #endregion
+
+
+    #region Save
 
     private void Save()
     {
       File.WriteAllText(filePath, TurnOffLimit.ToString());
     }
+
+    #endregion
+
+    #region Load
 
     private void Load()
     {
@@ -420,6 +475,8 @@ namespace WindowsManager.ViewModels
       }
     }
 
+    #endregion
+
     #region Dispose
 
     public override void Dispose()
@@ -427,6 +484,7 @@ namespace WindowsManager.ViewModels
       base.Dispose();
 
       isActiveSerialDisposable?.Dispose();
+      isDimmedDisposable?.Dispose();
     }
 
     #endregion

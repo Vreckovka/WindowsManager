@@ -170,13 +170,13 @@
                                                Margin="0,0,0,0"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
-                                               Text="{Binding TimeTillTurnOff, StringFormat={}{0:N2} min., Mode=OneWay}">
+                                               Text="{Binding ActualTimerTime, StringFormat={}{0:N2} min., Mode=OneWay}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Foreground" Value="{StaticResource DefaultRedBrush}" />
 
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding TimeTillTurnOff}" Value="{x:Null}">
+                                                    <DataTrigger Binding="{Binding ActualTimerTime}" Value="{x:Null}">
                                                         <Setter Property="Visibility" Value="Collapsed" />
                                                     </DataTrigger>
                                                 </Style.Triggers>

@@ -105,8 +105,6 @@ namespace WindowsManager.ViewModels
 
     #region Methods
 
-
-
     #region Initialize
 
     public override void Initialize()
