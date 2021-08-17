@@ -13,7 +13,7 @@
         xmlns:views="clr-namespace:WindowsManager.Views"
         Title="{Binding Title}"
         Width="1000"
-        Height="450"
+        Height="550"
         MinWidth="350"
         MinHeight="350"
         Style="{StaticResource {x:Type Window}}"

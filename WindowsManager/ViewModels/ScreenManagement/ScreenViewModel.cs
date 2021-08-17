@@ -65,6 +65,8 @@ namespace WindowsManager.ViewModels
             Save();
           }
 
+          RaisePropertyChanged(nameof(TotalSaved));
+
           RaisePropertyChanged();
         }
       }
@@ -277,6 +279,44 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
+
+    #region PowerOutput
+
+    private double powerOutput;
+
+    public double PowerOutput
+    {
+      get { return powerOutput; }
+      set
+      {
+        if (value != powerOutput)
+        {
+          powerOutput = value;
+          Save();
+          RaisePropertyChanged(nameof(TotalSaved));
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TotalSaved
+
+    private double kwhCost = 0.09;
+
+    [JsonIgnore]
+    public double TotalSaved
+    {
+      get
+      {
+        return TotalDimmTime.TotalHours * (PowerOutput / 1000.0)  * kwhCost;
+      }
+
+    }
+
+    #endregion
+
 
     [JsonIgnore]
     public override Screen Model { get => base.Model; set => base.Model = value; }
@@ -548,6 +588,7 @@ namespace WindowsManager.ViewModels
           {
             TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
             TurnOffLimit = serialized.TurnOffLimit;
+            PowerOutput = serialized.PowerOutput;
           }
 
         }
