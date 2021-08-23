@@ -18,7 +18,8 @@ using VCore.WPF.ViewModels.Navigation;
 namespace WindowsManager.ViewModels
 {
   //TODO: Monitor group - linkovat monitory (Predator ak bol aktivny tak nevyplne ten 19')
-  //TODO: Statistiky (kolko bolo vypnuty ktory monitor, a kolko som usetril € (realne dat kw/h a spotrebu))
+  //TODO: Statistiky (kolko som usetril € (realne dat kw/h a spotrebu) zo vsetkych monitorov dohromady, kolko € to je za rok pri aktualnej spotrebe)
+  //TODO: Fast panel (horiaci tachometer iconka) - monitory a sound dokopy (ako na zaciatku)
   public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
   {
     #region Constructors

@@ -126,6 +126,8 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    public bool ShouldByValue { get; set; }
+
     #region TurnOffLimit
 
     private double? turnOffLimit = null;
@@ -142,13 +144,16 @@ namespace WindowsManager.ViewModels
           if (turnOffLimit == 0)
           {
             StopTurnOffTimer();
-
+            ShouldByValue = false;
             File.Delete(filePath);
           }
           else
           {
             if (!IsDimmed && !IsActive)
+            {
+              ShouldByValue = true;
               StartTurnOffTimer();
+            }
 
             Save();
           }
@@ -175,13 +180,17 @@ namespace WindowsManager.ViewModels
         {
           isActive = value;
 
+          Debug.WriteLine($"{Name} - isACtive  = {value}");
+
           if (!isActive && !IsDimmed)
           {
             StartTurnOffTimer();
+
           }
           else if (!IsDimmed)
           {
             StopTurnOffTimer();
+
           }
 
           if (isActive)
@@ -190,6 +199,7 @@ namespace WindowsManager.ViewModels
           }
 
           RaisePropertyChanged();
+          turnOffCommand?.RaiseCanExecuteChanged();
         }
       }
     }
@@ -310,8 +320,40 @@ namespace WindowsManager.ViewModels
     {
       get
       {
-        return TotalDimmTime.TotalHours * (PowerOutput / 1000.0)  * kwhCost;
+        return TotalDimmTime.TotalHours * (PowerOutput / 1000.0) * kwhCost;
       }
+
+    }
+
+    #endregion
+
+    #region StartDayOfCounting
+
+    private DateTime startDayOfCounting;
+
+    public DateTime StartDayOfCounting
+    {
+      get { return startDayOfCounting; }
+      set
+      {
+        if (value != startDayOfCounting)
+        {
+          startDayOfCounting = value;
+
+          RaisePropertyChanged();
+          RaisePropertyChanged(nameof(DaysOfUsingSoftware));
+        }
+      }
+    }
+
+    #endregion
+
+    #region DaysOfUsingSoftware
+
+    [JsonIgnore]
+    public int DaysOfUsingSoftware
+    {
+      get { return (int)(DateTime.Now - StartDayOfCounting).TotalDays; }
 
     }
 
@@ -332,10 +374,14 @@ namespace WindowsManager.ViewModels
     {
       get
       {
-        return turnOffCommand ??= new ActionCommand(DimmOrUnDimm);
+        return turnOffCommand ??= new ActionCommand(DimmOrUnDimm, CanTurnOffCommnad);
       }
     }
 
+    private bool CanTurnOffCommnad()
+    {
+      return !IsActive;
+    }
 
     #endregion
 
@@ -451,15 +497,31 @@ namespace WindowsManager.ViewModels
 
     #region StartTurnOffTimer
 
-    private void StartTurnOffTimer()
+    public void StartTurnOffTimer()
     {
+      if (IsDimmed)
+      {
+        return;
+      }
+
+      if (TurnOffLimit == null && ShouldByValue)
+      {
+        TurnOffLimit = 0;
+      }
+
       if (TurnOffLimit != null && Model != null)
       {
+        Debug.WriteLine($"{Name} - StartTurnOffTimer");
+
         TimeSinceActive = 0;
 
         isActiveSerialDisposable.Disposable = automaticTurnOffTimer.OnTimerTick.Subscribe(OnTurnOffTimerTick);
 
         automaticTurnOffTimer.StartTimer();
+      }
+      else
+      {
+        Debug.WriteLine($"{Name} - Nevydareny nepresiel if StartTurnOffTimer");
       }
     }
 
@@ -473,6 +535,8 @@ namespace WindowsManager.ViewModels
 
       TimeSinceActive = null;
       ActualTimerTime = null;
+
+      Debug.WriteLine($"{Name} - StopTurnOffTimer");
     }
 
     #endregion
@@ -564,16 +628,20 @@ namespace WindowsManager.ViewModels
 
     private void Save()
     {
-      var json = JsonSerializer.Serialize(this);
+      if (filePath != null && File.Exists(filePath) && wasLoaded)
+      {
+        var json = JsonSerializer.Serialize(this);
 
-      if (filePath != null)
         File.WriteAllText(filePath, json);
+      }
+
     }
 
     #endregion
 
     #region Load
 
+    private bool wasLoaded;
     private void Load()
     {
       try
@@ -589,12 +657,30 @@ namespace WindowsManager.ViewModels
             TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
             TurnOffLimit = serialized.TurnOffLimit;
             PowerOutput = serialized.PowerOutput;
-          }
+            StartDayOfCounting = serialized.StartDayOfCounting;
+            ShouldByValue = serialized.ShouldByValue;
 
+            if (StartDayOfCounting == DateTime.MinValue)
+            {
+              StartDayOfCounting = DateTime.Now;
+
+              Save();
+            }
+          }
+        }
+        else
+        {
+          StartDayOfCounting = DateTime.Now;
+
+          Save();
         }
       }
       catch (JsonException ex)
       {
+      }
+      finally
+      {
+        wasLoaded = true;
       }
     }
 

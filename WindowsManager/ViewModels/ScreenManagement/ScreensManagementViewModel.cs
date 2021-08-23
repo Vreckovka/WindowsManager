@@ -120,8 +120,8 @@ namespace WindowsManager.ViewModels
       if (Screens.Count > 0)
         Screens[0].IsSelected = true;
 
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher().Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher().Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
 
       foreach (var screen in Screens)
       {
@@ -130,7 +130,7 @@ namespace WindowsManager.ViewModels
 
       UpdateActualScreen();
 
-      Observable.Interval(TimeSpan.FromSeconds(0.2)).Subscribe(x => UpdateActualScreen()).DisposeWith(this);
+      Observable.Interval(TimeSpan.FromSeconds(0.2)).ObserveOnDispatcher().Subscribe(x => UpdateActualScreen()).DisposeWith(this);
 
       Application.Current.MainWindow.Closing += MainWindow_Closing;
     }
@@ -180,28 +180,35 @@ namespace WindowsManager.ViewModels
     {
       var isAllBlack = Screens.Where(x => x != actualScreen).All(x => x.IsDimmed);
 
-      Application.Current.Dispatcher.Invoke(() =>
+
+      if (Screens.IndexOf(screenViewModel) == 0)
       {
-        if (Screens.IndexOf(screenViewModel) == 0)
-        {
-          var screen = Screens[1];
+        var screen = Screens[1];
 
-          if (screen.IsDimmed != screenViewModel.IsDimmed)
-          {
-            screen.DimmOrUnDimm();
-          }
+        if (screen.IsDimmed != screenViewModel.IsDimmed)
+        {
+          screen.DimmOrUnDimm();
         }
+      }
+      else if (Screens.IndexOf(screenViewModel) == 1)
+      {
+        var screen = Screens[0];
+
+        if (screen.IsActive)
+        {
+          screenViewModel.StopTurnOffTimer();
+        }
+      }
 
 
-        if (isAllBlack)
-        {
-          IsTurnOffScreensButActive = true;
-        }
-        else
-        {
-          IsTurnOffScreensButActive = false;
-        }
-      });
+      if (isAllBlack)
+      {
+        IsTurnOffScreensButActive = true;
+      }
+      else
+      {
+        IsTurnOffScreensButActive = false;
+      }
     }
 
     #endregion
@@ -210,15 +217,46 @@ namespace WindowsManager.ViewModels
 
     private void OnActiveChanged(ScreenViewModel screenViewModel)
     {
-      Application.Current.Dispatcher.Invoke(() =>
-      {
-        if (Screens.IndexOf(screenViewModel) == 1 && screenViewModel.IsActive)
-        {
-          var screen = Screens[0];
+      ConnectScreens(screenViewModel, 0, 1);
+    }
 
-          screen.StopTurnOffTimer();
+    #endregion
+
+    #region ConnectScreens
+
+    private void ConnectScreens(ScreenViewModel screenViewModel, int firstIndex, int secondIndex)
+    {
+      HookScreen(screenViewModel, firstIndex, secondIndex);
+      HookScreen(screenViewModel, secondIndex, firstIndex);
+    }
+
+    #endregion
+
+    #region HookScreen
+
+    private void HookScreen(ScreenViewModel screenViewModel, int yourIndex, int indexToHook)
+    {
+      if (Screens.IndexOf(screenViewModel) == yourIndex)
+      {
+        var screen = Screens[indexToHook];
+
+        if (screenViewModel.IsActive)
+        {
+          if (!screenViewModel.IsDimmed)
+          {
+            if (screen.IsDimmed)
+            {
+              screen.DimmOrUnDimm();
+            }
+
+            screen.StopTurnOffTimer();
+          }
         }
-      });
+        else if (!screen.IsActive)
+        {
+          screen.StartTurnOffTimer();
+        }
+      }
     }
 
     #endregion
@@ -228,6 +266,7 @@ namespace WindowsManager.ViewModels
     ScreenViewModel actualScreen;
     private void UpdateActualScreen()
     {
+
       var newAcutalScreen = GetCurrentScreen();
 
       if (newAcutalScreen != actualScreen)
@@ -240,6 +279,7 @@ namespace WindowsManager.ViewModels
         if (actualScreen != null)
           actualScreen.IsActive = true;
       }
+
     }
 
     #endregion

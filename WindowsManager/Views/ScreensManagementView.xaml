@@ -397,6 +397,8 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Style="{StaticResource HeaderText}" Text="Name " />
@@ -458,7 +460,23 @@
 
                         <TextBlock Grid.Row="4" Grid.Column="1">
                             <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalSaved, Mode=OneWay, StringFormat={}{0:N6}}" />
-                            <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalSaved, Mode=OneWay, StringFormat={}({0:N2} €)}" Foreground="#20ffffff"/>
+                            <Run Foreground="#20ffffff" Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalSaved, Mode=OneWay, StringFormat={}({0:N2} €)}" />
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="5"
+                                   Style="{StaticResource HeaderText}"
+                                   Text="Days of using software" />
+
+                        <TextBlock Grid.Row="5" Grid.Column="1">
+                            <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.DaysOfUsingSoftware, Mode=OneWay, StringFormat={}{0:N0}}" />
+                        </TextBlock>
+
+                        <TextBlock Grid.Row="6"
+                                   Style="{StaticResource HeaderText}"
+                                   Text="Start date" />
+
+                        <TextBlock Grid.Row="6" Grid.Column="1">
+                            <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.StartDayOfCounting, Mode=OneWay, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
                         </TextBlock>
                     </Grid>
                 </Border>
