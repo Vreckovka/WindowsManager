@@ -32,6 +32,25 @@ namespace WindowsManager.ViewModels
     {
       if (!Directory.Exists(folderPath))
         Directory.CreateDirectory(folderPath);
+
+
+      var backupPath = "Data\\Monitors\\Backup";
+      var newDir = backupPath + $"\\Data_{ DateTime.Today.ToShortDateString()}";
+      ;
+      if (!Directory.Exists(newDir))
+      {
+        Directory.CreateDirectory(newDir);
+
+        CopyFiles("Data\\Monitors", newDir);
+      }
+    }
+
+    private static void CopyFiles(string sourcePath, string targetPath, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+    {
+      foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", searchOption))
+      {
+        File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+      }
     }
 
     #region Properties
