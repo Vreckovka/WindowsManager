@@ -380,7 +380,7 @@ namespace WindowsManager.ViewModels
 
     private bool CanTurnOffCommnad()
     {
-      return !IsActive;
+      return true;
     }
 
     #endregion
