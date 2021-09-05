@@ -57,11 +57,29 @@
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
+
+                    <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
+                        <Setter Property="Width" Value="20" />
+                        <Setter Property="Height" Value="20" />
+                        <Setter Property="IconDefaultColor" Value="#353535" />
+                        <Setter Property="IconHoverColor" Value="#555555" />
+                        <Setter Property="IsReadOnly" Value="True" />
+                        <Setter Property="Margin" Value="0,0,5,0" />
+                        <Setter Property="IconWidth" Value="15" />
+                        <Setter Property="IconHeight" Value="15" />
+                    </Style>
                 </Grid.Resources>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
                     <Border VerticalAlignment="Top" Cursor="Hand">
-                        <controls:PathButton Margin="0,10"
+                        <controls:PathButton Width="auto"
+                                             Height="auto"
+                                             Margin="0,10"
                                              Padding="15"
                                              Command="{Binding TurnOffButActive}"
                                              FontSize="15"
@@ -101,22 +119,17 @@
                         </controls:PathButton>
                     </Border>
 
-                    <Border Margin="25,15,15,15">
-                        <Border.Resources>
-                            <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
-                                <Setter Property="Width" Value="20" />
-                                <Setter Property="Height" Value="20" />
-                                <Setter Property="IconDefaultColor" Value="#454545" />
-                                <Setter Property="IconHoverColor" Value="#ccc" />
-                                <Setter Property="IsReadOnly" Value="True" />
-                                <Setter Property="Margin" Value="0,0,5,0" />
-                            </Style>
-                        </Border.Resources>
+                    <Border Grid.Column="1"
+                            Margin="25,10"
+                            HorizontalAlignment="Left">
+
                         <StackPanel>
                             <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                <controls:PathButton IconHeight="13"
+                                <controls:PathButton Margin="-2,0,7,0"
+                                                     IconHeight="13"
                                                      IconWidth="17"
-                                                     PathStyle="{StaticResource BulbOff}" />
+                                                     PathStyle="{StaticResource BulbOff}"
+                                                     ToolTip="Total dimmed time" />
 
                                 <TextBlock VerticalAlignment="Center"
                                            FontWeight="Bold"
@@ -135,7 +148,8 @@
                                 <controls:PathButton Padding="2,0,0,0"
                                                      IconHeight="13"
                                                      IconWidth="10"
-                                                     PathStyle="{StaticResource euro-sign}" />
+                                                     PathStyle="{StaticResource euro-sign}"
+                                                     ToolTip="Total saved" />
 
                                 <TextBlock VerticalAlignment="Center"
                                            FontWeight="Bold"
@@ -153,12 +167,13 @@
                             <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                 <controls:PathButton IconHeight="15"
                                                      IconWidth="15"
-                                                     PathStyle="{StaticResource calendar-day}" />
+                                                     PathStyle="{StaticResource calendar-day}"
+                                                     ToolTip="Days of using software" />
 
                                 <TextBlock VerticalAlignment="Center"
                                            FontWeight="Bold"
                                            Foreground="#858585"
-                                           Text="Days of using software" />
+                                           Text="Days of using software:" />
 
 
                                 <TextBlock Margin="4,0,0,0"
@@ -171,7 +186,8 @@
                             <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                                 <controls:PathButton IconHeight="15"
                                                      IconWidth="15"
-                                                     PathStyle="{StaticResource clock}" />
+                                                     PathStyle="{StaticResource clock}"
+                                                     ToolTip="Start date of using software" />
 
                                 <TextBlock VerticalAlignment="Center"
                                            FontWeight="Bold"
@@ -190,7 +206,7 @@
 
 
                     </Border>
-                </StackPanel>
+                </Grid>
 
                 <Border Grid.Row="1"
                         Height="1"
@@ -355,7 +371,9 @@
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
-                                        <controls:PathButton Margin="5"
+                                        <controls:PathButton Width="auto"
+                                                             Height="auto"
+                                                             Margin="5"
                                                              HorizontalAlignment="Left"
                                                              Command="{Binding TurnOffCommand}"
                                                              IconDefaultColor="#353535"
@@ -460,16 +478,16 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="HorizontalAlignment" Value="Left" />
-                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="FontSize" Value="12" />
                                 <Setter Property="FontWeight" Value="DemiBold" />
-                                <Setter Property="Foreground" Value="#656565" />
+                                <Setter Property="Foreground" Value="#555555" />
                             </Style>
 
                             <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="VerticalContentAlignment" Value="Center" />
                                 <Setter Property="FontSize" Value="13" />
-                                <Setter Property="Foreground" Value="#656565" />
+                                <Setter Property="Foreground" Value="#555555" />
                             </Style>
 
                             <Style x:Key="HeaderText"
@@ -479,22 +497,10 @@
                                 <Setter Property="FontWeight" Value="Bold" />
                                 <Setter Property="Margin" Value="5,5,15,5" />
                             </Style>
-
-                            <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
-                                <Setter Property="Width" Value="20" />
-                                <Setter Property="Height" Value="20" />
-                                <Setter Property="IconWidth" Value="15" />
-                                <Setter Property="IconHeight" Value="15" />
-                                <Setter Property="IconDefaultColor" Value="#959595" />
-                                <Setter Property="IconHoverColor" Value="#ccc" />
-                                <Setter Property="IsReadOnly" Value="True" />
-                                <Setter Property="Margin" Value="0,0,5,0" />
-                            </Style>
-
                         </Grid.Resources>
 
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="35" />
+                            <ColumnDefinition Width="25" />
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition />
                             <ColumnDefinition Width="40" />
@@ -551,7 +557,8 @@
                                              IconDefaultColor="#50ffffff"
                                              IconHoverColor="{StaticResource GreenColor}"
                                              IsReadOnly="True"
-                                             PathStyle="{StaticResource Save}" />
+                                             PathStyle="{StaticResource Save}"
+                                             ToolTip="Save" />
 
                         <!--  Total dimmed time  -->
 
@@ -600,7 +607,8 @@
                                              IconDefaultColor="#50ffffff"
                                              IconHoverColor="{StaticResource GreenColor}"
                                              IsReadOnly="True"
-                                             PathStyle="{StaticResource Save}" />
+                                             PathStyle="{StaticResource Save}"
+                                             ToolTip="Save" />
 
 
                         <!--  Saved by dimmed  -->

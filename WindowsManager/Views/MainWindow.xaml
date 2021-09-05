@@ -12,7 +12,7 @@
         xmlns:soundManagement="clr-namespace:SoundManagement;assembly=SoundManagement"
         xmlns:views="clr-namespace:WindowsManager.Views"
         Title="{Binding Title}"
-        Width="1000"
+        Width="850"
         Height="650"
         MinWidth="450"
         MinHeight="350"
