@@ -60,7 +60,7 @@
                 </Grid.Resources>
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal">
-                    <Border Cursor="Hand">
+                    <Border VerticalAlignment="Top" Cursor="Hand">
                         <controls:PathButton Margin="0,10"
                                              Padding="15"
                                              Command="{Binding TurnOffButActive}"
@@ -99,6 +99,94 @@
                                 </Style>
                             </controls:PathButton.Style>
                         </controls:PathButton>
+                    </Border>
+
+                    <Border Margin="25,15,15,15">
+                        <Border.Resources>
+                            <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
+                                <Setter Property="Width" Value="20" />
+                                <Setter Property="Height" Value="20" />
+                                <Setter Property="IconDefaultColor" Value="#454545" />
+                                <Setter Property="IconHoverColor" Value="#ccc" />
+                                <Setter Property="IsReadOnly" Value="True" />
+                                <Setter Property="Margin" Value="0,0,5,0" />
+                            </Style>
+                        </Border.Resources>
+                        <StackPanel>
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                <controls:PathButton IconHeight="13"
+                                                     IconWidth="17"
+                                                     PathStyle="{StaticResource BulbOff}" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#858585"
+                                           Text="Total dimmed time:" />
+
+
+                                <TextBlock Margin="0,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#555555"
+                                           Text="{Binding TotalDimmTime, StringFormat={}{0:\\ dd\\:hh\\:mm\\:ss}}" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                <controls:PathButton Padding="2,0,0,0"
+                                                     IconHeight="13"
+                                                     IconWidth="10"
+                                                     PathStyle="{StaticResource euro-sign}" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#858585"
+                                           Text="Total saved:" />
+
+
+                                <TextBlock Margin="4,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#555555"
+                                           Text="{Binding TotalSaved, StringFormat={}{0:N7} ({0:N2} €)}" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                <controls:PathButton IconHeight="15"
+                                                     IconWidth="15"
+                                                     PathStyle="{StaticResource calendar-day}" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#858585"
+                                           Text="Days of using software" />
+
+
+                                <TextBlock Margin="4,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#555555"
+                                           Text="{Binding TotalDays, StringFormat={}{0:N5}}" />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                <controls:PathButton IconHeight="15"
+                                                     IconWidth="15"
+                                                     PathStyle="{StaticResource clock}" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#858585"
+                                           Text="Start date of using software:" />
+
+
+                                <TextBlock Margin="4,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold"
+                                           Foreground="#555555"
+                                           Text="{Binding LoadedData.StartDayOfUsingSoftware, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                            </StackPanel>
+                        </StackPanel>
+
 
 
                     </Border>
@@ -108,6 +196,7 @@
                         Height="1"
                         Margin="0,5,0,0"
                         Background="#252525" />
+
 
                 <ListView x:Name="monitorsListView"
                           Grid.Row="2"
@@ -344,7 +433,15 @@
                                         <Setter Property="BorderBrush" Value="#252525" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                <Setter Property="BorderBrush" Value="#70ffffff" />
+                                                <Setter Property="BorderBrush">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush>
+                                                            <GradientStop Offset="0" Color="#75ffffff" />
+                                                            <GradientStop Offset="0.5" Color="#65ffffff" />
+                                                            <GradientStop Offset="1" Color="#55ffffff" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -363,29 +460,41 @@
                             <Style TargetType="TextBlock">
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="HorizontalAlignment" Value="Left" />
-                                <Setter Property="FontSize" Value="15" />
-
+                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="FontWeight" Value="DemiBold" />
+                                <Setter Property="Foreground" Value="#656565" />
                             </Style>
 
                             <Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
                                 <Setter Property="VerticalAlignment" Value="Center" />
                                 <Setter Property="VerticalContentAlignment" Value="Center" />
-                                <Setter Property="FontSize" Value="15" />
+                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="Foreground" Value="#656565" />
                             </Style>
 
                             <Style x:Key="HeaderText"
                                    BasedOn="{StaticResource {x:Type TextBlock}}"
                                    TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Foreground" Value="#858585" />
                                 <Setter Property="FontWeight" Value="Bold" />
-                                <Setter Property="HorizontalAlignment" Value="Left" />
                                 <Setter Property="Margin" Value="5,5,15,5" />
                             </Style>
 
+                            <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
+                                <Setter Property="Width" Value="20" />
+                                <Setter Property="Height" Value="20" />
+                                <Setter Property="IconWidth" Value="15" />
+                                <Setter Property="IconHeight" Value="15" />
+                                <Setter Property="IconDefaultColor" Value="#959595" />
+                                <Setter Property="IconHoverColor" Value="#ccc" />
+                                <Setter Property="IsReadOnly" Value="True" />
+                                <Setter Property="Margin" Value="0,0,5,0" />
+                            </Style>
 
                         </Grid.Resources>
 
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="35" />
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition />
                             <ColumnDefinition Width="40" />
@@ -401,20 +510,41 @@
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Style="{StaticResource HeaderText}" Text="Name " />
-                        <TextBlock Grid.Column="1" Text="{Binding ElementName=monitorsListView, Path=SelectedItem.Name}" />
+                        <!--  Name  -->
 
+                        <controls:PathButton Grid.Row="0"
+                                             PathStyle="{StaticResource tag}"
+                                             ToolTip="Name of the monitor" />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="1"
+                                   Style="{StaticResource HeaderText}"
+                                   Text="Name " />
+
+                        <TextBlock Grid.Row="0"
+                                   Grid.Column="2"
+                                   Text="{Binding ElementName=monitorsListView, Path=SelectedItem.Name}" />
+
+
+                        <!--  Off timer - time  -->
+
+                        <controls:PathButton Grid.Row="1"
+                                             Grid.Column="0"
+                                             PathStyle="{StaticResource timer}"
+                                             ToolTip="Off timer - time" />
 
                         <TextBlock Grid.Row="1"
+                                   Grid.Column="1"
                                    Style="{StaticResource HeaderText}"
                                    Text="Off timer - time" />
 
                         <TextBox Grid.Row="1"
-                                 Grid.Column="1"
+                                 Grid.Column="2"
                                  Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TurnOffLimit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
 
+
                         <controls:PathButton Grid.Row="1"
-                                             Grid.Column="2"
+                                             Grid.Column="3"
                                              Margin="0,0"
                                              HorizontalAlignment="Right"
                                              VerticalAlignment="Center"
@@ -423,28 +553,47 @@
                                              IsReadOnly="True"
                                              PathStyle="{StaticResource Save}" />
 
-                        <TextBlock Grid.Row="2"
-                                   Style="{StaticResource HeaderText}"
-                                   Text="Total time off" />
+                        <!--  Total dimmed time  -->
 
+                        <controls:PathButton Grid.Row="2"
+                                             Grid.Column="0"
+                                             Margin="-10,0,0,0"
+                                             IconWidth="20"
+                                             PathStyle="{StaticResource BulbOff}"
+                                             ToolTip="Total dimmed time" />
 
                         <TextBlock Grid.Row="2"
                                    Grid.Column="1"
+                                   Style="{StaticResource HeaderText}"
+                                   Text="Total dimmed time" />
+
+
+                        <TextBlock Grid.Row="2"
+                                   Grid.Column="2"
                                    Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalDimmTime, Mode=OneWay, StringFormat={}{0:\\ dd\\:hh\\:mm\\:ss}}" />
 
 
+                        <!--  Power output (Watt)  -->
+
+
+                        <controls:PathButton Grid.Row="3"
+                                             Grid.Column="0"
+                                             IconWidth="18"
+                                             PathStyle="{StaticResource meter-bolt}"
+                                             ToolTip="Power output (Watt)" />
 
                         <TextBlock Grid.Row="3"
+                                   Grid.Column="1"
                                    Style="{StaticResource HeaderText}"
                                    Text="Power output (Watt)" />
 
 
                         <TextBox Grid.Row="3"
-                                 Grid.Column="1"
+                                 Grid.Column="2"
                                  Text="{Binding ElementName=monitorsListView, Path=SelectedItem.PowerOutput, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
 
                         <controls:PathButton Grid.Row="3"
-                                             Grid.Column="2"
+                                             Grid.Column="3"
                                              Margin="0,0,0,0"
                                              HorizontalAlignment="Right"
                                              VerticalAlignment="Center"
@@ -454,28 +603,55 @@
                                              PathStyle="{StaticResource Save}" />
 
 
+                        <!--  Saved by dimmed  -->
+
+                        <controls:PathButton Grid.Row="4"
+                                             Grid.Column="0"
+                                             Margin="-3,0,0,0"
+                                             IconWidth="12"
+                                             PathStyle="{StaticResource euro-sign}"
+                                             ToolTip="Saved by dimmed" />
+
                         <TextBlock Grid.Row="4"
+                                   Grid.Column="1"
                                    Style="{StaticResource HeaderText}"
                                    Text="Saved by dimmed" />
 
-                        <TextBlock Grid.Row="4" Grid.Column="1">
+                        <TextBlock Grid.Row="4" Grid.Column="2">
                             <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalSaved, Mode=OneWay, StringFormat={}{0:N6}}" />
                             <Run Foreground="#20ffffff" Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TotalSaved, Mode=OneWay, StringFormat={}({0:N2} €)}" />
                         </TextBlock>
 
+                        <!--  Days of using software  -->
+
+                        <controls:PathButton Grid.Row="5"
+                                             Grid.Column="0"
+                                             PathStyle="{StaticResource calendar-day}"
+                                             ToolTip="Days of using software" />
+
                         <TextBlock Grid.Row="5"
+                                   Grid.Column="1"
                                    Style="{StaticResource HeaderText}"
                                    Text="Days of using software" />
 
-                        <TextBlock Grid.Row="5" Grid.Column="1">
+                        <TextBlock Grid.Row="5" Grid.Column="2">
                             <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.DaysOfUsingSoftware, Mode=OneWay, StringFormat={}{0:N0}}" />
                         </TextBlock>
 
-                        <TextBlock Grid.Row="6"
-                                   Style="{StaticResource HeaderText}"
-                                   Text="Start date" />
 
-                        <TextBlock Grid.Row="6" Grid.Column="1">
+                        <!--  Start date  -->
+
+                        <controls:PathButton Grid.Row="6"
+                                             Grid.Column="0"
+                                             PathStyle="{StaticResource clock}"
+                                             ToolTip="Start date of couting" />
+
+                        <TextBlock Grid.Row="6"
+                                   Grid.Column="1"
+                                   Style="{StaticResource HeaderText}"
+                                   Text="Start date of couting" />
+
+                        <TextBlock Grid.Row="6" Grid.Column="2">
                             <Run Text="{Binding ElementName=monitorsListView, Path=SelectedItem.StartDayOfCounting, Mode=OneWay, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
                         </TextBlock>
                     </Grid>

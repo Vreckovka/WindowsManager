@@ -1,56 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using WindowsManager.Modularity;
 using WindowsManager.Views;
-using Microsoft.Win32;
 using VCore;
 using VCore.ItemsCollections;
 using VCore.Modularity.RegionProviders;
-using VCore.Standard;
 using VCore.Standard.Helpers;
 using VCore.ViewModels;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.ScreenManagement
 {
+  public class ScreensManagementData
+  {
+    public DateTime StartDayOfUsingSoftware { get; set; }
+  }
+
   public class ScreensManagementViewModel : RegionViewModel<ScreensManagementView>
   {
 
+    private string filePath;
     private string folderPath = "Data\\Monitors";
 
     public ScreensManagementViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
-      if (!Directory.Exists(folderPath))
-        Directory.CreateDirectory(folderPath);
-
-
-      var backupPath = "Data\\Monitors\\Backup";
-      var newDir = backupPath + $"\\Data_{ DateTime.Today.ToShortDateString()}";
-      ;
-      if (!Directory.Exists(newDir))
-      {
-        Directory.CreateDirectory(newDir);
-
-        CopyFiles("Data\\Monitors", newDir);
-      }
-    }
-
-    private static void CopyFiles(string sourcePath, string targetPath, SearchOption searchOption = SearchOption.TopDirectoryOnly)
-    {
-      foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", searchOption))
-      {
-        File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
-      }
+      filePath = folderPath + "\\monitors_data.txt";
     }
 
     #region Properties
@@ -104,6 +85,80 @@ namespace WindowsManager.ViewModels
 
     public override string Header => "Monitors";
 
+    #region TotalDimmTime
+
+    private TimeSpan totalDimmTime;
+
+    public TimeSpan TotalDimmTime
+    {
+      get { return totalDimmTime; }
+      set
+      {
+        if (value != totalDimmTime)
+        {
+          totalDimmTime = value;
+
+          RaisePropertyChanged(nameof(TotalSaved));
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TotalSaved
+
+    private double totalSaved;
+
+    public double TotalSaved
+    {
+      get { return totalSaved; }
+      set
+      {
+        if (value != totalSaved)
+        {
+          totalSaved = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region LoadedData
+
+    private ScreensManagementData loadedData;
+
+    public ScreensManagementData LoadedData
+    {
+      get { return loadedData; }
+      set
+      {
+        if (value != loadedData)
+        {
+          loadedData = value;
+          RaisePropertyChanged(nameof(TotalDays));
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    public double TotalDays
+    {
+      get
+      {
+        if (LoadedData != null)
+        {
+          var totalDays = (DateTime.Now - LoadedData.StartDayOfUsingSoftware).TotalDays;
+
+          return totalDays;
+        }
+
+        return 0;
+      }
+    }
 
     #endregion
 
@@ -139,8 +194,14 @@ namespace WindowsManager.ViewModels
       if (Screens.Count > 0)
         Screens[0].IsSelected = true;
 
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher().Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher().Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher()
+        .Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
+
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher()
+        .Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
+
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.TotalDimmTime)).Subscribe((x) => OnDimmedTimeChagend()).DisposeWith(this);
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.TotalSaved)).Subscribe((x) => OnSavedChagend()).DisposeWith(this);
 
       foreach (var screen in Screens)
       {
@@ -152,6 +213,10 @@ namespace WindowsManager.ViewModels
       Observable.Interval(TimeSpan.FromSeconds(0.2)).ObserveOnDispatcher().Subscribe(x => UpdateActualScreen()).DisposeWith(this);
 
       Application.Current.MainWindow.Closing += MainWindow_Closing;
+
+
+      Task.Run(() => Load());
+      Task.Run(() => CreateBackup());
     }
 
     #region MainWindow_Closing
@@ -165,6 +230,56 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
+
+    #endregion
+
+    #region OnDimmedTimeChagend
+
+    private void OnDimmedTimeChagend()
+    {
+      TotalDimmTime = new TimeSpan(Screens.Sum(r => r.TotalDimmTimeTicks));
+    }
+
+    #endregion
+
+    #region OnSavedChagend
+
+    private void OnSavedChagend()
+    {
+      TotalSaved = Screens.Sum(r => r.TotalSaved);
+    }
+
+    #endregion
+
+    #region CreateBackup
+
+    private void CreateBackup()
+    {
+      if (!Directory.Exists(folderPath))
+        Directory.CreateDirectory(folderPath);
+
+      var backupPath = "Data\\Monitors\\Backup";
+      var newDir = backupPath + $"\\Data_{ DateTime.Today.ToShortDateString()}";
+      ;
+      if (!Directory.Exists(newDir))
+      {
+        Directory.CreateDirectory(newDir);
+
+        CopyFiles("Data\\Monitors", newDir);
+      }
+    }
+
+    #endregion
+
+    #region CopyFiles
+
+    private void CopyFiles(string sourcePath, string targetPath, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+    {
+      foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", searchOption))
+      {
+        File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+      }
+    }
 
     #endregion
 
@@ -299,6 +414,7 @@ namespace WindowsManager.ViewModels
           actualScreen.IsActive = true;
       }
 
+      RaisePropertyChanged(nameof(TotalDays));
     }
 
     #endregion
@@ -346,6 +462,54 @@ namespace WindowsManager.ViewModels
       GetCursorPos(ref w32Mouse);
 
       return new Point(w32Mouse.X, w32Mouse.Y);
+    }
+
+    #endregion
+
+    #region Save
+
+    private void Save()
+    {
+      var fileExists = File.Exists(filePath);
+
+      if ((fileExists && wasLoaded) || !fileExists)
+      {
+        var json = JsonSerializer.Serialize(LoadedData);
+
+        File.WriteAllText(filePath, json);
+      }
+    }
+
+    #endregion
+
+    #region Load
+
+    private bool wasLoaded;
+    private void Load()
+    {
+      try
+      {
+        if (File.Exists(filePath))
+        {
+          var data = File.ReadAllText(filePath);
+
+          LoadedData = JsonSerializer.Deserialize<ScreensManagementData>(data);
+        }
+        else
+        {
+          wasLoaded = true;
+
+          LoadedData = new ScreensManagementData()
+          {
+            StartDayOfUsingSoftware = DateTime.Now
+          };
+
+          Save();
+        }
+      }
+      catch (JsonException ex)
+      {
+      }
     }
 
     #endregion

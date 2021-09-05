@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using VCore;

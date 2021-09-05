@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.ScreenManagement
 {
   public static class MonitorHelper
   {

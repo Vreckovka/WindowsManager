@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.ScreenManagement
 {
   public class BrightnessController : IDisposable
   {

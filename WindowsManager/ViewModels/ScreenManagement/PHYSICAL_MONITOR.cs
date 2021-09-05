@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.ScreenManagement
 {
   [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
   public struct PHYSICAL_MONITOR

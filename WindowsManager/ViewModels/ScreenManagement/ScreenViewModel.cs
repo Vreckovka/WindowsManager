@@ -4,10 +4,8 @@ using System.IO;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -16,7 +14,7 @@ using VCore;
 using VCore.Standard;
 using VCore.Standard.Helpers;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.ScreenManagement
 {
   public class ScreenViewModel : ViewModel<Screen>
   {
@@ -545,7 +543,7 @@ namespace WindowsManager.ViewModels
 
     private void OnTurnOffTimerTick(long index)
     {
-      System.Windows.Application.Current.Dispatcher.Invoke(() =>
+      System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
       {
         TimeSinceActive = automaticTurnOffTimer.ActualTime;
 
@@ -628,12 +626,20 @@ namespace WindowsManager.ViewModels
 
     private void Save()
     {
-      if (filePath != null && File.Exists(filePath) && wasLoaded)
+      if (string.IsNullOrEmpty(filePath))
+      {
+        return;
+      }
+
+      var fileExists = File.Exists(filePath);
+
+      if ((fileExists && wasLoaded ) || !fileExists)
       {
         var json = JsonSerializer.Serialize(this);
 
         File.WriteAllText(filePath, json);
       }
+     
 
     }
 
@@ -660,6 +666,8 @@ namespace WindowsManager.ViewModels
             StartDayOfCounting = serialized.StartDayOfCounting;
             ShouldByValue = serialized.ShouldByValue;
 
+            wasLoaded = true;
+
             if (StartDayOfCounting == DateTime.MinValue)
             {
               StartDayOfCounting = DateTime.Now;
@@ -670,6 +678,8 @@ namespace WindowsManager.ViewModels
         }
         else
         {
+          wasLoaded = true;
+
           StartDayOfCounting = DateTime.Now;
 
           Save();
@@ -677,10 +687,6 @@ namespace WindowsManager.ViewModels
       }
       catch (JsonException ex)
       {
-      }
-      finally
-      {
-        wasLoaded = true;
       }
     }
 
