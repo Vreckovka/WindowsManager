@@ -44,6 +44,22 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region DisableAutomaticConnect
+
+    public bool DisableAutomaticConnect
+    {
+      get { return Model.DisableAutomaticConnect; }
+      set
+      {
+        if (value != Model.DisableAutomaticConnect)
+        {
+          Model.DisableAutomaticConnect = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
 
   }
 

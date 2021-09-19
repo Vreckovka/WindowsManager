@@ -12,6 +12,9 @@
              mc:Ignorable="d">
 
 
+    <UserControl.Resources>
+        <ResourceDictionary Source="pack://application:,,,/VCore.WPF;component/StylesDictionaries/FontAwesome6Glyphs.xaml" />
+    </UserControl.Resources>
 
     <HeaderedContentControl Header="Output device">
         <HeaderedContentControl.Content>
@@ -98,16 +101,28 @@
                                                     <ColumnDefinition />
                                                 </Grid.ColumnDefinitions>
 
-                                                <controls:PathButton Grid.Column="0"
-                                                                     Margin="0,0,7,0"
-                                                                     Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}"
-                                                                     CommandParameter="{Binding}"
-                                                                     IconHeight="18"
-                                                                     IconHoverColor="{StaticResource DefaultRedColor}"
-                                                                     IconWidth="14"
-                                                                     IsReadOnly="True"
-                                                                     PathStyle="{StaticResource Trash}"
-                                                                     ToolTip="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}" />
+                                                <StackPanel Margin="0,0,7,0" Orientation="Horizontal">
+                                                    <controls:PathButton Margin="0,0,5,0"
+                                                                         FontSize="18"
+                                                                         Foreground="White"
+                                                                         ForegroundCheckedColor="{StaticResource DefaultRedColor}"
+                                                                         ForegroundDefaultColor="#15ffffff"
+                                                                         ForegroundHoverColor="{StaticResource DefaultRedColor}"
+                                                                         IsChecked="{Binding DisableAutomaticConnect, Mode=TwoWay}"
+                                                                         IsReadOnly="False"
+                                                                         Style="{StaticResource link-horizontal-slash}"
+                                                                         ToolTip="DISABLE/ENABLE Automatic connect (When device is connect is set as DEFAULT)" />
+
+                                                    <controls:PathButton Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}"
+                                                                         CommandParameter="{Binding}"
+                                                                         IconHeight="18"
+                                                                         IconHoverColor="{StaticResource DefaultRedColor}"
+                                                                         IconWidth="14"
+                                                                         IsReadOnly="True"
+                                                                         PathStyle="{StaticResource Trash}"
+                                                                         ToolTip="Remove" />
+                                                </StackPanel>
+
 
                                                 <Grid Grid.Column="1">
                                                     <Grid.Style>
