@@ -86,12 +86,12 @@
                                              FontWeight="Bold"
                                              ForegroundCheckedColor="#20ffffff"
                                              ForegroundDefaultColor="#20ffffff"
+                                             IconCheckedColor="{StaticResource YellowColor}"
                                              IconDefaultColor="{StaticResource DefaultRedColor}"
                                              IconHeight="35"
                                              IconHoverColor="{StaticResource DefaultRedColor}"
                                              IconWidth="45"
                                              IsChecked="{Binding IsTurnOffScreensButActive, Mode=OneWay}"
-                                             PathCheckedBrush="{StaticResource YellowBrush}"
                                              ToolTip="Will turn on/off all screens that are not currently active">
                             <controls:PathButton.Style>
                                 <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
@@ -241,11 +241,11 @@
                                     <Grid Margin="0,0,0,0" Background="#10ffffff">
                                         <controls:PathButton Margin="7,0,0,0"
                                                              Padding="0"
+                                                             IconCheckedColor="#32a87d"
                                                              IconHeight="15"
                                                              IconWidth="18"
                                                              IsChecked="{Binding IsActive}"
                                                              IsHitTestVisible="False"
-                                                             PathCheckedBrush="#32a87d"
                                                              PathStyle="{StaticResource CheckMark}">
                                             <controls:PathButton.Style>
                                                 <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
@@ -376,12 +376,12 @@
                                                              Margin="5"
                                                              HorizontalAlignment="Left"
                                                              Command="{Binding TurnOffCommand}"
+                                                             IconCheckedColor="{StaticResource DefaultRedColor}"
                                                              IconDefaultColor="#353535"
                                                              IconHeight="20"
                                                              IconHoverColor="{StaticResource DefaultRedColor}"
                                                              IconWidth="25"
                                                              IsChecked="{Binding IsDimmed, Mode=OneWay}"
-                                                             PathCheckedBrush="{StaticResource DefaultRedBrush}"
                                                              PathStyle="{StaticResource BulbOff}"
                                                              ToolTip="Black out" />
 
@@ -519,7 +519,7 @@
                         <!--  Name  -->
 
                         <controls:PathButton Grid.Row="0"
-                                             PathStyle="{StaticResource tag}"
+                                             Style="{StaticResource tag}"
                                              ToolTip="Name of the monitor" />
 
                         <TextBlock Grid.Row="0"

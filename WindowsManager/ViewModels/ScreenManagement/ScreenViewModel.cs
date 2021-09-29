@@ -637,10 +637,11 @@ namespace WindowsManager.ViewModels.ScreenManagement
       {
         var json = JsonSerializer.Serialize(this);
 
-        File.WriteAllText(filePath, json);
+        if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
+        {
+          File.WriteAllText(filePath, json);
+        }
       }
-     
-
     }
 
     #endregion

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -8,12 +9,14 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using WindowsManager.ViewModels.Home;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using VCore;
 using VCore.ViewModels;
 using VCore.ViewModels.Navigation;
+using VCore.WPF.Other;
 using VCore.WPF.ViewModels.Navigation;
 
 namespace WindowsManager.ViewModels
@@ -23,13 +26,17 @@ namespace WindowsManager.ViewModels
   //TODO: Fast panel (horiaci tachometer iconka) - monitory a sound dokopy (ako na zaciatku)
   public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
   {
+    private readonly HomeViewModel homeViewModel;
+
     #region Constructors
 
     public WindowManagerMainWindowViewModel(
       ScreensManagementViewModel screensManagementViewModel,
       TurnOffViewModel turnOffViewModel,
-      SoundManagerViewModel soundManagerViewModel)
+      SoundManagerViewModel soundManagerViewModel,
+      HomeViewModel homeViewModel)
     {
+      this.homeViewModel = homeViewModel ?? throw new ArgumentNullException(nameof(homeViewModel));
       ScreensManagementViewModel = screensManagementViewModel;
       TurnOffViewModel = turnOffViewModel;
       SoundManagerViewModel = soundManagerViewModel;
@@ -75,6 +82,9 @@ namespace WindowsManager.ViewModels
 
     private void CreateMenu()
     {
+      var homeMenuVm = new NavigationItem(homeViewModel);
+      homeMenuVm.IconPathData = IconPaths.Home;
+
       var monitorsMenuVm = new NavigationItem(ScreensManagementViewModel);
       monitorsMenuVm.IconPathData = "M512 0H64C28.65 0 0 28.65 0 64v288c0 35.35 28.65 64 64 64h148.3l-9.6 48H152C138.8 464 128 474.8 128 488S138.8 512 152 512h272c13.25 0 24-10.75 24-24s-10.75-24-24-24h-50.73L363.7 416H512c35.35 0 64-28.65 64-64V64C576 28.65 547.3 0 512 0zM324.3 464H251.7L261.3 416h53.46L324.3 464zM528 352c0 8.822-7.178 16-16 16H64c-8.822 0-16-7.178-16-16V64c0-8.822 7.178-16 16-16h448c8.822 0 16 7.178 16 16V352z";
      
@@ -85,12 +95,12 @@ namespace WindowsManager.ViewModels
       var sndMngr = new NavigationItem(SoundManagerViewModel);
       sndMngr.IconPathData = "M456 160c22.09 0 40-17.91 40-40S478.1 80 456 80S416 97.91 416 120S433.9 160 456 160zM576 0h-240c-35.35 0-64 28.65-64 64v384c0 35.35 28.65 64 64 64H576c35.35 0 64-28.65 64-64V64C640 28.65 611.3 0 576 0zM592 448c0 8.822-7.178 16-16 16h-240c-8.822 0-16-7.178-16-16V64c0-8.822 7.178-16 16-16H576c8.822 0 16 7.178 16 16V448zM456 224C398.6 224 352 270.6 352 328s46.56 104 104 104s104-46.56 104-104S513.4 224 456 224zM456 384c-30.88 0-56-25.12-56-56c0-30.88 25.12-56 56-56S512 297.1 512 328C512 358.9 486.9 384 456 384zM184 80C161.9 80 144 97.91 144 120S161.9 160 184 160S224 142.1 224 120S206.1 80 184 80zM184 272C199.7 272 213.8 278.5 224 288.9V232.3C211.7 227.1 198.2 224 184 224C126.6 224 80 270.6 80 328s46.56 104 104 104c14.24 0 27.67-3.115 40-8.346v-56.58C213.8 377.5 199.7 384 184 384C153.1 384 128 358.9 128 328C128 297.1 153.1 272 184 272zM264.1 0H64C28.65 0 0 28.65 0 64v384c0 35.35 28.65 64 64 64h200.1c-11.94-13.24-20.25-29.67-23.35-48H64c-8.822 0-16-7.178-16-16V64c0-8.822 7.178-16 16-16h177.6C244.7 29.67 253 13.24 264.1 0z";
 
-      
+      MainMenu.Items.Add(homeMenuVm);
       MainMenu.Items.Add(monitorsMenuVm);
       MainMenu.Items.Add(sndMngr);
       MainMenu.Items.Add(turnOff);
 
-      monitorsMenuVm.IsActive = true;
+      homeMenuVm.IsActive = true;
 
     }
 

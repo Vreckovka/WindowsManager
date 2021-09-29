@@ -45,9 +45,9 @@
                             </TextBlock>
 
                             <controls:PathButton Margin="10,10"
+                                                 IconCheckedColor="{StaticResource LightRedColor}"
                                                  IconDefaultColor="#ccc"
-                                                 IsChecked="{Binding IsActualMuted}"
-                                                 PathCheckedBrush="{StaticResource LightRedBrush}">
+                                                 IsChecked="{Binding IsActualMuted}">
                                 <controls:PathButton.Style>
                                     <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">
                                         <Setter Property="PathStyle" Value="{StaticResource Volume}" />
@@ -150,6 +150,7 @@
                                                                Text="{Binding Model.Description}" />
 
                                                     <controls:PathButton Grid.Column="2"
+                                                                         IconCheckedColor="{StaticResource GreenColor}"
                                                                          IconDefaultColor="Transparent"
                                                                          IconHeight="12"
                                                                          IconWidth="14"
@@ -157,7 +158,6 @@
                                                                          IsHitTestVisible="False"
                                                                          IsReadOnly="True"
                                                                          Opacity="0.70"
-                                                                         PathCheckedBrush="{StaticResource GreenBrush}"
                                                                          PathStyle="{StaticResource CheckMark}">
                                                         <controls:PathButton.Style>
                                                             <Style BasedOn="{StaticResource {x:Type controls:PathButton}}" TargetType="controls:PathButton">

@@ -7,6 +7,9 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Views\Home\HomeView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\ScreensManagementView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -21,6 +24,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Views\Home\HomeView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Home\HomeViewResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\MainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
