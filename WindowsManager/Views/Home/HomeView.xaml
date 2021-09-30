@@ -103,7 +103,7 @@
                                                 <TextBlock FontSize="15"
                                                            FontWeight="Bold"
                                                            Foreground="{StaticResource YellowBrush}">
-                                                    <Run Text="{Binding Size}" />
+                                                    <Run Text="{Binding Size, StringFormat={}{0:N2}}" />
                                                     <Run Text="{Binding SizeUnit}" />
                                                 </TextBlock>
                                             </StackPanel>
@@ -153,6 +153,7 @@
                                             <Button Background="Transparent"
                                                     BorderThickness="0"
                                                     Command="{Binding DataContext.OpenInBrowser, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                    CommandParameter="{Binding DataContext.Model.Link, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
                                                     Content="{Binding Href}"
                                                     Cursor="Hand"
                                                     FontSize="15"

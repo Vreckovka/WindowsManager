@@ -4,7 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
-     <ApplicationIcon>Icon.ico</ApplicationIcon>    
+     <ApplicationIcon>Icon.ico</ApplicationIcon>
+     <Platforms>AnyCPU;x64</Platforms>    
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,12 +33,15 @@
     <PackageReference Include="System.Reactive" Version="5.0.0" />
     <PackageReference Include="Prism.Ninject" Version="7.2.0.1422" />
     <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="94.0.4606.6100" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CustomLibraries\Logger\Logger.csproj" />
     <ProjectReference Include="..\..\CustomLibraries\SoundManagement\SoundManagement.csproj" />
     <ProjectReference Include="..\..\CustomLibraries\VCore.Standard\VCore.Standard.csproj" />
     <ProjectReference Include="..\..\CustomLibraries\VCore\VCore.WPF.csproj" />
+    <ProjectReference Include="..\..\VPlayer\VPlayer.AudioStorage\VPlayer.AudioStorage.csproj" />
     <ProjectReference Include="..\..\VPlayer\VPlayer.DarkTheme\VPlayer.DarkTheme.csproj" />
   </ItemGroup>
 

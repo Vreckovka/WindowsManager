@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WindowsManager.Modularity;
@@ -11,16 +12,19 @@ using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.Views.Home;
 using VCore.Modularity.RegionProviders;
 using VCore.ViewModels;
+using VPlayer.AudioStorage.Scrappers.CSFD;
 
 namespace WindowsManager.ViewModels.Home
 {
   public class HomeViewModel : RegionViewModel<HomeView>
   {
     private readonly RargbtScrapper rargbtScrapper;
+    private readonly ICSFDWebsiteScrapper iCsfdWebsiteScrapper;
 
-    public HomeViewModel(RargbtScrapper rargbtScrapper, IRegionProvider regionProvider) : base(regionProvider)
+    public HomeViewModel(RargbtScrapper rargbtScrapper, IRegionProvider regionProvider, ICSFDWebsiteScrapper iCsfdWebsiteScrapper) : base(regionProvider)
     {
       this.rargbtScrapper = rargbtScrapper ?? throw new ArgumentNullException(nameof(rargbtScrapper));
+      this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
@@ -81,9 +85,31 @@ namespace WindowsManager.ViewModels.Home
       {
         RargbtTorrrents = topTorrents.Select(x => new RargbtTorrentViewModel(x)).ToList();
         DateOfData = rargbtScrapper.DateOfData;
+
+        Task.Run(() =>
+        {
+          OnGetTorrents();
+        });
       });
     }
 
+    private async void OnGetTorrents()
+    {
+      if (RargbtTorrrents != null)
+      {
+        foreach (var item in RargbtTorrrents.Where(x => x.Model is VideoRargbtTorrent))
+        {
+          if (item.Model is VideoRargbtTorrent videoRargbt)
+          {
+            var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.ParsedName, CancellationToken.None);
 
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+              item.ItemExtraData = data;
+            });
+          }
+        }
+      }
+    }
   }
 }

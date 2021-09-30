@@ -639,6 +639,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
         if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
         {
+          filePath.EnsureDirectoryExists();
+
           File.WriteAllText(filePath, json);
         }
       }

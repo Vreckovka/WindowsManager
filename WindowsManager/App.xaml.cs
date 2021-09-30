@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WindowsManager.ViewModels;
+using Logger;
 using Ninject;
 using Prism.Ioc;
 using Prism.Ninject;
@@ -14,6 +15,8 @@ using Prism.Regions;
 using SoundManagement;
 using VCore.Modularity.NinjectModules;
 using VCore.Standard.Modularity.NinjectModules;
+using VPlayer.AudioStorage.Modularity.NinjectModules;
+using VPlayer.Core.Managers.Status;
 
 namespace WindowsManager
 {
@@ -30,6 +33,11 @@ namespace WindowsManager
 
       Kernel.Load<CommonNinjectModule>();
       Kernel.Load<WPFNinjectModule>();
+      Kernel.Bind<ILogger>().To<Logger.Logger>();
+      Kernel.Bind<ILoggerContainer>().To<ConsoleLogger>();
+
+      Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
+      Kernel.Load<AudioStorageNinjectModule>();
     }
 
     protected override Window CreateShell()

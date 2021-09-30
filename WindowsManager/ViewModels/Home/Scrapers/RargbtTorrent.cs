@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 
 namespace WindowsManager.ViewModels.Home.Scrapers
 {
@@ -28,10 +29,20 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
     public string ImagePath { get; set; }
     public double? Size { get; set; }
-    public string SizeUnit { get; set; }
+    public SizeUnit? SizeUnit { get; set; }
     public int? Seeders { get; set; }
     public int? Leechers { get; set; }
     public int? SeedersOrderIndex { get; set; }
     public DateTime? Created { get; set; }
   }
+
+  public enum SizeUnit
+  {
+    B,
+    KB,
+    MB,
+    GB,
+    TB
+  }
+ 
 }

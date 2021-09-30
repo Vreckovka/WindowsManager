@@ -132,8 +132,6 @@ namespace WindowsManager.ViewModels.Home.Scrapers
                     {
                       parsedName = match.Groups[1].Value?.Replace(".", " ");
                       quality = match.Groups[2].Value?.Replace(".", " ");
-
-
                     }
                     else
                     {
@@ -146,8 +144,6 @@ namespace WindowsManager.ViewModels.Home.Scrapers
                         quality = match.Groups[2].Value?.Replace(".", " ");
                       }
                     }
-
-
                   }
                 }
 
@@ -218,7 +214,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
                     Seeders = seeders,
                     SeedersOrderIndex = index,
                     Size = size,
-                    SizeUnit = sizeUnit,
+                    SizeUnit = GetSizeUnit(sizeUnit),
                     ParsedName = parsedName,
                     Quality = quality
                   };
@@ -237,7 +233,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
                     Seeders = seeders,
                     SeedersOrderIndex = index,
                     Size = size,
-                    SizeUnit = sizeUnit
+                    SizeUnit = GetSizeUnit(sizeUnit)
                   };
                 }
 
@@ -255,7 +251,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
                     var qualities = parent.Qualities.ToList();
                     qualities.Add(newVideoTorrent);
 
-                    parent.Qualities = qualities;
+                    parent.Qualities = qualities.OrderBy(x => x.SizeUnit).ThenBy(x => x.Size).ToList();
                   }
                   else
                   {
@@ -372,6 +368,35 @@ namespace WindowsManager.ViewModels.Home.Scrapers
     }
 
     #endregion
+
+    private SizeUnit? GetSizeUnit(string unit)
+    {
+      switch (unit)
+      {
+        case "B":
+        {
+          return SizeUnit.B;
+        }
+        case "KB":
+        {
+          return SizeUnit.KB;
+        }
+        case "MB":
+        {
+          return SizeUnit.MB;
+        }
+        case "GB":
+        {
+          return SizeUnit.GB;
+        }
+        case "TB":
+        {
+          return SizeUnit.TB;
+        }
+      }
+
+      return null;
+    }
 
   }
 }

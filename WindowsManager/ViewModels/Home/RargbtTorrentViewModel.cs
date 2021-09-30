@@ -14,22 +14,22 @@ namespace WindowsManager.ViewModels.Home
 
     #region TurnOffCommand
 
-    private ActionCommand openInBrowser;
+    private ActionCommand<string> openInBrowser;
     public ICommand OpenInBrowser
     {
       get
       {
-        return openInBrowser ??= new ActionCommand(OnOpenInBrowser);
+        return openInBrowser ??= new ActionCommand<string>(OnOpenInBrowser);
       }
     }
 
-    private void OnOpenInBrowser()
+    private void OnOpenInBrowser(string path)
     {
-      if (!string.IsNullOrEmpty(Model.Link))
+      if (!string.IsNullOrEmpty(path))
       {
         Process.Start(new System.Diagnostics.ProcessStartInfo()
         {
-          FileName = Model.Link,
+          FileName = path,
           UseShellExecute = true,
           Verb = "open"
         });
@@ -37,5 +37,25 @@ namespace WindowsManager.ViewModels.Home
     }
 
     #endregion
+
+    #region ItemExtraData
+
+    private object itemExtraData;
+
+    public object ItemExtraData
+    {
+      get { return itemExtraData; }
+      set
+      {
+        if (value != itemExtraData)
+        {
+          itemExtraData = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
   }
 }
