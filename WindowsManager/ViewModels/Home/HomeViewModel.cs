@@ -46,6 +46,26 @@ namespace WindowsManager.ViewModels.Home
 
     #endregion
 
+    #region DateOfData
+
+    private DateTime? dateOfData;
+
+    public DateTime? DateOfData
+    {
+      get { return dateOfData; }
+      set
+      {
+        if (value != dateOfData)
+        {
+          dateOfData = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+
     public override void Initialize()
     {
       base.Initialize();
@@ -60,6 +80,7 @@ namespace WindowsManager.ViewModels.Home
       Application.Current.Dispatcher.Invoke(() =>
       {
         RargbtTorrrents = topTorrents.Select(x => new RargbtTorrentViewModel(x)).ToList();
+        DateOfData = rargbtScrapper.DateOfData;
       });
     }
 
