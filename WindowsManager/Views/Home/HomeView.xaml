@@ -81,14 +81,14 @@
                                                            Margin="5,0,0,0"
                                                            HorizontalAlignment="Left"
                                                            VerticalAlignment="Center"
-                                                           Source="{Binding CategoryImagePath, Converter={converters:CacheImageConverter}, IsAsync=True}" />
+                                                           Source="{Binding CategoryImagePath, IsAsync=True}" />
                                                 </StackPanel>
 
                                                 <Grid>
-                                                    <Image HorizontalAlignment="Left" Source="{Binding ImagePath, Converter={converters:CacheImageConverter}, IsAsync=True}" />
+                                                    <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
 
                                                     <Grid.ToolTip>
-                                                        <Image HorizontalAlignment="Left" Source="{Binding ImagePath, Converter={converters:CacheImageConverter}, IsAsync=True}" />
+                                                        <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
                                                     </Grid.ToolTip>
                                                 </Grid>
 
