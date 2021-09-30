@@ -37,6 +37,7 @@ namespace WindowsManager
       Kernel.Bind<ILogger>().To<Logger.Logger>().InSingletonScope(); 
       Kernel.Bind<ILoggerContainer>().To<ConsoleLogger>().InSingletonScope();;
       Kernel.Bind<ScreensManagementViewModel>().ToSelf().InSingletonScope();
+      Kernel.Bind<SoundManagerViewModel>().ToSelf().InSingletonScope();
 
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();

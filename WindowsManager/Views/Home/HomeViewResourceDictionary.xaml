@@ -132,7 +132,7 @@
                                                             Background="Transparent"
                                                             BorderThickness="0"
                                                             Command="{Binding DataContext.OpenInBrowser, ElementName=Container}"
-                                                            CommandParameter="{Binding DataContext.Model.Link, ElementName=Container}"
+                                                            CommandParameter="{Binding Link}"
                                                             Content="{Binding Href}"
                                                             Cursor="Hand"
                                                             FontSize="15"

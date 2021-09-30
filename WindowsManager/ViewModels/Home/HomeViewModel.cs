@@ -26,11 +26,13 @@ namespace WindowsManager.ViewModels.Home
       RargbtScrapper rargbtScrapper, 
       IRegionProvider regionProvider, 
       ICSFDWebsiteScrapper iCsfdWebsiteScrapper,
-      ScreensManagementViewModel screensManagementViewModel) : base(regionProvider)
+      ScreensManagementViewModel screensManagementViewModel,
+      SoundManagerViewModel soundManagerViewModel) : base(regionProvider)
     {
       this.rargbtScrapper = rargbtScrapper ?? throw new ArgumentNullException(nameof(rargbtScrapper));
       this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
       ScreensManagementViewModel = screensManagementViewModel;
+      SoundManagerViewModel = soundManagerViewModel;
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
@@ -38,6 +40,8 @@ namespace WindowsManager.ViewModels.Home
     public override string Header => "Home";
 
     public ScreensManagementViewModel ScreensManagementViewModel { get; }
+
+    public SoundManagerViewModel SoundManagerViewModel { get; }
 
     #region RargbtTorrrents
 
