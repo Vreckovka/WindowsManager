@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using WindowsManager.ViewModels;
+using WindowsManager.ViewModels.ScreenManagement;
 using Logger;
 using Ninject;
 using Prism.Ioc;
@@ -33,8 +34,9 @@ namespace WindowsManager
 
       Kernel.Load<CommonNinjectModule>();
       Kernel.Load<WPFNinjectModule>();
-      Kernel.Bind<ILogger>().To<Logger.Logger>();
-      Kernel.Bind<ILoggerContainer>().To<ConsoleLogger>();
+      Kernel.Bind<ILogger>().To<Logger.Logger>().InSingletonScope(); 
+      Kernel.Bind<ILoggerContainer>().To<ConsoleLogger>().InSingletonScope();;
+      Kernel.Bind<ScreensManagementViewModel>().ToSelf().InSingletonScope();
 
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();

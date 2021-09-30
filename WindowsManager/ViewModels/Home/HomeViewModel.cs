@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
+using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.Views.Home;
 using VCore.Modularity.RegionProviders;
 using VCore.ViewModels;
@@ -21,15 +22,22 @@ namespace WindowsManager.ViewModels.Home
     private readonly RargbtScrapper rargbtScrapper;
     private readonly ICSFDWebsiteScrapper iCsfdWebsiteScrapper;
 
-    public HomeViewModel(RargbtScrapper rargbtScrapper, IRegionProvider regionProvider, ICSFDWebsiteScrapper iCsfdWebsiteScrapper) : base(regionProvider)
+    public HomeViewModel(
+      RargbtScrapper rargbtScrapper, 
+      IRegionProvider regionProvider, 
+      ICSFDWebsiteScrapper iCsfdWebsiteScrapper,
+      ScreensManagementViewModel screensManagementViewModel) : base(regionProvider)
     {
       this.rargbtScrapper = rargbtScrapper ?? throw new ArgumentNullException(nameof(rargbtScrapper));
       this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
+      ScreensManagementViewModel = screensManagementViewModel;
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
 
     public override string Header => "Home";
+
+    public ScreensManagementViewModel ScreensManagementViewModel { get; }
 
     #region RargbtTorrrents
 
