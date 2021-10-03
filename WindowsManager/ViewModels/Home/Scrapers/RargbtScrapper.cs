@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,15 +11,33 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using VCore;
+using VPlayer.AudioStorage.Scrappers.CSFD;
 
 
 namespace WindowsManager.ViewModels.Home.Scrapers
 {
   public class RargbtScrapper
   {
+    private readonly IChromeDriverProvider chromeDriverProvider;
+
+    public RargbtScrapper(IChromeDriverProvider chromeDriverProvider)
+    {
+      this.chromeDriverProvider = chromeDriverProvider ?? throw new ArgumentNullException(nameof(chromeDriverProvider));
+    }
+
     private string baseFolder = "Data\\Rargbt";
 
     public DateTime? DateOfData { get; set; }
+
+    #region GetTorrentNodes
+
+    private HtmlNodeCollection GetTorrentNodes(HtmlDocument document)
+    {
+      //html[1]/body[1]/table[3]/tr[1]/td[2]/table[1]/tr[3]/table[1]/tr
+      return document.DocumentNode.SelectNodes("/html/body/table[3]/tbody/tr/td[2]/div/table/tbody/tr[2]/td/table[2]/tbody/tr");
+    }
+
+    #endregion
 
     #region ScrapePage
 
@@ -40,13 +59,13 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
             document.LoadHtml(htmlCode);
 
-            var torrentsNode = document.DocumentNode.SelectNodes("html[1]/body[1]/table[3]/tr[1]/td[2]/table[1]/tr[3]/table[1]/tr");
+            var torrentsNodes = GetTorrentNodes(document);
 
             int index = 0;
 
-            if (torrentsNode != null)
+            if (torrentsNodes != null)
             {
-              foreach (var node in torrentsNode)
+              foreach (var node in torrentsNodes)
               {
                 if (index == 0)
                 {
@@ -291,31 +310,48 @@ namespace WindowsManager.ViewModels.Home.Scrapers
       {
         DateOfData = DateTime.Now;
 
+        Console.WriteLine("Loading torrents from file " + pathToFile);
         return File.ReadAllText(pathToFile);
       }
       else
       {
-
 #if RELEASE
-        var html = client.DownloadString($"https://rarbg2019.org/torrents.php?order=seeders&by=DESC&page={pageNumber}");
+        if (!chromeDriverProvider.Initialize())
+        {
+          return null;
+        }
+
+        chromeDriverProvider.ChromeDriver.Url = "https://rarbg2019.org/torrents.php?order=seeders&by=DESC&page={pageNumber}";
+        chromeDriverProvider.ChromeDriver.Navigate();
+
+        var html = chromeDriverProvider.ChromeDriver.PageSource;
+
+        Console.WriteLine("Scrapping torrents from web ");
+        //var html = client.DownloadString($"https://rarbg2019.org/torrents.php?order=seeders&by=DESC&page={pageNumber}");
 #else
         var html = File.ReadAllText("rartb.txt");
 #endif
+
         var document = new HtmlDocument();
 
         document.LoadHtml(html);
 
-        var torrentsNode = document.DocumentNode.SelectNodes("html[1]/body[1]/table[3]/tr[1]/td[2]/table[1]/tr[3]/table[1]/tr");
+        var torrentsNodes = GetTorrentNodes(document);
 
-        if (torrentsNode == null)
+        if (torrentsNodes == null)
         {
-          pathToFile = GetSavedFilePath(DateTime.Now.AddDays(-1));
-
-          if (File.Exists(pathToFile))
+          for (int i = 1; i < 6; i++)
           {
-            DateOfData = DateTime.Now.AddDays(-1);
-            return File.ReadAllText(pathToFile);
+            pathToFile = GetSavedFilePath(DateTime.Now.AddDays(-i));
+
+            Console.WriteLine("Loading torrents from file " + pathToFile);
+            if (File.Exists(pathToFile))
+            {
+              DateOfData = DateTime.Now.AddDays(-i);
+              return File.ReadAllText(pathToFile);
+            }
           }
+        
 
           return null;
         }
@@ -362,9 +398,9 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
     private string GetSavedFilePath(DateTime date)
     {
-      var newName = $"rargbt_torrents_{date.ToShortDateString()}.txt";
-
-      return Path.Combine(baseFolder, newName);
+      var newName = $"rargbt_torrents_{date.ToString("dd.MM.yyyy")}.txt";
+      var path = Path.Combine(baseFolder, newName);
+      return path;
     }
 
     #endregion
@@ -374,25 +410,25 @@ namespace WindowsManager.ViewModels.Home.Scrapers
       switch (unit)
       {
         case "B":
-        {
-          return SizeUnit.B;
-        }
+          {
+            return SizeUnit.B;
+          }
         case "KB":
-        {
-          return SizeUnit.KB;
-        }
+          {
+            return SizeUnit.KB;
+          }
         case "MB":
-        {
-          return SizeUnit.MB;
-        }
+          {
+            return SizeUnit.MB;
+          }
         case "GB":
-        {
-          return SizeUnit.GB;
-        }
+          {
+            return SizeUnit.GB;
+          }
         case "TB":
-        {
-          return SizeUnit.TB;
-        }
+          {
+            return SizeUnit.TB;
+          }
       }
 
       return null;

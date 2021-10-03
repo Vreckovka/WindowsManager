@@ -16,46 +16,29 @@ using Prism.Regions;
 using SoundManagement;
 using VCore.Modularity.NinjectModules;
 using VCore.Standard.Modularity.NinjectModules;
+using VCore.WPF;
+using VCore.WPF.Views.SplashScreen;
 using VPlayer.AudioStorage.Modularity.NinjectModules;
 using VPlayer.Core.Managers.Status;
 
 namespace WindowsManager
 {
-  /// <summary>
-  /// Interaction logic for App.xaml
-  /// </summary>
-  public partial class App : PrismApplication
-  {
-    private IKernel Kernel;
-    private Mutex singleInstanceMutex;
-    protected override void RegisterTypes(IContainerRegistry containerRegistry)
-    {
-      Kernel = Container.GetContainer();
 
-      Kernel.Load<CommonNinjectModule>();
-      Kernel.Load<WPFNinjectModule>();
-      Kernel.Bind<ILogger>().To<Logger.Logger>().InSingletonScope(); 
-      Kernel.Bind<ILoggerContainer>().To<ConsoleLogger>().InSingletonScope();;
+  public class WindowsManagerApp : VApplication<MainWindow, WindowManagerMainWindowViewModel, SplashScreenView>
+  {
+    private Mutex singleInstanceMutex;
+
+    protected override void LoadModules()
+    {
+      base.LoadModules();
+
       Kernel.Bind<ScreensManagementViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<SoundManagerViewModel>().ToSelf().InSingletonScope();
 
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();
     }
-
-    protected override Window CreateShell()
-    {
-      var shell = Container.Resolve<MainWindow>();
-
-      RegionManager.SetRegionManager(shell, Kernel.Get<IRegionManager>());
-      RegionManager.UpdateRegions();
-
-      var dataContext = Container.Resolve<WindowManagerMainWindowViewModel>();
-      shell.DataContext = dataContext;
-
-      return shell;
-    }
-
+  
     protected override void OnStartup(StartupEventArgs e)
     {
       base.OnStartup(e);
@@ -69,7 +52,6 @@ namespace WindowsManager
         App.Current.Shutdown();
       }
 #endif
-
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -78,5 +60,15 @@ namespace WindowsManager
 
       base.OnExit(e);
     }
+
+  }
+
+
+  /// <summary>
+  /// Interaction logic for App.xaml
+  /// </summary>
+  public partial class App : WindowsManagerApp
+  {
+
   }
 }
