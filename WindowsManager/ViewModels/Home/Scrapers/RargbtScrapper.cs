@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using VCore;
@@ -43,7 +44,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
     public Task<IEnumerable<RargbtTorrent>> ScrapePage(int pageNumber)
     {
-      return Task.Run(() =>
+      return Task.Run(async () =>
       {
         using (WebClient client = new WebClient())
         {
@@ -51,7 +52,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
           client.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0");
 
-          var htmlCode = LoadTorrents(client, pageNumber);
+          var htmlCode = await LoadTorrents(pageNumber);
 
           if (htmlCode != null)
           {
@@ -288,10 +289,6 @@ namespace WindowsManager.ViewModels.Home.Scrapers
             }
           }
 
-          if (list.Count > 0)
-          {
-            SaveHtml(htmlCode);
-          }
 
           return list.AsEnumerable();
         }
@@ -302,7 +299,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
 
     #region LoadTorrents
 
-    private string LoadTorrents(WebClient client, int pageNumber)
+    private async Task<string> LoadTorrents(int pageNumber)
     {
       var pathToFile = GetSavedFilePath(DateTime.Now);
 
@@ -324,10 +321,12 @@ namespace WindowsManager.ViewModels.Home.Scrapers
         chromeDriverProvider.ChromeDriver.Url = "https://rarbg2019.org/torrents.php?order=seeders&by=DESC&page={pageNumber}";
         chromeDriverProvider.ChromeDriver.Navigate();
 
+        await Task.Delay(2500);
+
         var html = chromeDriverProvider.ChromeDriver.PageSource;
 
-        Console.WriteLine("Scrapping torrents from web ");
-        //var html = client.DownloadString($"https://rarbg2019.org/torrents.php?order=seeders&by=DESC&page={pageNumber}");
+
+
 #else
         var html = File.ReadAllText("rartb.txt");
 #endif
@@ -345,19 +344,23 @@ namespace WindowsManager.ViewModels.Home.Scrapers
             pathToFile = GetSavedFilePath(DateTime.Now.AddDays(-i));
 
             Console.WriteLine("Loading torrents from file " + pathToFile);
+
             if (File.Exists(pathToFile))
             {
               DateOfData = DateTime.Now.AddDays(-i);
+
               return File.ReadAllText(pathToFile);
             }
           }
-        
 
           return null;
         }
         else
         {
           DateOfData = DateTime.Now;
+
+          SaveHtml(html);
+
 
           return html;
         }
