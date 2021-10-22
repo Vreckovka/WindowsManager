@@ -13,6 +13,7 @@ using WindowsManager.Windows;
 using VCore;
 using VCore.Standard;
 using VCore.Standard.Helpers;
+using VCore.WPF.Misc;
 
 namespace WindowsManager.ViewModels.ScreenManagement
 {

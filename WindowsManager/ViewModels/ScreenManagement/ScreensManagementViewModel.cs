@@ -12,9 +12,10 @@ using WindowsManager.Modularity;
 using WindowsManager.Views;
 using VCore;
 using VCore.ItemsCollections;
-using VCore.Modularity.RegionProviders;
 using VCore.Standard.Helpers;
-using VCore.ViewModels;
+using VCore.WPF.Misc;
+using VCore.WPF.Modularity.RegionProviders;
+using VCore.WPF.ViewModels;
 
 namespace WindowsManager.ViewModels.ScreenManagement
 {

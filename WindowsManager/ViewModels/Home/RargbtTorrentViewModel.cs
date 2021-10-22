@@ -3,6 +3,7 @@ using System.Windows.Input;
 using WindowsManager.ViewModels.Home.Scrapers;
 using VCore;
 using VCore.Standard;
+using VCore.WPF.Misc;
 
 namespace WindowsManager.ViewModels.Home
 {

@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPlayer.AudioStorage", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "..\CustomLibraries\Logger\Logger.csproj", "{0118000F-7D9F-4387-A0D6-FBF176911F29}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChromeDriverScrapper", "..\CustomLibraries\Custom\ChromeDriverScrapper\ChromeDriverScrapper.csproj", "{60EAB032-DF01-4C55-8C56-47051D04AEC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,14 @@ Global
 		{0118000F-7D9F-4387-A0D6-FBF176911F29}.Release|x64.Build.0 = Release|Any CPU
 		{0118000F-7D9F-4387-A0D6-FBF176911F29}.Release|x86.ActiveCfg = Release|x86
 		{0118000F-7D9F-4387-A0D6-FBF176911F29}.Release|x86.Build.0 = Release|x86
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Debug|x64.ActiveCfg = Debug|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Debug|x64.Build.0 = Debug|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Debug|x86.ActiveCfg = Debug|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|Any CPU.ActiveCfg = Release|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x64.ActiveCfg = Release|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x64.Build.0 = Release|x64
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,6 +137,7 @@ Global
 		{B40BF16A-8258-4017-8E56-9A53897A6F60} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 		{F915254B-8B21-485F-9F97-9519B577A013} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 		{0118000F-7D9F-4387-A0D6-FBF176911F29} = {6C1F2D29-2698-40B8-9E57-50286E168758}
+		{60EAB032-DF01-4C55-8C56-47051D04AEC9} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9EF278F8-352D-46D0-AB54-E86C83C78EB7}

@@ -14,16 +14,15 @@ using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using VCore;
-using VCore.ViewModels;
-using VCore.ViewModels.Navigation;
+using VCore.WPF.Misc;
 using VCore.WPF.Other;
+using VCore.WPF.ViewModels;
 using VCore.WPF.ViewModels.Navigation;
 
 namespace WindowsManager.ViewModels
 {
   //TODO: Monitor group - linkovat monitory (Predator ak bol aktivny tak nevyplne ten 19')
-  //TODO: Statistiky (kolko som usetril € (realne dat kw/h a spotrebu) zo vsetkych monitorov dohromady, kolko € to je za rok pri aktualnej spotrebe)
-  //TODO: Fast panel (horiaci tachometer iconka) - monitory a sound dokopy (ako na zaciatku)
+  //TODO: Fast panel (horiaci tachometer iconka) 
   public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
   {
     private readonly HomeViewModel homeViewModel;

@@ -8,9 +8,10 @@ using System.Windows.Input;
 using WindowsManager.Modularity;
 using WindowsManager.Views;
 using VCore;
-using VCore.Modularity.RegionProviders;
 using VCore.Standard;
-using VCore.ViewModels;
+using VCore.WPF.Misc;
+using VCore.WPF.Modularity.RegionProviders;
+using VCore.WPF.ViewModels;
 
 namespace WindowsManager.ViewModels.TurnOff
 {

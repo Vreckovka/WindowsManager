@@ -14,7 +14,6 @@ using Prism.Ioc;
 using Prism.Ninject;
 using Prism.Regions;
 using SoundManagement;
-using VCore.Modularity.NinjectModules;
 using VCore.Standard.Modularity.NinjectModules;
 using VCore.WPF;
 using VCore.WPF.Views.SplashScreen;

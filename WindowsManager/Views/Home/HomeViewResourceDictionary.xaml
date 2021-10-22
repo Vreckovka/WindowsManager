@@ -1,11 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:VCore.Controls;assembly=VCore.WPF"
-                    xmlns:converters="clr-namespace:VCore.Converters;assembly=VCore.WPF"
                     xmlns:converters1="clr-namespace:VCore.WPF.Converters;assembly=VCore.WPF"
                     xmlns:domain="clr-namespace:VPlayer.AudioStorage.Scrappers.CSFD.Domain;assembly=VPlayer.AudioStorage"
-                    xmlns:library="clr-namespace:VPlayer.Library;assembly=VCore.WPF"
-                    xmlns:templateSelectors="clr-namespace:WindowsManager.TemplateSelectors">
+                    xmlns:templateSelectors="clr-namespace:WindowsManager.TemplateSelectors"
+                    xmlns:controls1="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF">
 
     <Style x:Key="ParameterLabel" TargetType="TextBlock">
         <Setter Property="Foreground" Value="#656565" />
@@ -67,7 +65,7 @@
                                 HorizontalAlignment="Left"
                                 Background="#10ffffff"
                                 Orientation="Horizontal">
-                        <controls:PathButton x:Name="QualitiesToggleButton"
+                        <controls1:PathButton x:Name="QualitiesToggleButton"
                                              Margin="0,0,5,0"
                                              Padding="5"
                                              HorizontalContentAlignment="Left"
@@ -92,7 +90,7 @@
                             <Style TargetType="StackPanel">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Qualities.Count, Mode=OneWay, Converter={library:IsGreaterConverter}, ConverterParameter=0}" Value="true">
+                                    <DataTrigger Binding="{Binding Qualities.Count, Mode=OneWay, Converter={converters1:IsGreaterConverter}, ConverterParameter=0}" Value="true">
                                         <Setter Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -447,7 +445,7 @@
                                                         <Style BasedOn="{StaticResource Content}" TargetType="TextBlock">
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding Model, Converter={converters:IsTypeConverter}, ConverterParameter={x:Type domain:CSFDTVShowSeasonEpisode}}" Value="true">
+                                                                <DataTrigger Binding="{Binding Model, Converter={converters1:IsTypeConverter}, ConverterParameter={x:Type domain:CSFDTVShowSeasonEpisode}}" Value="true">
                                                                     <Setter Property="Visibility" Value="Visible" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>

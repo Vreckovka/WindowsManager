@@ -2,11 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
-             xmlns:controls1="clr-namespace:VCore.Controls;assembly=VCore.WPF"
-             xmlns:converters="clr-namespace:VCore.WPF.Converters;assembly=VCore.WPF"
+             xmlns:controls2="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:library="clr-namespace:VPlayer.Library;assembly=VCore.WPF"
-             xmlns:local="clr-namespace:WindowsManager.Views.Home"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:soundManagement="clr-namespace:SoundManagement;assembly=SoundManagement"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -14,823 +11,823 @@
              d:DesignWidth="800"
              mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <ResourceDictionary Source="HomeViewResourceDictionary.xaml" />
-    </UserControl.Resources>
-
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
-
-        <TextBlock Margin="7,5,0,5"
-                   FontSize="17"
-                   Foreground="#757575"
-                   Text="{Binding DateOfData, StringFormat={}Date of data: {0:dd.MM.yyyy}}" />
-
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="190" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
-
-            <ScrollViewer Grid.Row="0"
-                          HorizontalScrollBarVisibility="auto"
-                          VerticalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding RargbtTorrrents}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <controls:VirtualizingWrapPanel Orientation="Vertical" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Width="350"
-                                    Margin="5"
-                                    Padding="7"
-                                    Background="#151515"
-                                    BorderBrush="#45cccccc"
-                                    BorderThickness="1">
-                                <Grid DataContext="{Binding Model}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
-
-                                    <Grid VerticalAlignment="Top">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="auto" />
-                                            <ColumnDefinition />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Border Grid.Column="0"
-                                                MaxWidth="75"
-                                                Margin="0,0,10,0"
-                                                Padding="5"
-                                                Background="#08ffffff">
-                                            <StackPanel>
-                                                <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
-                                                    <TextBlock FontSize="20"
-                                                               FontWeight="Bold"
-                                                               Foreground="#e8b761"
-                                                               Text="{Binding SeedersOrderIndex}" />
-
-                                                    <Image Height="25"
-                                                           Margin="5,0,0,0"
-                                                           HorizontalAlignment="Left"
-                                                           VerticalAlignment="Center"
-                                                           Source="{Binding CategoryImagePath, IsAsync=True}" />
-                                                </StackPanel>
-
-                                                <Grid>
-                                                    <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
-
-                                                    <Grid.ToolTip>
-                                                        <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
-                                                    </Grid.ToolTip>
-                                                </Grid>
-
-                                            </StackPanel>
-                                        </Border>
-
-                                        <Grid Grid.Column="1">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="auto" />
-                                                <RowDefinition Height="auto" />
-                                                <RowDefinition />
-                                            </Grid.RowDefinitions>
-
-                                            <StackPanel Margin="0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Style="{StaticResource ParameterLabel}" Text="Size:" />
-                                                    <TextBlock FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="{StaticResource YellowBrush}">
-                                                        <Run Text="{Binding Size, StringFormat={}{0:N2}}" />
-                                                        <Run Text="{Binding SizeUnit}" />
-                                                    </TextBlock>
-                                                </StackPanel>
-
-
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Style="{StaticResource ParameterLabel}" Text="Leech:" />
-                                                    <TextBlock FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="#959595"
-                                                               Text="{Binding Leechers}" />
-                                                </StackPanel>
-
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Row="0"
-                                                        Grid.Column="1"
-                                                        Margin="5,0,0,0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="60"
-                                                               Style="{StaticResource ParameterLabel}"
-                                                               Text="Created:" />
-                                                    <TextBlock FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="#ccc"
-                                                               Text="{Binding Created, StringFormat={}{0:dd.MM.yy}}" />
-                                                </StackPanel>
-
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Width="60"
-                                                               Style="{StaticResource ParameterLabel}"
-                                                               Text="Seeders:" />
-                                                    <TextBlock FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="{StaticResource GreenBrush3}"
-                                                               Text="{Binding Seeders}" />
-                                                </StackPanel>
-
-
-                                            </StackPanel>
-
-                                            <StackPanel Grid.Row="1"
-                                                        Grid.Column="0"
-                                                        Grid.ColumnSpan="2"
-                                                        Orientation="Horizontal">
-                                                <TextBlock Style="{StaticResource ParameterLabel}" Text="Link:  " />
-                                                <Button Background="Transparent"
-                                                        BorderThickness="0"
-                                                        Command="{Binding DataContext.OpenInBrowser, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
-                                                        CommandParameter="{Binding DataContext.Model.Link, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
-                                                        Content="{Binding Href}"
-                                                        Cursor="Hand"
-                                                        FontSize="15"
-                                                        FontWeight="Bold"
-                                                        ToolTip="{Binding Link}">
-                                                    <Button.Style>
-                                                        <Style TargetType="Button">
-                                                            <Setter Property="Template">
-                                                                <Setter.Value>
-                                                                    <ControlTemplate TargetType="{x:Type Button}">
-                                                                        <Border Background="{TemplateBinding Background}">
-                                                                            <ContentPresenter Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" />
-                                                                        </Border>
-                                                                    </ControlTemplate>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                            <Setter Property="Foreground" Value="#7b994e" />
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="true">
-                                                                    <Setter Property="Foreground" Value="#c2eb86" />
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Button.Style>
-                                                </Button>
-                                            </StackPanel>
-
-
-                                            <ContentControl Grid.Row="2"
-                                                            Grid.Column="0"
-                                                            Grid.ColumnSpan="2"
-                                                            Content="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
-                                                            ContentTemplateSelector="{StaticResource TorrentTypeTemplateSelector}" />
-                                        </Grid>
-
-                                    </Grid>
-
-
-                                </Grid>
-                            </Border>
-
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-
-            <Grid Grid.Row="1">
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <Grid Grid.Column="0" DataContext="{Binding ScreensManagementViewModel}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-
-                        <Border VerticalAlignment="Top" Cursor="Hand">
-                            <controls1:PathButton Width="auto"
-                                                  Height="auto"
-                                                  Margin="0,10"
-                                                  Padding="15"
-                                                  Command="{Binding TurnOffButActive}"
-                                                  FontSize="15"
-                                                  FontWeight="Bold"
-                                                  ForegroundCheckedColor="#20ffffff"
-                                                  ForegroundDefaultColor="#20ffffff"
-                                                  IconCheckedColor="{StaticResource YellowColor}"
-                                                  IconDefaultColor="{StaticResource DefaultRedColor}"
-                                                  IconHeight="35"
-                                                  IconHoverColor="{StaticResource DefaultRedColor}"
-                                                  IconWidth="45"
-                                                  IsChecked="{Binding IsTurnOffScreensButActive, Mode=OneWay}"
-                                                  ToolTip="Will turn on/off all screens that are not currently active">
-                                <controls1:PathButton.Style>
-                                    <Style BasedOn="{StaticResource {x:Type controls1:PathButton}}" TargetType="controls1:PathButton">
-                                        <Setter Property="Background" Value="#05ffffff" />
-                                        <Setter Property="BorderBrush" Value="#08ffffff" />
-                                        <Setter Property="BorderThickness" Value="2" />
-                                        <Setter Property="PathStyle" Value="{StaticResource BulbOn}" />
-                                        <!--<Setter Property="Opacity" Value="0.85" />-->
-                                        <Setter Property="Content" Value="Turn ON inactive monitors" />
-
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#10ffffff" />
-                                                <Setter Property="BorderBrush" Value="#20ffffff" />
-                                                <Setter Property="Opacity" Value="1" />
-                                            </Trigger>
-
-                                            <Trigger Property="IsChecked" Value="False">
-                                                <Setter Property="PathStyle" Value="{StaticResource BulbOff}" />
-                                                <Setter Property="Content" Value="Turn OFF inactive monitors" />
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </controls1:PathButton.Style>
-                            </controls1:PathButton>
-                        </Border>
-
-                        <Border Grid.Column="1"
-                                Margin="25,10"
-                                HorizontalAlignment="Left">
-
-                            <StackPanel>
-                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                    <controls1:PathButton Margin="-2,0,-3,0"
-                                                          IconHeight="13"
-                                                          IconWidth="17"
-                                                          PathStyle="{StaticResource BulbOff}"
-                                                          ToolTip="Total dimmed time" />
-
-                                    <TextBlock VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#858585"
-                                               Text="Total dimmed time:" />
-
-
-                                    <TextBlock Margin="0,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#555555"
-                                               Text="{Binding TotalDimmTime, StringFormat={}{0:\\ dd\\:hh\\:mm\\:ss}}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                    <controls1:PathButton Padding="2,0,0,0"
-                                                          IconHeight="13"
-                                                          IconWidth="10"
-                                                          PathStyle="{StaticResource euro-sign}"
-                                                          ToolTip="Total saved" />
-
-                                    <TextBlock VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#858585"
-                                               Text="Total saved:" />
-
-
-                                    <TextBlock Margin="4,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#555555"
-                                               Text="{Binding TotalSaved, StringFormat={}{0:N7} ({0:N2} €)}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                    <controls1:PathButton Margin="0,0,-1,0"
-                                                          IconHeight="15"
-                                                          IconWidth="15"
-                                                          PathStyle="{StaticResource calendar-day}"
-                                                          ToolTip="Days of using software" />
-
-                                    <TextBlock VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#858585"
-                                               Text="Days of using software:" />
-
-
-                                    <TextBlock Margin="4,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#555555"
-                                               Text="{Binding TotalDays, StringFormat={}{0:N5}}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                    <controls1:PathButton Margin="0,0,-1,0"
-                                                          IconHeight="15"
-                                                          IconWidth="15"
-                                                          PathStyle="{StaticResource clock}"
-                                                          ToolTip="Start date of using software" />
-
-                                    <TextBlock VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#858585"
-                                               Text="Start date of using software:" />
-
-
-                                    <TextBlock Margin="4,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontWeight="Bold"
-                                               Foreground="#555555"
-                                               Text="{Binding LoadedData.StartDayOfUsingSoftware, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
-                                </StackPanel>
-                            </StackPanel>
-
-
-
-                        </Border>
-                    </Grid>
-
-                    <ListView Grid.Row="1"
-                              Margin="0,8,0,0"
-                              Background="Transparent"
-                              Foreground="#bbb"
-                              ItemsSource="{Binding Screens}"
-                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListView.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ListView.ItemsPanel>
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Border Margin="-5,0,5,0" BorderThickness="2">
-                                    <Grid Width="200" Height="155">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="auto" />
-                                            <RowDefinition Height="auto" />
-                                            <RowDefinition Height="auto" />
-                                            <RowDefinition Height="auto" />
-                                            <RowDefinition Height="*" />
-                                        </Grid.RowDefinitions>
-
-                                        <Grid Margin="0,0,0,0" Background="#10ffffff">
-                                            <controls1:PathButton Margin="7,0,0,0"
-                                                                  Padding="0"
-                                                                  IconCheckedColor="#32a87d"
-                                                                  IconHeight="15"
-                                                                  IconWidth="18"
-                                                                  IsChecked="{Binding IsActive}"
-                                                                  IsHitTestVisible="False"
-                                                                  PathStyle="{StaticResource CheckMark}">
-                                                <controls1:PathButton.Style>
-                                                    <Style BasedOn="{StaticResource {x:Type controls1:PathButton}}" TargetType="controls1:PathButton">
-                                                        <Style.Triggers>
-                                                            <Trigger Property="IsChecked" Value="False">
-                                                                <Setter Property="Visibility" Value="Hidden" />
-                                                            </Trigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </controls1:PathButton.Style>
-                                            </controls1:PathButton>
-
-                                            <Border Margin="0,0,0,0"
-                                                    Padding="0,5,0,5"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Top">
-                                                <TextBlock HorizontalAlignment="Center"
-                                                           FontSize="17"
-                                                           FontWeight="DemiBold"
-                                                           Foreground="#ddd"
-                                                           Text="{Binding Name}" />
-                                            </Border>
-
-                                        </Grid>
-
-                                        <TextBlock Grid.Row="1"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Top"
-                                                   Foreground="#ccc">
-                                            <Run Text="{Binding Model.Bounds.Width}" />
-                                            <Run Text="x" />
-                                            <Run Text="{Binding Model.Bounds.Height}" />
-                                        </TextBlock>
-
-                                        <Border Grid.Row="2"
-                                                Margin="0,5,0,0"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                CornerRadius="3">
-                                            <TextBlock Padding="7,3"
-                                                       FontWeight="Bold"
-                                                       Foreground="White">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
-                                                                <Setter Property="Text" Value="Dimmed" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
-                                                                <Setter Property="Text" Value="Online" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
-                                                            <Setter Property="Background" Value="{StaticResource DefaultRedBrush}" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
-                                                            <Setter Property="Background" Value="{StaticResource GreenBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                        </Border>
-
-
-                                        <Border Grid.Row="3"
-                                                Margin="0,7,0,0"
-                                                Padding="8,3"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                BorderThickness="0,0,0,1.5"
-                                                CornerRadius="5">
-                                            <TextBlock FontSize="14" FontWeight="Bold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="White" />
-
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding ActualTimerTime}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-
-                                                <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ hh}, Mode=OneWay}" />
-                                                <Run FontSize="12"
-                                                     Foreground="#60ffffff"
-                                                     Text="(hrs)" />
-
-                                                <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ mm}, Mode=OneWay}" />
-                                                <Run FontSize="12"
-                                                     Foreground="#60ffffff"
-                                                     Text="(min)" />
-                                                <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ ss}, Mode=OneWay}" />
-                                                <Run FontSize="12"
-                                                     Foreground="#60ffffff"
-                                                     Text="(sec)" />
-                                            </TextBlock>
-
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsDimmed}" Value="true">
-                                                            <Setter Property="Background" Value="#20ffffff" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource DefaultRedBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                        </Border>
-
-
-                                        <Grid Grid.Row="4" VerticalAlignment="Bottom">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="auto" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <controls1:PathButton Width="auto"
-                                                                  Height="auto"
-                                                                  Margin="5"
-                                                                  HorizontalAlignment="Left"
-                                                                  Command="{Binding TurnOffCommand}"
-                                                                  IconCheckedColor="{StaticResource DefaultRedColor}"
-                                                                  IconDefaultColor="#353535"
-                                                                  IconHeight="20"
-                                                                  IconHoverColor="{StaticResource DefaultRedColor}"
-                                                                  IconWidth="25"
-                                                                  IsChecked="{Binding IsDimmed, Mode=OneWay}"
-                                                                  PathStyle="{StaticResource BulbOff}"
-                                                                  ToolTip="Black out" />
-
-                                            <Grid Grid.Column="1"
-                                                  Margin="5,0,0,0"
-                                                  VerticalAlignment="Center">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition />
-                                                    <ColumnDefinition Width="auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <Grid.Resources>
-                                                    <system:Double x:Key="SliderThumbSize">11</system:Double>
-                                                </Grid.Resources>
-
-                                                <Slider Grid.Column="0"
-                                                        Height="2"
-                                                        VerticalAlignment="Center"
-                                                        Foreground="#85ffffff"
-                                                        IsSnapToTickEnabled="True"
-                                                        Maximum="100"
-                                                        Minimum="0"
-                                                        TickFrequency="5"
-                                                        Value="{Binding Brightness}">
-                                                    <Slider.Resources>
-                                                        <Style BasedOn="{StaticResource {x:Type Thumb}}" TargetType="Thumb">
-                                                            <Setter Property="Height" Value="10" />
-                                                            <Setter Property="Width" Value="10" />
-                                                        </Style>
-                                                    </Slider.Resources>
-                                                </Slider>
-
-                                                <TextBlock Grid.Column="1"
-                                                           Margin="10,0"
-                                                           VerticalAlignment="Center"
-                                                           FontSize="17"
-                                                           Foreground="#65ffffff"
-                                                           Text="{Binding Brightness}" />
-
-
-
-                                                <Grid.Style>
-                                                    <Style TargetType="Grid">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding Brightness}" Value="{x:Null}">
-                                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Grid.Style>
-                                            </Grid>
-                                        </Grid>
-
-                                        <Grid.Style>
-                                            <Style TargetType="Grid">
-                                                <Setter Property="Background" Value="#080808" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsDimmed}" Value="false">
-                                                        <Setter Property="Background" Value="#151515" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Grid.Style>
-                                    </Grid>
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Setter Property="BorderBrush" Value="#252525" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter Property="BorderBrush">
-                                                        <Setter.Value>
-                                                            <LinearGradientBrush>
-                                                                <GradientStop Offset="0" Color="#75ffffff" />
-                                                                <GradientStop Offset="0.5" Color="#65ffffff" />
-                                                                <GradientStop Offset="1" Color="#55ffffff" />
-                                                            </LinearGradientBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                </Border>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Grid>
-
-                <Grid Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <Border Margin="10,10,0,0"
-                            Padding="2"
-                            VerticalAlignment="Top"
-                            Background="#05ffffff"
-                            BorderBrush="#35ffffff"
-                            BorderThickness="1"
-                            DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}">
-                        <StackPanel>
-                            <ComboBox VerticalAlignment="Top"
-                                      DisplayMemberPath="Description"
-                                      ItemsSource="{Binding SoundDevices}"
-                                      SelectedItem="{Binding SelectedSoundDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <StackPanel>
-                                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                                    <TextBlock Margin="0,10"
-                                               HorizontalAlignment="Center"
-                                               FontSize="17"
-                                               Foreground="#858585">
-                                        <Run Text="Volume" />
-                                        <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
-                                    </TextBlock>
-
-                                    <controls1:PathButton Margin="10,10"
-                                                          IconCheckedColor="{StaticResource LightRedColor}"
-                                                          IconDefaultColor="#ccc"
-                                                          IsChecked="{Binding IsActualMuted}">
-                                        <controls1:PathButton.Style>
-                                            <Style BasedOn="{StaticResource {x:Type controls1:PathButton}}" TargetType="controls1:PathButton">
-                                                <Setter Property="PathStyle" Value="{StaticResource Volume}" />
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsChecked" Value="True">
-                                                        <Setter Property="PathStyle" Value="{StaticResource VolumeOff}" />
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </controls1:PathButton.Style>
-                                    </controls1:PathButton>
-                                </StackPanel>
-
-                                <Slider DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
-                                        Maximum="100"
-                                        Value="{Binding ActualVolume}" />
-
-                            </StackPanel>
-
+  <UserControl.Resources>
+    <ResourceDictionary Source="HomeViewResourceDictionary.xaml" />
+  </UserControl.Resources>
+
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="auto" />
+      <RowDefinition />
+    </Grid.RowDefinitions>
+
+    <TextBlock Margin="7,5,0,5"
+               FontSize="17"
+               Foreground="#757575"
+               Text="{Binding DateOfData, StringFormat={}Date of data: {0:dd.MM.yyyy}}" />
+
+    <Grid Grid.Row="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="190" />
+        <RowDefinition />
+      </Grid.RowDefinitions>
+
+      <ScrollViewer Grid.Row="0"
+                    HorizontalScrollBarVisibility="auto"
+                    VerticalScrollBarVisibility="Disabled">
+        <ItemsControl ItemsSource="{Binding RargbtTorrrents}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <controls:VirtualizingWrapPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Width="350"
+                      Margin="5"
+                      Padding="7"
+                      Background="#151515"
+                      BorderBrush="#45cccccc"
+                      BorderThickness="1">
+                <Grid DataContext="{Binding Model}">
+                  <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                  </Grid.RowDefinitions>
+
+                  <Grid VerticalAlignment="Top">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="auto" />
+                      <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0"
+                            MaxWidth="75"
+                            Margin="0,0,10,0"
+                            Padding="5"
+                            Background="#08ffffff">
+                      <StackPanel>
+                        <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                          <TextBlock FontSize="20"
+                                     FontWeight="Bold"
+                                     Foreground="#e8b761"
+                                     Text="{Binding SeedersOrderIndex}" />
+
+                          <Image Height="25"
+                                 Margin="5,0,0,0"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Center"
+                                 Source="{Binding CategoryImagePath, IsAsync=True}" />
                         </StackPanel>
 
+                        <Grid>
+                          <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
+
+                          <Grid.ToolTip>
+                            <Image HorizontalAlignment="Left" Source="{Binding ImagePath, IsAsync=True}" />
+                          </Grid.ToolTip>
+                        </Grid>
+
+                      </StackPanel>
                     </Border>
 
-                    <ListView Name="KnowDevicesListView"
-                              Grid.Row="1"
-                              Margin="10,10,0,0"
-                              BorderBrush="#20ffffff"
-                              BorderThickness="1"
-                              ItemsSource="{Binding SoundManagerViewModel.KnownSoundDevices}"
-                              SelectionMode="Single">
-                        <ListView.ItemContainerStyle>
-                            <Style BasedOn="{StaticResource ListViewItemStyle}" TargetType="ListViewItem">
-                                <Setter Property="AllowDrop" Value="True" />
-                                <Setter Property="Foreground" Value="White" />
+                    <Grid Grid.Column="1">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                      </Grid.ColumnDefinitions>
 
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type ListViewItem}">
-                                            <Border x:Name="border"
-                                                    Margin="2"
-                                                    Padding="5"
-                                                    AllowDrop="True"
-                                                    Background="{TemplateBinding Background}"
-                                                    BorderBrush="#20ffffff"
-                                                    BorderThickness="1">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="auto" />
-                                                        <ColumnDefinition />
-                                                    </Grid.ColumnDefinitions>
+                      <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                      </Grid.RowDefinitions>
 
-                                                    <StackPanel Margin="0,0,7,0" Orientation="Horizontal">
-                                                        <controls1:PathButton Margin="0,0,5,0"
-                                                                              FontSize="18"
-                                                                              Foreground="White"
-                                                                              ForegroundCheckedColor="{StaticResource DefaultRedColor}"
-                                                                              ForegroundDefaultColor="#15ffffff"
-                                                                              ForegroundHoverColor="{StaticResource DefaultRedColor}"
-                                                                              IsChecked="{Binding DisableAutomaticConnect, Mode=TwoWay}"
-                                                                              IsReadOnly="False"
-                                                                              Style="{StaticResource link-horizontal-slash}"
-                                                                              ToolTip="DISABLE/ENABLE Automatic connect (When device is connect is set as DEFAULT)" />
-
-                                                        <controls1:PathButton Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}"
-                                                                              CommandParameter="{Binding}"
-                                                                              IconHeight="18"
-                                                                              IconHoverColor="{StaticResource DefaultRedColor}"
-                                                                              IconWidth="14"
-                                                                              IsReadOnly="True"
-                                                                              PathStyle="{StaticResource Trash}"
-                                                                              ToolTip="Remove" />
+                      <StackPanel Margin="0">
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Style="{StaticResource ParameterLabel}" Text="Size:" />
+                          <TextBlock FontSize="15"
+                                     FontWeight="Bold"
+                                     Foreground="{StaticResource YellowBrush}">
+                            <Run Text="{Binding Size, StringFormat={}{0:N2}}" />
+                            <Run Text="{Binding SizeUnit}" />
+                          </TextBlock>
+                        </StackPanel>
 
 
-                                                        <controls1:PathButton IconCheckedColor="{StaticResource GreenColor}"
-                                                                              IconDefaultColor="Transparent"
-                                                                              IconHeight="12"
-                                                                              IconWidth="14"
-                                                                              Margin="0 0 -7 0"
-                                                                              IsChecked="{Binding IsDefault}"
-                                                                              IsHitTestVisible="False"
-                                                                              IsReadOnly="True"
-                                                                              Opacity="0.70"
-                                                                              PathStyle="{StaticResource CheckMark}">
-                                                            <controls1:PathButton.Style>
-                                                                <Style BasedOn="{StaticResource {x:Type controls1:PathButton}}" TargetType="controls1:PathButton">
-                                                                    <Style.Triggers>
-                                                                        <Trigger Property="IsChecked" Value="False">
-                                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                                        </Trigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </controls1:PathButton.Style>
-                                                        </controls1:PathButton>
-                                                    </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Style="{StaticResource ParameterLabel}" Text="Leech:" />
+                          <TextBlock FontSize="15"
+                                     FontWeight="Bold"
+                                     Foreground="#959595"
+                                     Text="{Binding Leechers}" />
+                        </StackPanel>
+
+                      </StackPanel>
+
+                      <StackPanel Grid.Row="0"
+                                  Grid.Column="1"
+                                  Margin="5,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Width="60"
+                                     Style="{StaticResource ParameterLabel}"
+                                     Text="Created:" />
+                          <TextBlock FontSize="15"
+                                     FontWeight="Bold"
+                                     Foreground="#ccc"
+                                     Text="{Binding Created, StringFormat={}{0:dd.MM.yy}}" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Width="60"
+                                     Style="{StaticResource ParameterLabel}"
+                                     Text="Seeders:" />
+                          <TextBlock FontSize="15"
+                                     FontWeight="Bold"
+                                     Foreground="{StaticResource GreenBrush3}"
+                                     Text="{Binding Seeders}" />
+                        </StackPanel>
 
 
-                                                    <Grid Grid.Column="1">
-                                                        <Grid.Style>
-                                                            <Style TargetType="Grid">
-                                                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="s_PreviewMouseLeftButtonDown" />
-                                                            </Style>
-                                                        </Grid.Style>
+                      </StackPanel>
 
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="auto" />
-                                                            <ColumnDefinition />
-                                                            <ColumnDefinition Width="auto" />
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <TextBlock Grid.Column="0"
-                                                                   Margin="0,0,10,0"
-                                                                   VerticalAlignment="Center"
-                                                                   FontSize="12"
-                                                                   Foreground="#20ffffff"
-                                                                   Text="{Binding Priority}" />
-
-                                                        <TextBlock Grid.Column="1"
-                                                                   FontSize="15"
-                                                                   Foreground="#bbffffff"
-                                                                   Text="{Binding Model.Description}" />
-
-                                                    </Grid>
-
-                                                </Grid>
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <EventSetter Event="Drop" Handler="listbox1_Drop" />
-                                                    </Style>
-                                                </Border.Style>
-                                            </Border>
-
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter Property="Background" Value="#20ffffff" />
-                                                </Trigger>
-
-                                                <EventTrigger RoutedEvent="DragOver">
-                                                    <RemoveStoryboard BeginStoryboardName="onDragLeaveAnimation" />
-                                                    <RemoveStoryboard BeginStoryboardName="onDropAnimation" />
-
-                                                    <BeginStoryboard x:Name="onDragOverAnimation">
-                                                        <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
-                                                            <ColorAnimation To="#ccffffff" Duration="0:0:0:.05" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </EventTrigger>
-
-                                                <EventTrigger RoutedEvent="DragLeave">
-                                                    <RemoveStoryboard BeginStoryboardName="onDragOverAnimation" />
-
-                                                    <BeginStoryboard x:Name="onDragLeaveAnimation">
-                                                        <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
-                                                            <ColorAnimation To="#20ffffff" Duration="0:0:0:.05" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </EventTrigger>
-
-                                                <EventTrigger RoutedEvent="Drop">
-                                                    <RemoveStoryboard BeginStoryboardName="onDragOverAnimation" />
-
-                                                    <BeginStoryboard x:Name="onDropAnimation">
-                                                        <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
-                                                            <ColorAnimation To="#20ffffff" Duration="0:0:0:.05" />
-                                                        </Storyboard>
-                                                    </BeginStoryboard>
-                                                </EventTrigger>
-
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                      <StackPanel Grid.Row="1"
+                                  Grid.Column="0"
+                                  Grid.ColumnSpan="2"
+                                  Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource ParameterLabel}" Text="Link:  " />
+                        <Button Background="Transparent"
+                                BorderThickness="0"
+                                Command="{Binding DataContext.OpenInBrowser, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                CommandParameter="{Binding DataContext.Model.Link, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                Content="{Binding Href}"
+                                Cursor="Hand"
+                                FontSize="15"
+                                FontWeight="Bold"
+                                ToolTip="{Binding Link}">
+                          <Button.Style>
+                            <Style TargetType="Button">
+                              <Setter Property="Template">
+                                <Setter.Value>
+                                  <ControlTemplate TargetType="{x:Type Button}">
+                                    <Border Background="{TemplateBinding Background}">
+                                      <ContentPresenter Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" />
+                                    </Border>
+                                  </ControlTemplate>
+                                </Setter.Value>
+                              </Setter>
+                              <Setter Property="Foreground" Value="#7b994e" />
+                              <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                  <Setter Property="Foreground" Value="#c2eb86" />
+                                </Trigger>
+                              </Style.Triggers>
                             </Style>
-                        </ListView.ItemContainerStyle>
-                    </ListView>
-                </Grid>
+                          </Button.Style>
+                        </Button>
+                      </StackPanel>
 
-            </Grid>
+
+                      <ContentControl Grid.Row="2"
+                                      Grid.Column="0"
+                                      Grid.ColumnSpan="2"
+                                      Content="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                      ContentTemplateSelector="{StaticResource TorrentTypeTemplateSelector}" />
+                    </Grid>
+
+                  </Grid>
+
+
+                </Grid>
+              </Border>
+
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <Grid Grid.Row="1">
+
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="auto" />
+          <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" DataContext="{Binding ScreensManagementViewModel}">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          <Grid Grid.Row="0" Margin="0,5,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="auto" />
+              <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Border VerticalAlignment="Top" Cursor="Hand">
+              <controls2:PathButton Width="auto"
+                                    Height="auto"
+                                    Margin="0,10"
+                                    Padding="15"
+                                    Command="{Binding TurnOffButActive}"
+                                    FontSize="15"
+                                    FontWeight="Bold"
+                                    ForegroundCheckedColor="#20ffffff"
+                                    ForegroundDefaultColor="#20ffffff"
+                                    IconCheckedColor="{StaticResource YellowColor}"
+                                    IconDefaultColor="{StaticResource DefaultRedColor}"
+                                    IconHeight="35"
+                                    IconHoverColor="{StaticResource DefaultRedColor}"
+                                    IconWidth="45"
+                                    IsChecked="{Binding IsTurnOffScreensButActive, Mode=OneWay}"
+                                    ToolTip="Will turn on/off all screens that are not currently active">
+                <controls2:PathButton.Style>
+                  <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
+                    <Setter Property="Background" Value="#05ffffff" />
+                    <Setter Property="BorderBrush" Value="#08ffffff" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="PathStyle" Value="{StaticResource BulbOn}" />
+                    <!--<Setter Property="Opacity" Value="0.85" />-->
+                    <Setter Property="Content" Value="Turn ON inactive monitors" />
+
+                    <Style.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#10ffffff" />
+                        <Setter Property="BorderBrush" Value="#20ffffff" />
+                        <Setter Property="Opacity" Value="1" />
+                      </Trigger>
+
+                      <Trigger Property="IsChecked" Value="False">
+                        <Setter Property="PathStyle" Value="{StaticResource BulbOff}" />
+                        <Setter Property="Content" Value="Turn OFF inactive monitors" />
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </controls2:PathButton.Style>
+              </controls2:PathButton>
+            </Border>
+
+            <Border Grid.Column="1"
+                    Margin="25,10"
+                    HorizontalAlignment="Left">
+
+              <StackPanel>
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                  <controls2:PathButton Margin="-2,0,-3,0"
+                                        IconHeight="13"
+                                        IconWidth="17"
+                                        PathStyle="{StaticResource BulbOff}"
+                                        ToolTip="Total dimmed time" />
+
+                  <TextBlock VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#858585"
+                             Text="Total dimmed time:" />
+
+
+                  <TextBlock Margin="0,0,0,0"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#555555"
+                             Text="{Binding TotalDimmTime, StringFormat={}{0:\\ dd\\:hh\\:mm\\:ss}}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                  <controls2:PathButton Padding="2,0,0,0"
+                                        IconHeight="13"
+                                        IconWidth="10"
+                                        PathStyle="{StaticResource euro-sign}"
+                                        ToolTip="Total saved" />
+
+                  <TextBlock VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#858585"
+                             Text="Total saved:" />
+
+
+                  <TextBlock Margin="4,0,0,0"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#555555"
+                             Text="{Binding TotalSaved, StringFormat={}{0:N7} ({0:N2} €)}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                  <controls2:PathButton Margin="0,0,-1,0"
+                                        IconHeight="15"
+                                        IconWidth="15"
+                                        PathStyle="{StaticResource calendar-day}"
+                                        ToolTip="Days of using software" />
+
+                  <TextBlock VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#858585"
+                             Text="Days of using software:" />
+
+
+                  <TextBlock Margin="4,0,0,0"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#555555"
+                             Text="{Binding TotalDays, StringFormat={}{0:N5}}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                  <controls2:PathButton Margin="0,0,-1,0"
+                                        IconHeight="15"
+                                        IconWidth="15"
+                                        PathStyle="{StaticResource clock}"
+                                        ToolTip="Start date of using software" />
+
+                  <TextBlock VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#858585"
+                             Text="Start date of using software:" />
+
+
+                  <TextBlock Margin="4,0,0,0"
+                             VerticalAlignment="Center"
+                             FontWeight="Bold"
+                             Foreground="#555555"
+                             Text="{Binding LoadedData.StartDayOfUsingSoftware, StringFormat={}{0:dd.MM.yyyy HH:mm}}" />
+                </StackPanel>
+              </StackPanel>
+
+
+
+            </Border>
+          </Grid>
+
+          <ListView Grid.Row="1"
+                    Margin="0,8,0,0"
+                    Background="Transparent"
+                    Foreground="#bbb"
+                    ItemsSource="{Binding Screens}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel />
+              </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+              <DataTemplate>
+                <Border Margin="-5,0,5,0" BorderThickness="2">
+                  <Grid Width="200" Height="155">
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="auto" />
+                      <RowDefinition Height="auto" />
+                      <RowDefinition Height="auto" />
+                      <RowDefinition Height="auto" />
+                      <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Margin="0,0,0,0" Background="#10ffffff">
+                      <controls2:PathButton Margin="7,0,0,0"
+                                            Padding="0"
+                                            IconCheckedColor="#32a87d"
+                                            IconHeight="15"
+                                            IconWidth="18"
+                                            IsChecked="{Binding IsActive}"
+                                            IsHitTestVisible="False"
+                                            PathStyle="{StaticResource CheckMark}">
+                        <controls2:PathButton.Style>
+                          <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
+                            <Style.Triggers>
+                              <Trigger Property="IsChecked" Value="False">
+                                <Setter Property="Visibility" Value="Hidden" />
+                              </Trigger>
+                            </Style.Triggers>
+                          </Style>
+                        </controls2:PathButton.Style>
+                      </controls2:PathButton>
+
+                      <Border Margin="0,0,0,0"
+                              Padding="0,5,0,5"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Top">
+                        <TextBlock HorizontalAlignment="Center"
+                                   FontSize="17"
+                                   FontWeight="DemiBold"
+                                   Foreground="#ddd"
+                                   Text="{Binding Name}" />
+                      </Border>
+
+                    </Grid>
+
+                    <TextBlock Grid.Row="1"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Top"
+                               Foreground="#ccc">
+                      <Run Text="{Binding Model.Bounds.Width}" />
+                      <Run Text="x" />
+                      <Run Text="{Binding Model.Bounds.Height}" />
+                    </TextBlock>
+
+                    <Border Grid.Row="2"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            CornerRadius="3">
+                      <TextBlock Padding="7,3"
+                                 FontWeight="Bold"
+                                 Foreground="White">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
+                                <Setter Property="Text" Value="Dimmed" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
+                                <Setter Property="Text" Value="Online" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="True">
+                              <Setter Property="Background" Value="{StaticResource DefaultRedBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsDimmed, Mode=OneWay}" Value="False">
+                              <Setter Property="Background" Value="{StaticResource GreenBrush}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+
+
+                    <Border Grid.Row="3"
+                            Margin="0,7,0,0"
+                            Padding="8,3"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            BorderThickness="0,0,0,1.5"
+                            CornerRadius="5">
+                      <TextBlock FontSize="14" FontWeight="Bold">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="White" />
+
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding ActualTimerTime}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+
+                        <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ hh}, Mode=OneWay}" />
+                        <Run FontSize="12"
+                             Foreground="#60ffffff"
+                             Text="(hrs)" />
+
+                        <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ mm}, Mode=OneWay}" />
+                        <Run FontSize="12"
+                             Foreground="#60ffffff"
+                             Text="(min)" />
+                        <Run Text="{Binding ActualTimerTime, StringFormat={}{0:\\ ss}, Mode=OneWay}" />
+                        <Run FontSize="12"
+                             Foreground="#60ffffff"
+                             Text="(sec)" />
+                      </TextBlock>
+
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsDimmed}" Value="true">
+                              <Setter Property="Background" Value="#20ffffff" />
+                              <Setter Property="BorderBrush" Value="{StaticResource DefaultRedBrush}" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                    </Border>
+
+
+                    <Grid Grid.Row="4" VerticalAlignment="Bottom">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+
+                      <controls2:PathButton Width="auto"
+                                            Height="auto"
+                                            Margin="5"
+                                            HorizontalAlignment="Left"
+                                            Command="{Binding TurnOffCommand}"
+                                            IconCheckedColor="{StaticResource DefaultRedColor}"
+                                            IconDefaultColor="#353535"
+                                            IconHeight="20"
+                                            IconHoverColor="{StaticResource DefaultRedColor}"
+                                            IconWidth="25"
+                                            IsChecked="{Binding IsDimmed, Mode=OneWay}"
+                                            PathStyle="{StaticResource BulbOff}"
+                                            ToolTip="Black out" />
+
+                      <Grid Grid.Column="1"
+                            Margin="5,0,0,0"
+                            VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition />
+                          <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.Resources>
+                          <system:Double x:Key="SliderThumbSize">11</system:Double>
+                        </Grid.Resources>
+
+                        <Slider Grid.Column="0"
+                                Height="2"
+                                VerticalAlignment="Center"
+                                Foreground="#85ffffff"
+                                IsSnapToTickEnabled="True"
+                                Maximum="100"
+                                Minimum="0"
+                                TickFrequency="5"
+                                Value="{Binding Brightness}">
+                          <Slider.Resources>
+                            <Style BasedOn="{StaticResource {x:Type Thumb}}" TargetType="Thumb">
+                              <Setter Property="Height" Value="10" />
+                              <Setter Property="Width" Value="10" />
+                            </Style>
+                          </Slider.Resources>
+                        </Slider>
+
+                        <TextBlock Grid.Column="1"
+                                   Margin="10,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="17"
+                                   Foreground="#65ffffff"
+                                   Text="{Binding Brightness}" />
+
+
+
+                        <Grid.Style>
+                          <Style TargetType="Grid">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding Brightness}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Grid.Style>
+                      </Grid>
+                    </Grid>
+
+                    <Grid.Style>
+                      <Style TargetType="Grid">
+                        <Setter Property="Background" Value="#080808" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsDimmed}" Value="false">
+                            <Setter Property="Background" Value="#151515" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Grid.Style>
+                  </Grid>
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Setter Property="BorderBrush" Value="#252525" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                          <Setter Property="BorderBrush">
+                            <Setter.Value>
+                              <LinearGradientBrush>
+                                <GradientStop Offset="0" Color="#75ffffff" />
+                                <GradientStop Offset="0.5" Color="#65ffffff" />
+                                <GradientStop Offset="1" Color="#55ffffff" />
+                              </LinearGradientBrush>
+                            </Setter.Value>
+                          </Setter>
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                </Border>
+              </DataTemplate>
+            </ListView.ItemTemplate>
+          </ListView>
         </Grid>
 
+        <Grid Grid.Column="1">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+          </Grid.RowDefinitions>
+
+          <Border Margin="10,10,0,0"
+                  Padding="2"
+                  VerticalAlignment="Top"
+                  Background="#05ffffff"
+                  BorderBrush="#35ffffff"
+                  BorderThickness="1"
+                  DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}">
+            <StackPanel>
+              <ComboBox VerticalAlignment="Top"
+                        DisplayMemberPath="Description"
+                        ItemsSource="{Binding SoundDevices}"
+                        SelectedItem="{Binding SelectedSoundDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+              <StackPanel>
+                <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                  <TextBlock Margin="0,10"
+                             HorizontalAlignment="Center"
+                             FontSize="17"
+                             Foreground="#858585">
+                    <Run Text="Volume" />
+                    <Run Foreground="#ccc" Text="{Binding ActualVolume, StringFormat={}{0:N0} %}" />
+                  </TextBlock>
+
+                  <controls2:PathButton Margin="10,10"
+                                        IconCheckedColor="{StaticResource LightRedColor}"
+                                        IconDefaultColor="#ccc"
+                                        IsChecked="{Binding IsActualMuted}">
+                    <controls2:PathButton.Style>
+                      <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
+                        <Setter Property="PathStyle" Value="{StaticResource Volume}" />
+                        <Style.Triggers>
+                          <Trigger Property="IsChecked" Value="True">
+                            <Setter Property="PathStyle" Value="{StaticResource VolumeOff}" />
+                          </Trigger>
+                        </Style.Triggers>
+                      </Style>
+                    </controls2:PathButton.Style>
+                  </controls2:PathButton>
+                </StackPanel>
+
+                <Slider DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
+                        Maximum="100"
+                        Value="{Binding ActualVolume}" />
+
+              </StackPanel>
+
+            </StackPanel>
+
+          </Border>
+
+          <ListView Name="KnowDevicesListView"
+                    Grid.Row="1"
+                    Margin="10,10,0,0"
+                    BorderBrush="#20ffffff"
+                    BorderThickness="1"
+                    ItemsSource="{Binding SoundManagerViewModel.KnownSoundDevices}"
+                    SelectionMode="Single">
+            <ListView.ItemContainerStyle>
+              <Style BasedOn="{StaticResource ListViewItemStyle}" TargetType="ListViewItem">
+                <Setter Property="AllowDrop" Value="True" />
+                <Setter Property="Foreground" Value="White" />
+
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                      <Border x:Name="border"
+                              Margin="2"
+                              Padding="5"
+                              AllowDrop="True"
+                              Background="{TemplateBinding Background}"
+                              BorderBrush="#20ffffff"
+                              BorderThickness="1">
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" />
+                            <ColumnDefinition />
+                          </Grid.ColumnDefinitions>
+
+                          <StackPanel Margin="0,0,7,0" Orientation="Horizontal">
+                            <controls2:PathButton Margin="0,0,5,0"
+                                                  FontSize="18"
+                                                  Foreground="White"
+                                                  ForegroundCheckedColor="{StaticResource DefaultRedColor}"
+                                                  ForegroundDefaultColor="#15ffffff"
+                                                  ForegroundHoverColor="{StaticResource DefaultRedColor}"
+                                                  IsChecked="{Binding DisableAutomaticConnect, Mode=TwoWay}"
+                                                  IsReadOnly="False"
+                                                  Style="{StaticResource link-horizontal-slash}"
+                                                  ToolTip="DISABLE/ENABLE Automatic connect (When device is connect is set as DEFAULT)" />
+
+                            <controls2:PathButton Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}"
+                                                  CommandParameter="{Binding}"
+                                                  IconHeight="18"
+                                                  IconHoverColor="{StaticResource DefaultRedColor}"
+                                                  IconWidth="14"
+                                                  IsReadOnly="True"
+                                                  PathStyle="{StaticResource Trash}"
+                                                  ToolTip="Remove" />
 
 
+                            <controls2:PathButton Margin="0,0,-7,0"
+                                                  IconCheckedColor="{StaticResource GreenColor}"
+                                                  IconDefaultColor="Transparent"
+                                                  IconHeight="12"
+                                                  IconWidth="14"
+                                                  IsChecked="{Binding IsDefault}"
+                                                  IsHitTestVisible="False"
+                                                  IsReadOnly="True"
+                                                  Opacity="0.70"
+                                                  PathStyle="{StaticResource CheckMark}">
+                              <controls2:PathButton.Style>
+                                <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
+                                  <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="False">
+                                      <Setter Property="Visibility" Value="Hidden" />
+                                    </Trigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </controls2:PathButton.Style>
+                            </controls2:PathButton>
+                          </StackPanel>
+
+
+                          <Grid Grid.Column="1">
+                            <Grid.Style>
+                              <Style TargetType="Grid">
+                                <EventSetter Event="PreviewMouseLeftButtonDown" Handler="s_PreviewMouseLeftButtonDown" />
+                              </Style>
+                            </Grid.Style>
+
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="auto" />
+                              <ColumnDefinition />
+                              <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Margin="0,0,10,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       Foreground="#20ffffff"
+                                       Text="{Binding Priority}" />
+
+                            <TextBlock Grid.Column="1"
+                                       FontSize="15"
+                                       Foreground="#bbffffff"
+                                       Text="{Binding Model.Description}" />
+
+                          </Grid>
+
+                        </Grid>
+                        <Border.Style>
+                          <Style TargetType="Border">
+                            <EventSetter Event="Drop" Handler="listbox1_Drop" />
+                          </Style>
+                        </Border.Style>
+                      </Border>
+
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                          <Setter Property="Background" Value="#20ffffff" />
+                        </Trigger>
+
+                        <EventTrigger RoutedEvent="DragOver">
+                          <RemoveStoryboard BeginStoryboardName="onDragLeaveAnimation" />
+                          <RemoveStoryboard BeginStoryboardName="onDropAnimation" />
+
+                          <BeginStoryboard x:Name="onDragOverAnimation">
+                            <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                              <ColorAnimation To="#ccffffff" Duration="0:0:0:.05" />
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+
+                        <EventTrigger RoutedEvent="DragLeave">
+                          <RemoveStoryboard BeginStoryboardName="onDragOverAnimation" />
+
+                          <BeginStoryboard x:Name="onDragLeaveAnimation">
+                            <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                              <ColorAnimation To="#20ffffff" Duration="0:0:0:.05" />
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+
+                        <EventTrigger RoutedEvent="Drop">
+                          <RemoveStoryboard BeginStoryboardName="onDragOverAnimation" />
+
+                          <BeginStoryboard x:Name="onDropAnimation">
+                            <Storyboard Storyboard.TargetName="border" Storyboard.TargetProperty="(Border.BorderBrush).(SolidColorBrush.Color)">
+                              <ColorAnimation To="#20ffffff" Duration="0:0:0:.05" />
+                            </Storyboard>
+                          </BeginStoryboard>
+                        </EventTrigger>
+
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </ListView.ItemContainerStyle>
+          </ListView>
+        </Grid>
+
+      </Grid>
     </Grid>
+
+
+
+  </Grid>
 </UserControl>

@@ -11,8 +11,8 @@ using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.Views.Home;
-using VCore.Modularity.RegionProviders;
-using VCore.ViewModels;
+using VCore.WPF.Modularity.RegionProviders;
+using VCore.WPF.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
 
 namespace WindowsManager.ViewModels.Home
