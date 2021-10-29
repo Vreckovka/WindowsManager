@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using WindowsManager.ViewModels;
 using WindowsManager.ViewModels.Home;
 using WindowsManager.ViewModels.Home.Scrapers;
 
@@ -15,7 +16,7 @@ namespace WindowsManager.TemplateSelectors
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-      if (item is RargbtTorrentViewModel vm && vm.Model is VideoRargbtTorrent)
+      if (item is VideoRargbtTorrentViewModel vm)
       {
         return Video;
       }

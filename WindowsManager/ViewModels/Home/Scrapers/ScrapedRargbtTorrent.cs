@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace WindowsManager.ViewModels.Home.Scrapers
 {
-  public class RargbtTorrent
+  public class ScrapedRargbtTorrent
   {
     public int? Category { get; set; }
     public string CategoryImagePath { get; set; }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,10 @@ using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.Views.Home;
+using Logger;
+using TorrentAPI;
+using TorrentAPI.Domain;
+using VCore.Standard.Factories.ViewModels;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
@@ -20,16 +25,22 @@ namespace WindowsManager.ViewModels.Home
   public class HomeViewModel : RegionViewModel<HomeView>
   {
     private readonly RargbtScrapper rargbtScrapper;
+    private readonly ILogger logger;
+    private readonly IViewModelsFactory viewModelsFactory;
     private readonly ICSFDWebsiteScrapper iCsfdWebsiteScrapper;
 
     public HomeViewModel(
-      RargbtScrapper rargbtScrapper, 
-      IRegionProvider regionProvider, 
+      RargbtScrapper rargbtScrapper,
+      IRegionProvider regionProvider,
+      ILogger logger,
+      IViewModelsFactory viewModelsFactory,
       ICSFDWebsiteScrapper iCsfdWebsiteScrapper,
       ScreensManagementViewModel screensManagementViewModel,
       SoundManagerViewModel soundManagerViewModel) : base(regionProvider)
     {
       this.rargbtScrapper = rargbtScrapper ?? throw new ArgumentNullException(nameof(rargbtScrapper));
+      this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+      this.viewModelsFactory = viewModelsFactory ?? throw new ArgumentNullException(nameof(viewModelsFactory));
       this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
       ScreensManagementViewModel = screensManagementViewModel;
       SoundManagerViewModel = soundManagerViewModel;
@@ -91,37 +102,167 @@ namespace WindowsManager.ViewModels.Home
 
     private async Task GetTorrents()
     {
-      var topTorrents = await rargbtScrapper.ScrapePage(1);
+      //var topTorrents = await rargbtScrapper.ScrapePage(1);
+      RargbtTorrent[] topTorrents = null;
+      var categories = Category.GetCategories();
 
-      Application.Current.Dispatcher.Invoke(() =>
+      for (int i = 0; i < 50; i++)
       {
-        RargbtTorrrents = topTorrents.Select(x => new RargbtTorrentViewModel(x)).ToList();
-        DateOfData = rargbtScrapper.DateOfData;
+        var client = new RarbgApiClient("https://torrentapi.org/pubapi_v2.php", "my_App_ID");
 
-        Task.Run(() =>
+        var settings = new Settings()
         {
-          OnGetTorrents();
+          Limit = 50,
+          Mode = Mode.List,
+          Filters = new[] { Filter.None },
+          Sort = Sort.Seeders
+        };
+
+        var result = await client.GetResponseAsync(settings);
+
+        if (result.Torrents != null)
+        {
+          topTorrents = result.Torrents;
+          logger.Log(MessageType.Success, $"SUCESS Attempt: {i + 1}");
+
+          break;
+        }
+
+        logger.Log(MessageType.Warning, $"FAILED Attempt: {i + 1}");
+      }
+
+      if (topTorrents != null)
+      {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+          try
+          {
+            var categories = Category.GetCategories().ToList();
+
+            foreach(var torrent in topTorrents)
+            {
+              torrent.CategoryObject = categories.SingleOrDefault(x => x.Name == torrent.Category);
+            }
+
+            var videos = topTorrents.Where(x => x.EpisodeInfo != null).Select(x => new VideoRargbtTorrent(x));
+            var videoGroups = videos.GroupBy(x => x.EpisodeInfo.Imdb).ToList();
+            var videoVms = new List<VideoRargbtTorrentViewModel>();
+
+            foreach (var videoGroup in videoGroups)
+            {
+              foreach (var qualityVideo in videoGroup)
+              {
+
+                var name = qualityVideo.Title;
+                string parsedName = null;
+                string quality = null;
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                  var nameRegex = new Regex(@"(.+)(\d...p)");
+                  var match = nameRegex.Match(name);
+
+                  if (match.Success)
+                  {
+                    parsedName = match.Groups[1].Value?.Replace(".", " ");
+                    quality = match.Groups[2].Value?.Replace(".", " ");
+                  }
+                  else
+                  {
+                    nameRegex = new Regex(@"(.+)(\d..p)");
+                    match = nameRegex.Match(name);
+
+                    if (match.Success)
+                    {
+                      parsedName = match.Groups[1].Value?.Replace(".", " ");
+                      quality = match.Groups[2].Value?.Replace(".", " ");
+                    }
+                   
+                  }
+                }
+
+                if(parsedName == null)
+                {
+                  qualityVideo.ParsedName = qualityVideo.Title;
+                }
+                else
+                {
+                  qualityVideo.ParsedName = parsedName;
+                }
+              
+                qualityVideo.Quality = quality;
+              }
+
+              var first = videoGroup.First();
+
+              if (videoGroup.Count() > 1)
+              {
+                var otherQualities = videoGroup.Skip(1);
+
+                first.Qualities = otherQualities.ToList();
+              }
+
+              var vm = viewModelsFactory.Create<VideoRargbtTorrentViewModel>(first);
+
+              videoVms.Add(vm);
+            }
+
+            var other = topTorrents
+              .Where(x => x.EpisodeInfo == null)
+              .Select(x => new RargbtTorrentViewModel(x)).ToList();
+
+            var oreders = other.Concat(videoVms).OrderByDescending(x => x.Model.Seeders).ToList();
+
+            for (int i = 0; i < oreders.Count; i++)
+            {
+              oreders[i].SeedersOrderIndex = i + 1;
+            }
+
+            RargbtTorrrents = oreders; 
+
+            DateOfData = rargbtScrapper.DateOfData;
+
+            Task.Run(() =>
+            {
+              OnGetTorrents();
+            });
+          }
+          catch (Exception ex)
+          {
+          }
         });
-      });
+      }
     }
+
+    #region OnGetTorrents
 
     private async void OnGetTorrents()
     {
       if (RargbtTorrrents != null)
       {
-        foreach (var item in RargbtTorrrents.Where(x => x.Model is VideoRargbtTorrent))
+        foreach (VideoRargbtTorrentViewModel videoRargbt in RargbtTorrrents.OfType<VideoRargbtTorrentViewModel>())
         {
-          if (item.Model is VideoRargbtTorrent videoRargbt)
+          try
           {
-            var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.ParsedName, CancellationToken.None);
+            var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.VideoRargbtTorrent.ParsedName, CancellationToken.None);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-              item.ItemExtraData = data;
+              videoRargbt.ItemExtraData = data;
             });
+          }
+          catch (Exception ex)
+          {
+            logger.Log(ex);
           }
         }
       }
+
     }
+
+    #endregion
+
+
   }
+
 }

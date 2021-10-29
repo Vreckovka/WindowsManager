@@ -18,6 +18,9 @@
     <Compile Update="Views\SoundSwitchView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\TorrentsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\TurnOffView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -39,6 +42,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SoundSwitchView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\TorrentsView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\TurnOffView.xaml">

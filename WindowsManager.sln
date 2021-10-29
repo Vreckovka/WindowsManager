@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "..\CustomLibrarie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChromeDriverScrapper", "..\CustomLibraries\Custom\ChromeDriverScrapper\ChromeDriverScrapper.csproj", "{60EAB032-DF01-4C55-8C56-47051D04AEC9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentAPI", "C:\Users\Roman Pecho\Desktop\csharp-torrentapi-master\TorrentAPI.csproj", "{EDEA20C5-8FFB-4761-9E17-FA52E8333301}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,8 +43,8 @@ Global
 		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Debug|x86.Build.0 = Debug|Any CPU
 		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x64.ActiveCfg = Release|Any CPU
-		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x64.Build.0 = Release|Any CPU
+		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x64.ActiveCfg = Release|x64
+		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x64.Build.0 = Release|x64
 		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x86.ActiveCfg = Release|Any CPU
 		{B2531A93-4D64-4240-93DA-63B23E2A53BF}.Release|x86.Build.0 = Release|Any CPU
 		{42FB10E0-3F6E-4B4E-A738-386CDCFFDCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -125,6 +127,18 @@ Global
 		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x64.ActiveCfg = Release|x64
 		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x64.Build.0 = Release|x64
 		{60EAB032-DF01-4C55-8C56-47051D04AEC9}.Release|x86.ActiveCfg = Release|x64
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|x64.Build.0 = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Debug|x86.Build.0 = Debug|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x64.ActiveCfg = Release|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x64.Build.0 = Release|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x86.ActiveCfg = Release|Any CPU
+		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
