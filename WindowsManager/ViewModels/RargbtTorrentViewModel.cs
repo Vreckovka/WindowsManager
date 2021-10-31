@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Net;
 using System.Windows.Input;
+using ChromeDriverScrapper;
 using TorrentAPI;
 using VCore.Standard;
 using VCore.WPF.Misc;
@@ -9,27 +11,58 @@ namespace WindowsManager.ViewModels
 {
   public class RargbtTorrentViewModel : ViewModel<RargbtTorrent>
   {
-    public RargbtTorrentViewModel(RargbtTorrent model) : base(model)
+    private readonly IRarbgApiClient rarbgApiClient;
+
+
+    public RargbtTorrentViewModel(RargbtTorrent model, IRarbgApiClient rarbgApiClient) : base(model)
     {
+      this.rarbgApiClient = rarbgApiClient ?? throw new ArgumentNullException(nameof(rarbgApiClient));
+
       Name = model.Title;
     }
 
-    #region TurnOffCommand
+    #region OpenInfoPage
 
-    private ActionCommand<string> openInBrowser;
-    public ICommand OpenInBrowser
+    private ActionCommand openInfoPage;
+    public ICommand OpenInfoPage
     {
       get
       {
-        return openInBrowser ??= new ActionCommand<string>(OnOpenInBrowser);
+        return openInfoPage ??= new ActionCommand(async () =>
+        {
+          if (!string.IsNullOrEmpty(Model.InfoPageParameter))
+          {
+            var path = await rarbgApiClient.GetInfoPageLink(Model.InfoPageParameter);
+
+            OnOpenInBrowser(path);
+          }
+        });
       }
     }
+
+    #endregion
+
+    #region Download
+
+    private ActionCommand download;
+
+    public ICommand Download
+    {
+      get
+      {
+        return download ??= new ActionCommand(() => OnOpenInBrowser(Model.Download));
+      }
+    }
+
+    #endregion
+
+    #region OnOpenInBrowser
 
     private void OnOpenInBrowser(string path)
     {
       if (!string.IsNullOrEmpty(path))
       {
-        Process.Start(new System.Diagnostics.ProcessStartInfo()
+        Process.Start(new ProcessStartInfo()
         {
           FileName = path,
           UseShellExecute = true,
@@ -39,6 +72,7 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
+
 
     #region ItemExtraData
 
@@ -59,8 +93,6 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-
-
     #region Name
 
     private string name;
@@ -79,8 +111,6 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
-
-
 
     #region SeedersOrderIndex
 
@@ -101,14 +131,58 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
+    #region ImageUrl
 
+    private string imageUrl;
+
+    public string ImageUrl
+    {
+      get { return imageUrl; }
+      set
+      {
+        if (value != imageUrl)
+        {
+          imageUrl = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region Created
+
+    private DateTime? created;
+
+    public DateTime? Created
+    {
+      get { return created; }
+      set
+      {
+        if (value != created)
+        {
+          created = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    public string InfoPageFakeUrl
+    {
+      get
+      {
+        return "https://torrentapi.org/redirect_to_info.php?" + "p=" + Model?.InfoPageParameter;
+      }
+    }
 
 
   }
 
   public class VideoRargbtTorrentViewModel : RargbtTorrentViewModel
   {
-    public VideoRargbtTorrentViewModel(VideoRargbtTorrent model) : base(model)
+    public VideoRargbtTorrentViewModel(VideoRargbtTorrent model, IRarbgApiClient rarbgApiClient) : base(model, rarbgApiClient)
     {
       Name = model.ParsedName;
     }
@@ -117,7 +191,7 @@ namespace WindowsManager.ViewModels
     {
       get
       {
-        return (VideoRargbtTorrent) Model;
+        return (VideoRargbtTorrent)Model;
       }
     }
   }

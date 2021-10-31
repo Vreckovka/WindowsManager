@@ -12,6 +12,8 @@ using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.Views.Home;
+using ChromeDriverScrapper;
+using HtmlAgilityPack;
 using Logger;
 using TorrentAPI;
 using TorrentAPI.Domain;
@@ -28,6 +30,8 @@ namespace WindowsManager.ViewModels.Home
     private readonly ILogger logger;
     private readonly IViewModelsFactory viewModelsFactory;
     private readonly ICSFDWebsiteScrapper iCsfdWebsiteScrapper;
+    private readonly IChromeDriverProvider chromeDriverProvider;
+    private readonly IRarbgApiClient rarbgApiClient;
 
     public HomeViewModel(
       RargbtScrapper rargbtScrapper,
@@ -36,12 +40,16 @@ namespace WindowsManager.ViewModels.Home
       IViewModelsFactory viewModelsFactory,
       ICSFDWebsiteScrapper iCsfdWebsiteScrapper,
       ScreensManagementViewModel screensManagementViewModel,
-      SoundManagerViewModel soundManagerViewModel) : base(regionProvider)
+      IChromeDriverProvider chromeDriverProvider,
+      SoundManagerViewModel soundManagerViewModel,
+      IRarbgApiClient rarbgApiClient) : base(regionProvider)
     {
       this.rargbtScrapper = rargbtScrapper ?? throw new ArgumentNullException(nameof(rargbtScrapper));
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
       this.viewModelsFactory = viewModelsFactory ?? throw new ArgumentNullException(nameof(viewModelsFactory));
       this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
+      this.chromeDriverProvider = chromeDriverProvider ?? throw new ArgumentNullException(nameof(chromeDriverProvider));
+      this.rarbgApiClient = rarbgApiClient ?? throw new ArgumentNullException(nameof(rarbgApiClient));
       ScreensManagementViewModel = screensManagementViewModel;
       SoundManagerViewModel = soundManagerViewModel;
     }
@@ -100,16 +108,14 @@ namespace WindowsManager.ViewModels.Home
       GetTorrents();
     }
 
+    #region GetTorrents
+
     private async Task GetTorrents()
     {
-      //var topTorrents = await rargbtScrapper.ScrapePage(1);
       RargbtTorrent[] topTorrents = null;
-      var categories = Category.GetCategories();
 
       for (int i = 0; i < 50; i++)
       {
-        var client = new RarbgApiClient("https://torrentapi.org/pubapi_v2.php", "my_App_ID");
-
         var settings = new Settings()
         {
           Limit = 50,
@@ -118,7 +124,7 @@ namespace WindowsManager.ViewModels.Home
           Sort = Sort.Seeders
         };
 
-        var result = await client.GetResponseAsync(settings);
+        var result = await rarbgApiClient.GetResponseAsync(settings);
 
         if (result.Torrents != null)
         {
@@ -133,13 +139,20 @@ namespace WindowsManager.ViewModels.Home
 
       if (topTorrents != null)
       {
-        Application.Current.Dispatcher.Invoke(() =>
+        await Application.Current.Dispatcher.InvokeAsync(() =>
         {
           try
           {
+            foreach (var torrent in topTorrents)
+            {
+              var origInfoPage = torrent.InfoPage;
+              torrent.InfoPageParameter = Regex.Match(origInfoPage, @"p=(.+)").Groups[1].Value;
+              torrent.InfoPageShort = Regex.Match(origInfoPage, @"__(.+)").Groups[1].Value;
+            }
+
             var categories = Category.GetCategories().ToList();
 
-            foreach(var torrent in topTorrents)
+            foreach (var torrent in topTorrents)
             {
               torrent.CategoryObject = categories.SingleOrDefault(x => x.Name == torrent.Category);
             }
@@ -177,11 +190,22 @@ namespace WindowsManager.ViewModels.Home
                       parsedName = match.Groups[1].Value?.Replace(".", " ");
                       quality = match.Groups[2].Value?.Replace(".", " ");
                     }
-                   
+                    else
+                    {
+                      nameRegex = new Regex(@"(.+)WEBRip");
+                      match = nameRegex.Match(name);
+
+                      if (match.Success)
+                      {
+                        parsedName = match.Groups[1].Value?.Replace(".", " ");
+                        quality = "WEBRip";
+                      }
+                    }
+
                   }
                 }
 
-                if(parsedName == null)
+                if (parsedName == null)
                 {
                   qualityVideo.ParsedName = qualityVideo.Title;
                 }
@@ -189,7 +213,7 @@ namespace WindowsManager.ViewModels.Home
                 {
                   qualityVideo.ParsedName = parsedName;
                 }
-              
+
                 qualityVideo.Quality = quality;
               }
 
@@ -209,7 +233,7 @@ namespace WindowsManager.ViewModels.Home
 
             var other = topTorrents
               .Where(x => x.EpisodeInfo == null)
-              .Select(x => new RargbtTorrentViewModel(x)).ToList();
+              .Select(x => viewModelsFactory.Create<RargbtTorrentViewModel>(x)).ToList();
 
             var oreders = other.Concat(videoVms).OrderByDescending(x => x.Model.Seeders).ToList();
 
@@ -218,12 +242,14 @@ namespace WindowsManager.ViewModels.Home
               oreders[i].SeedersOrderIndex = i + 1;
             }
 
-            RargbtTorrrents = oreders; 
+            RargbtTorrrents = oreders;
 
             DateOfData = rargbtScrapper.DateOfData;
 
             Task.Run(() =>
             {
+              //ScrapeInfoPage(RargbtTorrrents.ToArray());
+
               OnGetTorrents();
             });
           }
@@ -231,6 +257,48 @@ namespace WindowsManager.ViewModels.Home
           {
           }
         });
+      }
+    }
+
+    #endregion
+
+
+    private async Task ScrapeInfoPage(RargbtTorrentViewModel[] topTorrents)
+    {
+      foreach (var torrent in topTorrents)
+      {
+        var path = await rarbgApiClient.GetInfoPageLink(torrent.Model.InfoPageParameter);
+
+        if (chromeDriverProvider.Initialize())
+        {
+          var infoPageHtml = chromeDriverProvider.SafeNavigate(path);
+
+          //var infoPageHtml = await client.GetStringResponseAsync(torrent.Model.InfoPage);
+          //var infoPageHtml = File.ReadAllText("D:\\Aplikacie\\WindowsManager\\WindowsManager\\InfoPage.txt");
+
+          if(!string.IsNullOrEmpty(infoPageHtml))
+          {
+            var document = new HtmlDocument();
+            document.LoadHtml(infoPageHtml);
+
+            // var imagePath = document.DocumentNode.SelectNodes("//*[contains(local-name(), 'img')]");
+            var imagePath = document.DocumentNode.SelectNodes("/html[1]/body[1]/table[3]/tr[1]/td[2]/div[1]/table[1]/tr[2]/td[1]/div[1]/table[1]/tr[3]/td[2]/img")?.FirstOrDefault()?.Attributes[0]?.Value;
+            DateTime? created = null;
+
+            if (DateTime.TryParse(document.DocumentNode.SelectNodes("/html[1]/body[1]/table[3]/tr[1]/td[2]/div[1]/table[1]/tr[5]/td[2]")?.FirstOrDefault()?.InnerText, out var parsedCreated))
+            {
+              created = parsedCreated;
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+              torrent.ImageUrl = imagePath;
+              torrent.Created = created;
+            });
+
+            Task.Delay(5000);
+          }
+        }
       }
     }
 

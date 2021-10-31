@@ -99,8 +99,7 @@
                     </StackPanel>
 
 
-                    <Popup MaxWidth="550"
-                           MaxHeight="350"
+                    <Popup MaxHeight="350"
                            HorizontalOffset="0"
                            IsOpen="{Binding ElementName=QualitiesToggleButton, Path=IsChecked}"
                            Placement="Bottom"
@@ -119,23 +118,22 @@
                                                 <TextBlock FontSize="15"
                                                            FontWeight="Bold"
                                                            Text="{Binding ParsedName}" />
-                                                <TextBlock Width="45"
+                                                <TextBlock Width="55"
                                                            FontSize="15"
                                                            FontWeight="Bold"
                                                            Foreground="#f5a142"
                                                            Text="{Binding Quality}" />
 
                                                 <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                                    <Button Width="120"
+                                                    <Button Width="115"
                                                             Background="Transparent"
                                                             BorderThickness="0"
-                                                            Command="{Binding DataContext.OpenInBrowser, ElementName=Container}"
-                                                            CommandParameter="{Binding Link}"
-                                                            Content="{Binding Href}"
+                                                            Command="{Binding DataContext.OpenInfoPage, ElementName=Container}"
+                                                            Content="{Binding InfoPageShort}"
                                                             Cursor="Hand"
                                                             FontSize="15"
                                                             FontWeight="Bold"
-                                                            ToolTip="{Binding Link}">
+                                                            ToolTip="{Binding DataContext.InfoPageFakeUrl, ElementName=Container}">
                                                         <Button.Style>
                                                             <Style TargetType="Button">
                                                                 <Setter Property="Template">
@@ -156,14 +154,28 @@
                                                             </Style>
                                                         </Button.Style>
                                                     </Button>
+
+                                                    <controls1:PathButton Margin="0,0,10,0"
+                                                                          HorizontalAlignment="Right"
+                                                                          BorderThickness="0"
+                                                                          Command="{Binding DataContext.Download, ElementName=Container}"
+                                                                          Cursor="Hand"
+                                                                          FontSize="15"
+                                                                          FontWeight="Bold"
+                                                                          GlyphFontFamily="{StaticResource FontAwesome6Pro_Solid}"
+                                                                          IconDefaultColor="#85ffffff"
+                                                                          IconHoverColor="White"
+                                                                          IconMargin="0"
+                                                                          Style="{StaticResource down-to-line}"
+                                                                          ToolTip="Download" />
                                                 </StackPanel>
 
                                                 <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
                                                     <TextBlock Width="80"
                                                                FontSize="15"
                                                                FontWeight="Bold"
-                                                                Text="{Binding Size, ConverterParameter=N2, Converter={converters1:FileSizeConverter}}"
-                                                               Foreground="{StaticResource YellowBrush}"/>
+                                                               Foreground="{StaticResource YellowBrush}"
+                                                               Text="{Binding Size, ConverterParameter=N2, Converter={converters1:FileSizeConverter}}" />
 
 
                                                 </StackPanel>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ using Prism.Ioc;
 using Prism.Ninject;
 using Prism.Regions;
 using SoundManagement;
+using TorrentAPI;
 using VCore.Standard.Modularity.NinjectModules;
 using VCore.WPF;
 using VCore.WPF.Views.SplashScreen;
@@ -33,6 +35,10 @@ namespace WindowsManager
 
       Kernel.Bind<ScreensManagementViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<SoundManagerViewModel>().ToSelf().InSingletonScope();
+      Kernel.Bind<IRarbgApiClient>().To<RarbgApiClient>().InSingletonScope()
+        .WithConstructorArgument("baseUrl", "https://torrentapi.org/pubapi_v2.php")
+        .WithConstructorArgument("appID", Assembly.GetExecutingAssembly().GetName().Name);
+       
 
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();

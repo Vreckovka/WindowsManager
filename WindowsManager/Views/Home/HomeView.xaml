@@ -23,10 +23,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <TextBlock Margin="7,5,0,5"
-                   FontSize="17"
-                   Foreground="#757575"
-                   Text="{Binding DateOfData, StringFormat={}Date of data: {0:dd.MM.yyyy}}" />
+
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
@@ -47,16 +44,14 @@
                         <DataTemplate>
                             <Border x:Name="ParentBorder"
                                     Width="350"
+                                    Height="160"
                                     Margin="5"
                                     Padding="7"
                                     Background="#151515"
                                     BorderBrush="#45cccccc"
                                     BorderThickness="1">
                                 <Grid DataContext="{Binding Model}">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
+
 
                                     <Grid VerticalAlignment="Top">
                                         <Grid.ColumnDefinitions>
@@ -64,12 +59,12 @@
                                             <ColumnDefinition />
                                         </Grid.ColumnDefinitions>
 
-                                        <Border Grid.Column="0"
-                                                MaxWidth="75"
-                                                Margin="0,0,10,0"
-                                                Padding="5"
-                                                Background="#08ffffff">
-                                            <StackPanel>
+
+                                        <Grid Grid.Column="0"
+                                              Width="80"
+                                              Margin="0,0,10,0"
+                                              Background="#08ffffff">
+                                            <StackPanel Margin="0,5,0,0" HorizontalAlignment="Center">
                                                 <StackPanel Margin="0,0,0,10"
                                                             Orientation="Horizontal"
                                                             ToolTip="{Binding CategoryObject.Url}">
@@ -77,6 +72,7 @@
                                                                FontWeight="Bold"
                                                                Foreground="#e8b761"
                                                                Text="{Binding ElementName=ParentBorder, Path=DataContext.SeedersOrderIndex}" />
+
 
                                                     <Image Height="25"
                                                            Margin="5,0,0,0"
@@ -86,8 +82,11 @@
                                                 </StackPanel>
 
 
-                                                <Grid Height="85">
+                                                <Grid>
                                                     <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
+
+
+
 
                                                     <Grid.ToolTip>
                                                         <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
@@ -95,7 +94,27 @@
                                                 </Grid>
 
                                             </StackPanel>
-                                        </Border>
+
+                                            <Border Padding="10,3"
+                                                    VerticalAlignment="Bottom"
+                                                    Background="#aa000000">
+                                                <controls2:PathButton Margin="0,0,0,0"
+                                                                      HorizontalAlignment="Right"
+                                                                      BorderThickness="0"
+                                                                      Command="{Binding DataContext.Download, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                                      Cursor="Hand"
+                                                                      FontSize="15"
+                                                                      FontWeight="Bold"
+                                                                      GlyphFontFamily="{StaticResource FontAwesome6Pro_Solid}"
+                                                                      IconDefaultColor="#85ffffff"
+                                                                      IconHoverColor="White"
+                                                                      IconMargin="0"
+                                                                      Style="{StaticResource down-to-line}"
+                                                                      ToolTip="Download" />
+                                            </Border>
+
+                                        </Grid>
+
 
                                         <Grid Grid.Column="1">
                                             <Grid.ColumnDefinitions>
@@ -164,13 +183,12 @@
                                                 <TextBlock Style="{StaticResource ParameterLabel}" Text="Link:  " />
                                                 <Button Background="Transparent"
                                                         BorderThickness="0"
-                                                        Command="{Binding DataContext.OpenInBrowser, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
-                                                        CommandParameter="{Binding DataContext.Model.Link, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
-                                                        Content="{Binding Href}"
+                                                        Command="{Binding DataContext.OpenInfoPage, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                        Content="{Binding InfoPageShort}"
                                                         Cursor="Hand"
                                                         FontSize="15"
                                                         FontWeight="Bold"
-                                                        ToolTip="{Binding Link}">
+                                                        ToolTip="{Binding DataContext.InfoPageFakeUrl, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
                                                             <Setter Property="Template">
@@ -191,6 +209,8 @@
                                                         </Style>
                                                     </Button.Style>
                                                 </Button>
+
+
                                             </StackPanel>
 
 
