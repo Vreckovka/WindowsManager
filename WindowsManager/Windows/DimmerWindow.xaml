@@ -10,17 +10,34 @@
         ResizeMode="NoResize"
         WindowStyle="None"
         mc:Ignorable="d">
-    <Grid Background="Black" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
-        <controls:PathButton Width="auto"
-                             Height="auto"
-                             HorizontalAlignment="Center"
+    <Grid Name="GridParent"
+          Background="Black"
+          MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <controls:PathButton HorizontalAlignment="Center"
                              VerticalAlignment="Center"
-                             Glyph=""
+                             FontSize="17"
+                             FontWeight="SemiBold"
+                             ForegroundDefaultColor="White"
                              GlyphFontSize="188"
-                             IconDefaultColor="#15ffffff"
                              IconHeight="auto"
                              IconWidth="auto"
-                             IsHitTestVisible="False"
-                             Style="{StaticResource FontAwesomeGlyphPathButtonStyle}" />
+                             IsHitTestVisible="False">
+            <controls:PathButton.Style>
+                <Style BasedOn="{StaticResource FontAwesomeGlyphStyle}" TargetType="controls:PathButton">
+                    <Setter Property="Glyph" Value="" />
+                    <Setter Property="IconDefaultColor" Value="#10ffffff" />
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=GridParent, Path=IsMouseOver}" Value="true">
+                            <Setter Property="Glyph" Value="" />
+                            <Setter Property="IconDefaultColor" Value="{StaticResource YellowColor}" />
+                            <Setter Property="Content" Value=" Double click for close&#x0a;(Dvojklik pre vypnutie)" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </controls:PathButton.Style>
+        </controls:PathButton>
+
+
     </Grid>
 </Window>
