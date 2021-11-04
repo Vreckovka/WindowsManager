@@ -17,7 +17,6 @@
                              VerticalAlignment="Center"
                              FontSize="17"
                              FontWeight="SemiBold"
-                             ForegroundDefaultColor="White"
                              GlyphFontSize="188"
                              IconHeight="auto"
                              IconWidth="auto"
@@ -26,14 +25,33 @@
                 <Style BasedOn="{StaticResource FontAwesomeGlyphStyle}" TargetType="controls:PathButton">
                     <Setter Property="Glyph" Value="" />
                     <Setter Property="IconDefaultColor" Value="#10ffffff" />
+                    <Setter Property="ForegroundDefaultColor" Value="#ccc" />
 
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ElementName=GridParent, Path=IsMouseOver}" Value="true">
                             <Setter Property="Glyph" Value="" />
+                            <Setter Property="Margin" Value="175,0,0,0" />
                             <Setter Property="IconDefaultColor" Value="{StaticResource YellowColor}" />
-                            <Setter Property="Content" Value=" Double click for close&#x0a;(Dvojklik pre vypnutie)" />
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock HorizontalAlignment="Center" Text="Double click for turn" />
+                                        <TextBlock Grid.Row="1"
+                                                   HorizontalAlignment="Center"
+                                                   Text="(Dvojklik pre zapnutie)" />
+                                    </Grid>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="ForegroundDefaultColor" Value="White" />
                         </DataTrigger>
                     </Style.Triggers>
+
+
                 </Style>
             </controls:PathButton.Style>
         </controls:PathButton>
