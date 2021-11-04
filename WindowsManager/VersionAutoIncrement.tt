@@ -1,0 +1,23 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ output extension=".cs" #>
+
+using System.Reflection;
+
+[assembly: AssemblyVersion("<#= this.Major #>.<#= this.Minor #>.<#= this.DaysSinceProjectStarted #>.<#= this.MinutesSinceMidnight  #>")]
+
+<#+
+
+ static DateTime ProjectStartedDate = new DateTime(year: 2021, month: 4, day: 5);
+
+static TimeSpan timespan = DateTime.Now - ProjectStartedDate;
+static double years = timespan.TotalDays / 365;
+static double months = (years - (int) years) * 12;
+
+ int Major = (int)years;
+ int Minor = (int)months;
+
+ int DaysSinceProjectStarted = (int)((DateTime.Now - new DateTime(2000, 1, 1)).TotalDays);
+
+ int MinutesSinceMidnight = (int)DateTime.Now.TimeOfDay.TotalSeconds / 2;
+
+#>

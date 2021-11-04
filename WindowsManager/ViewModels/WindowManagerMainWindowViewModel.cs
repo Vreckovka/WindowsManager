@@ -15,6 +15,7 @@ using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using TorrentAPI;
 using VCore;
+using VCore.Standard.Factories.ViewModels;
 using VCore.WPF.Misc;
 using VCore.WPF.Other;
 using VCore.WPF.ViewModels;
@@ -36,7 +37,8 @@ namespace WindowsManager.ViewModels
       TurnOffViewModel turnOffViewModel,
       SoundManagerViewModel soundManagerViewModel,
       HomeViewModel homeViewModel,
-      TorrentsViewModel torrentsViewModel)
+      TorrentsViewModel torrentsViewModel,
+      IViewModelsFactory viewModelsFactory) : base(viewModelsFactory)
     {
       this.homeViewModel = homeViewModel ?? throw new ArgumentNullException(nameof(homeViewModel));
       this.torrentsViewModel = torrentsViewModel ?? throw new ArgumentNullException(nameof(torrentsViewModel));

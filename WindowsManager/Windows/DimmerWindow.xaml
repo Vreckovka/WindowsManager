@@ -1,11 +1,26 @@
 ﻿<Window x:Class="WindowsManager.Windows.DimmerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:WindowsManager.Windows"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        d:Height="1080"
+        d:Width="1920"
         ResizeMode="NoResize"
         WindowStyle="None"
         mc:Ignorable="d">
-  <Grid Background="Black" MouseLeftButtonDown="Grid_MouseLeftButtonDown"/>
+    <Grid Background="Black" MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <controls:PathButton Width="auto"
+                             Height="auto"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center"
+                             Glyph=""
+                             GlyphFontSize="188"
+                             IconDefaultColor="#15ffffff"
+                             IconHeight="auto"
+                             IconWidth="auto"
+                             IsHitTestVisible="False"
+                             Style="{StaticResource FontAwesomeGlyphPathButtonStyle}" />
+    </Grid>
 </Window>
