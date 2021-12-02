@@ -21,6 +21,7 @@ using VCore.Standard.Factories.ViewModels;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
+using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
 
 namespace WindowsManager.ViewModels.Home
 {
@@ -313,6 +314,15 @@ namespace WindowsManager.ViewModels.Home
           try
           {
             var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.VideoRargbtTorrent.ParsedName, CancellationToken.None);
+
+            if (data is CSFDTVShow cSFDTVShow &&
+                cSFDTVShow.Seasons != null &&
+                cSFDTVShow.Seasons.Count == 1 &&
+                cSFDTVShow.Seasons[0].SeasonEpisodes != null &&
+                cSFDTVShow.Seasons[0].SeasonEpisodes.Count == 1)
+            {
+              data = cSFDTVShow.Seasons[0].SeasonEpisodes[0];
+            }
 
             Application.Current.Dispatcher.Invoke(() =>
             {

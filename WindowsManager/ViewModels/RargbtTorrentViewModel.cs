@@ -6,6 +6,7 @@ using ChromeDriverScrapper;
 using TorrentAPI;
 using VCore.Standard;
 using VCore.WPF.Misc;
+using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
 
 namespace WindowsManager.ViewModels
 {
@@ -186,6 +187,32 @@ namespace WindowsManager.ViewModels
     {
       Name = model.ParsedName;
     }
+
+    #region OpenInBrowser
+
+    private ActionCommand openCsfd;
+    public ICommand OpenCsfd
+    {
+      get
+      {
+        return openCsfd ??= new ActionCommand(OnOpenCsfd);
+      }
+    }
+
+    private void OnOpenCsfd()
+    {
+      if (ItemExtraData is CSFDItem cSFDItem && !string.IsNullOrEmpty(cSFDItem.Url))
+      {
+        Process.Start(new ProcessStartInfo()
+        {
+          FileName = cSFDItem.Url,
+          UseShellExecute = true,
+          Verb = "open"
+        });
+      }
+    }
+
+    #endregion
 
     public VideoRargbtTorrent VideoRargbtTorrent
     {

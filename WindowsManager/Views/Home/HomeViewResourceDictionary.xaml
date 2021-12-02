@@ -208,9 +208,7 @@
                 </StackPanel>
 
                 <Border HorizontalAlignment="Right">
-                    <Button Command="{Binding OpenInBrowser}"
-                            CommandParameter="{Binding ItemExtraData.Url}"
-                            Cursor="Hand">
+                    <Button Command="{Binding OpenCsfd}" Cursor="Hand">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="BorderBrush" Value="Transparent" />

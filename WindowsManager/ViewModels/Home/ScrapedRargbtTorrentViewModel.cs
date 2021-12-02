@@ -13,7 +13,7 @@ namespace WindowsManager.ViewModels.Home
     {
     }
 
-    #region TurnOffCommand
+    #region OpenInBrowser
 
     private ActionCommand<string> openInBrowser;
     public ICommand OpenInBrowser
