@@ -343,7 +343,7 @@
                                     <controls2:PathButton Margin="0,0,-1,0"
                                                           IconHeight="15"
                                                           IconWidth="15"
-                                                          PathStyle="{StaticResource calendar-day}"
+                                                          PathStyle="{StaticResource calendar-day-path}"
                                                           ToolTip="Days of using software" />
 
                                     <TextBlock VerticalAlignment="Center"
