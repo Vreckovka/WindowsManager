@@ -21,11 +21,6 @@
 		<None Remove="Icon.ico" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ContentWithTargetPath Include="$(ProjectDir)\bin\x64\Debug\netcoreapp3.1\chromedriver.exe" CopyToOutputDirectory="PreserveNewest" TargetPath="chromedriver.exe" />
-	</ItemGroup>
-
-
 	<ItemGroup>
 		<COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
 			<Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
@@ -47,7 +42,6 @@
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
 		<PackageReference Include="Prism.Ninject" Version="7.2.0.1422" />
 		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
-		<PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="95.0.4638.5400" />
 	</ItemGroup>
 
 	<ItemGroup>
