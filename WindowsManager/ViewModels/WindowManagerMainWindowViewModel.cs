@@ -51,7 +51,7 @@ namespace WindowsManager.ViewModels
 
     #region Properties
 
-    public override string Title => "Window manager";
+    public override string Title => "WindowManager";
     public ScreensManagementViewModel ScreensManagementViewModel { get; set; }
     public TurnOffViewModel TurnOffViewModel { get; set; }
 

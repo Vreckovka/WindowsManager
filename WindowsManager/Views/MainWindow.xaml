@@ -16,6 +16,7 @@
         MinWidth="450"
         MinHeight="350"
         FontFamily="pack://application:,,,/VCore.WPF;component/Resources/Fonts/Roboto/#Roboto"
+        Icon="pack://application:,,,/WindowsManager;component/Icon.ico"
         Style="{StaticResource {x:Type Window}}"
         WindowStartupLocation="CenterScreen"
         WindowState="{Binding WindowState}"
