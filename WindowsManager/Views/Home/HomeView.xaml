@@ -51,8 +51,6 @@
                                     BorderBrush="#45cccccc"
                                     BorderThickness="1">
                                 <Grid DataContext="{Binding Model}">
-
-
                                     <Grid VerticalAlignment="Top">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto" />
@@ -86,8 +84,6 @@
                                                     <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
 
 
-
-
                                                     <Grid.ToolTip>
                                                         <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
                                                     </Grid.ToolTip>
@@ -101,7 +97,7 @@
                                                 <controls2:PathButton Margin="0,0,0,0"
                                                                       HorizontalAlignment="Right"
                                                                       BorderThickness="0"
-                                                                      Command="{Binding DataContext.Download, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                                      Command="{Binding DataContext.Download, ElementName=ParentBorder}"
                                                                       Cursor="Hand"
                                                                       FontSize="15"
                                                                       FontWeight="Bold"
@@ -183,12 +179,12 @@
                                                 <TextBlock Style="{StaticResource ParameterLabel}" Text="Link:  " />
                                                 <Button Background="Transparent"
                                                         BorderThickness="0"
-                                                        Command="{Binding DataContext.OpenInfoPage, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                        Command="{Binding DataContext.OpenInfoPage, ElementName=ParentBorder}"
                                                         Content="{Binding InfoPageShort}"
                                                         Cursor="Hand"
                                                         FontSize="15"
                                                         FontWeight="Bold"
-                                                        ToolTip="{Binding DataContext.InfoPageFakeUrl, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}">
+                                                        ToolTip="{Binding DataContext.InfoPageFakeUrl, ElementName=ParentBorder}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
                                                             <Setter Property="Template">
@@ -217,7 +213,7 @@
                                             <ContentControl Grid.Row="2"
                                                             Grid.Column="0"
                                                             Grid.ColumnSpan="2"
-                                                            Content="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Border, Mode=FindAncestor}}"
+                                                            Content="{Binding DataContext, ElementName=ParentBorder}"
                                                             ContentTemplateSelector="{StaticResource TorrentTypeTemplateSelector}" />
                                         </Grid>
 
@@ -848,11 +844,7 @@
                         </ListView.ItemContainerStyle>
                     </ListView>
                 </Grid>
-
             </Grid>
         </Grid>
-
-
-
     </Grid>
 </UserControl>

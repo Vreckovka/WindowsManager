@@ -72,7 +72,6 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
-
     #region ItemExtraData
 
     private object itemExtraData;
@@ -168,6 +167,8 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
+    #region InfoPageFakeUrl
+
     public string InfoPageFakeUrl
     {
       get
@@ -176,6 +177,7 @@ namespace WindowsManager.ViewModels.Torrents
       }
     }
 
+    #endregion
 
   }
 

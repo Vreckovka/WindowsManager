@@ -39,14 +39,14 @@
     <DataTemplate x:Key="RaragbtVideoTorrentDataTemplate">
         <Border x:Name="Container">
             <Grid>
-                <StackPanel Grid.Column="0" DataContext="{Binding Model}">
+                <StackPanel Grid.Column="0">
 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource ParameterLabel}" Text="Qality:  " />
                         <TextBlock FontSize="15"
                                    FontWeight="Bold"
                                    Foreground="#eb86a3"
-                                   Text="{Binding Quality}" />
+                                   Text="{Binding Model.Quality}" />
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
@@ -56,9 +56,9 @@
                                    FontSize="15"
                                    FontWeight="Bold"
                                    Foreground="#ebd886"
-                                   Text="{Binding ParsedName}"
+                                   Text="{Binding Model.ParsedName}"
                                    TextTrimming="CharacterEllipsis"
-                                   ToolTip="{Binding ParsedName}" />
+                                   ToolTip="{Binding Model.ParsedName}" />
                     </StackPanel>
 
                     <StackPanel Margin="0,10,0,5"
@@ -84,13 +84,13 @@
                                    VerticalAlignment="Center"
                                    FontSize="17"
                                    Foreground="#f5a142"
-                                   Text="{Binding Qualities.Count, Mode=OneWay}" />
+                                   Text="{Binding Model.Qualities.Count, Mode=OneWay}" />
 
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Qualities.Count, Mode=OneWay, Converter={converters1:IsGreaterConverter}, ConverterParameter=0}" Value="true">
+                                    <DataTrigger Binding="{Binding Model.Qualities.Count, Mode=OneWay, Converter={converters1:IsGreaterConverter}, ConverterParameter=0}" Value="true">
                                         <Setter Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -106,109 +106,12 @@
                            PlacementTarget="{Binding ElementName=QualitiesToggleButton}"
                            StaysOpen="False"
                            VerticalOffset="5">
-                        <Border Padding="10"
-                                Background="#10ffffff"
-                                BorderBrush="#30ffffff"
-                                BorderThickness="1">
-                            <ScrollViewer VerticalScrollBarVisibility="auto">
-                                <ItemsControl VerticalAlignment="Top" ItemsSource="{Binding Qualities}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Margin="0,2" Orientation="Horizontal">
-                                                <TextBlock FontSize="15"
-                                                           FontWeight="Bold"
-                                                           Text="{Binding ParsedName}" />
-                                                <TextBlock Width="55"
-                                                           FontSize="15"
-                                                           FontWeight="Bold"
-                                                           Foreground="#f5a142"
-                                                           Text="{Binding Quality}" />
-
-                                                <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                                    <Button Width="115"
-                                                            Background="Transparent"
-                                                            BorderThickness="0"
-                                                            Command="{Binding DataContext.OpenInfoPage, ElementName=Container}"
-                                                            Content="{Binding InfoPageShort}"
-                                                            Cursor="Hand"
-                                                            FontSize="15"
-                                                            FontWeight="Bold"
-                                                            ToolTip="{Binding DataContext.InfoPageFakeUrl, ElementName=Container}">
-                                                        <Button.Style>
-                                                            <Style TargetType="Button">
-                                                                <Setter Property="Template">
-                                                                    <Setter.Value>
-                                                                        <ControlTemplate TargetType="{x:Type Button}">
-                                                                            <Border Background="{TemplateBinding Background}">
-                                                                                <ContentPresenter Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" />
-                                                                            </Border>
-                                                                        </ControlTemplate>
-                                                                    </Setter.Value>
-                                                                </Setter>
-                                                                <Setter Property="Foreground" Value="#7b994e" />
-                                                                <Style.Triggers>
-                                                                    <Trigger Property="IsMouseOver" Value="true">
-                                                                        <Setter Property="Foreground" Value="#c2eb86" />
-                                                                    </Trigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Button.Style>
-                                                    </Button>
-
-                                                    <controls1:PathButton Margin="0,0,10,0"
-                                                                          HorizontalAlignment="Right"
-                                                                          BorderThickness="0"
-                                                                          Command="{Binding DataContext.Download, ElementName=Container}"
-                                                                          Cursor="Hand"
-                                                                          FontSize="15"
-                                                                          FontWeight="Bold"
-                                                                          GlyphFontFamily="{StaticResource FontAwesome6Pro_Solid}"
-                                                                          IconDefaultColor="#85ffffff"
-                                                                          IconHoverColor="White"
-                                                                          IconMargin="0"
-                                                                          Style="{StaticResource down-to-line}"
-                                                                          ToolTip="Download" />
-                                                </StackPanel>
-
-                                                <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                                    <TextBlock Width="80"
-                                                               FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="{StaticResource YellowBrush}"
-                                                               Text="{Binding Size, ConverterParameter=N2, Converter={converters1:FileSizeConverter}}" />
-
-
-                                                </StackPanel>
-
-                                                <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                                    <TextBlock Width="70"
-                                                               FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="{StaticResource GreenBrush3}"
-                                                               Text="{Binding Seeders, StringFormat={}S: {0}}" />
-                                                </StackPanel>
-
-
-                                                <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                                    <TextBlock Width="70"
-                                                               FontSize="15"
-                                                               FontWeight="Bold"
-                                                               Foreground="#959595"
-                                                               Text="{Binding Leechers, StringFormat={}L: {0}}" />
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </Border>
-
+                        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource QualitiesPopupTemplate}" />
                     </Popup>
-
                 </StackPanel>
 
                 <Border HorizontalAlignment="Right">
-                    <Button Style="{StaticResource CSFDItem}" Margin="0 -15 0 0"/>
+                    <Button Margin="0,-15,0,0" Style="{StaticResource CSFDItem}" />
                 </Border>
             </Grid>
         </Border>
