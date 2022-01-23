@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using WindowsManager.ViewModels;
 using WindowsManager.ViewModels.Home;
 using WindowsManager.ViewModels.Home.Scrapers;
+using WindowsManager.ViewModels.Torrents;
 
 namespace WindowsManager.TemplateSelectors
 {

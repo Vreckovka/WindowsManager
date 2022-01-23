@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using WindowsManager.ViewModels.Home;
 using WindowsManager.ViewModels.ScreenManagement;
+using WindowsManager.ViewModels.Torrents;
 using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using TorrentAPI;
@@ -78,15 +79,18 @@ namespace WindowsManager.ViewModels
 
     #endregion
 
-    public async override void Initialize()
+    #region Initialize
+
+    public override void Initialize()
     {
       base.Initialize();
 
-     
-       
-
       CreateMenu();
     }
+
+    #endregion
+
+    #region CreateMenu
 
     private void CreateMenu()
     {
@@ -95,7 +99,7 @@ namespace WindowsManager.ViewModels
 
       var monitorsMenuVm = new NavigationItem(ScreensManagementViewModel);
       monitorsMenuVm.IconPathData = "M512 0H64C28.65 0 0 28.65 0 64v288c0 35.35 28.65 64 64 64h148.3l-9.6 48H152C138.8 464 128 474.8 128 488S138.8 512 152 512h272c13.25 0 24-10.75 24-24s-10.75-24-24-24h-50.73L363.7 416H512c35.35 0 64-28.65 64-64V64C576 28.65 547.3 0 512 0zM324.3 464H251.7L261.3 416h53.46L324.3 464zM528 352c0 8.822-7.178 16-16 16H64c-8.822 0-16-7.178-16-16V64c0-8.822 7.178-16 16-16h448c8.822 0 16 7.178 16 16V352z";
-     
+
       var turnOff = new NavigationItem(TurnOffViewModel);
       turnOff.IconPathData = "M32 256C14.33 256 0 270.3 0 288c0 17.67 14.33 32 32 32s32-14.33 32-32C64 270.3 49.67 256 32 256zM84.35 446.4c-12.5 12.5-12.5 32.76 0 45.26c12.5 12.5 32.76 12.5 45.26 0c12.5-12.5 12.5-32.76 0-45.26C117.1 433.9 96.85 433.9 84.35 446.4zM129.6 129.6c12.5-12.5 12.5-32.76 0-45.25c-12.5-12.5-32.76-12.5-45.26 0c-12.5 12.5-12.5 32.76 0 45.25C96.85 142.1 117.1 142.1 129.6 129.6zM288 64c17.67 0 32-14.33 32-32c0-17.67-14.33-32-32-32C270.3 0 256 14.33 256 32C256 49.67 270.3 64 288 64zM446.4 446.4c-12.5 12.5-12.5 32.76 0 45.26c12.5 12.5 32.76 12.5 45.26 0c12.5-12.5 12.5-32.76 0-45.26S458.9 433.9 446.4 446.4zM544 256c-17.67 0-32 14.33-32 32c0 17.67 14.33 32 32 32s32-14.33 32-32C576 270.3 561.7 256 544 256zM446.4 84.35c-12.5 12.5-12.5 32.76 0 45.25c12.5 12.5 32.76 12.5 45.26 0c12.5-12.5 12.5-32.76 0-45.25C479.2 71.86 458.9 71.86 446.4 84.35zM287.1 127.1C199.6 128 127.1 199.6 127.1 288s71.63 160 159.1 159.1c88.37 .0014 160-71.63 160-159.1S376.4 128 287.1 127.1zM399.1 288c0 53.5-37.77 98.23-88 109.3V288c0-13.25-10.75-24-24-24c-13.25 0-24 10.75-24 24v109.3c-50.24-11.03-87.1-55.76-88-109.3c0-61.76 50.24-112 112-112C349.8 175.1 400 226.2 399.1 288z";
 
@@ -105,6 +109,7 @@ namespace WindowsManager.ViewModels
 
 
       var torrentsMenuVm = new NavigationItem(torrentsViewModel);
+      torrentsMenuVm.ImagePath = "utorrent_logo.png";
 
       MainMenu.Items.Add(homeMenuVm);
       MainMenu.Items.Add(monitorsMenuVm);
@@ -114,7 +119,9 @@ namespace WindowsManager.ViewModels
 
       homeMenuVm.IsActive = true;
 
-    }
+    } 
+
+    #endregion
 
     #region SwitchScreenCommand
 

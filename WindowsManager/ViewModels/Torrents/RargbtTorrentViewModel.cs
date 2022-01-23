@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net;
 using System.Windows.Input;
-using ChromeDriverScrapper;
 using TorrentAPI;
 using VCore.Standard;
 using VCore.WPF.Misc;
 using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
 
-namespace WindowsManager.ViewModels
+namespace WindowsManager.ViewModels.Torrents
 {
   public class RargbtTorrentViewModel : ViewModel<RargbtTorrent>
   {

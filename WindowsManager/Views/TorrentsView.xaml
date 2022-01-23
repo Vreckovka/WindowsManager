@@ -8,52 +8,89 @@
              d:DesignHeight="450"
              d:DesignWidth="800"
              mc:Ignorable="d">
-    <ListView ItemsSource="{Binding Torrents}">
-        <ListView.ItemTemplate>
-            <DataTemplate>
-                <Border>
-                    <Grid DataContext="{Binding Model}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition />
-                            <ColumnDefinition Width="auto" />
-                            <ColumnDefinition Width="auto" />
-                        </Grid.ColumnDefinitions>
+    <Grid>
+        <ListView ItemsSource="{Binding Torrents}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,0,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="auto" />
 
-                        <TextBlock Margin="0,0,10,0"
-                                   Foreground="#757575"
-                                   Text="{Binding Category}" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="1"
-                                   Margin="0,0,10,0"
-                                   Foreground="#757575"
-                                   Text="{Binding Ranked}" />
+                            <StackPanel Margin="0,0,10,0"
+                                        Orientation="Horizontal"
+                                        ToolTip="{Binding Model.CategoryObject.Name}">
+                                <TextBlock FontSize="20"
+                                           FontWeight="Bold"
+                                           Foreground="#e8b761"
+                                           Text="{Binding ElementName=ParentBorder, Path=DataContext.SeedersOrderIndex}" />
 
-                        <TextBlock Grid.Column="2"
-                                   Margin="0,0,10,0"
-                                   Foreground="White"
-                                   Text="{Binding Title}" />
 
-                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                <Image Height="25"
+                                       Margin="5,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Source="{Binding Model.CategoryObject.Url, IsAsync=True, Mode=OneWay}" />
+                            </StackPanel>
 
-                            <TextBlock Margin="0,0,10,0"
-                                       Foreground="{StaticResource YellowBrush}"
-                                       Text="{Binding Size, ConverterParameter=N2, Converter={converters:FileSizeConverter}}" />
-                        </StackPanel>
+                            <Border Grid.Column="1"
+                                    Width="40"
+                                    Height="33"
+                                    Margin="0,0,10,0">
+                                <Button HorizontalAlignment="Center" Style="{StaticResource CSFDItem}" />
 
-                        <TextBlock Grid.Column="4"
-                                   Margin="0,0,10,0"
-                                   Foreground="{StaticResource GreenBrush}"
-                                   Text="{Binding Seeders}" />
-                        <TextBlock Grid.Column="5"
-                                   Margin="0,0,10,0"
-                                   Foreground="{StaticResource DefaultRedBrush}"
-                                   Text="{Binding Leechers}" />
-                    </Grid>
-                </Border>
-            </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Model.CategoryObject.IsVideoCategory}" Value="false">
+                                                <Setter Property="Visibility" Value="Hidden" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+
+
+                            <TextBlock Grid.Column="2"
+                                       Margin="0,0,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Foreground="White"
+                                       Text="{Binding Model.Title}" />
+
+                            <StackPanel Grid.Column="3"
+                                        HorizontalAlignment="Right"
+                                        Orientation="Horizontal">
+
+                                <TextBlock Margin="10,0"
+                                           VerticalAlignment="Center"
+                                           Foreground="{StaticResource YellowBrush}"
+                                           Text="{Binding Model.Size, ConverterParameter=N2, Converter={converters:FileSizeConverter}}" />
+
+
+                                <StackPanel>
+                                    <TextBlock Margin="0,0,10,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{StaticResource GreenBrush}"
+                                               Text="{Binding Model.Seeders}" />
+                                    <TextBlock Margin="0,0,10,0"
+                                               HorizontalAlignment="Center"
+                                               Foreground="{StaticResource DefaultRedBrush}"
+                                               Text="{Binding Model.Leechers}" />
+                                </StackPanel>
+                            </StackPanel>
+
+
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </Grid>
 </UserControl>

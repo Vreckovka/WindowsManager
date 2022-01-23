@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using WindowsManager.ViewModels;
 using WindowsManager.ViewModels.ScreenManagement;
+using WindowsManager.ViewModels.Torrents;
 using Logger;
 using Ninject;
 using Prism.Ioc;
@@ -38,8 +39,9 @@ namespace WindowsManager
       Kernel.Bind<IRarbgApiClient>().To<RarbgApiClient>().InSingletonScope()
         .WithConstructorArgument("baseUrl", "https://torrentapi.org/pubapi_v2.php")
         .WithConstructorArgument("appID", Assembly.GetExecutingAssembly().GetName().Name);
-       
 
+
+      Kernel.Bind<ITorrentProvider>().To<RargbtTorrentProvider>().InSingletonScope();
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();
     }

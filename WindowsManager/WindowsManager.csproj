@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 		<None Remove="Icon.ico" />
+		<None Remove="utorrent_logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -57,6 +58,7 @@
 
 	<ItemGroup>
 		<Resource Include="Icon.ico" />
+		<Resource Include="utorrent_logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>
