@@ -260,7 +260,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         Directory.CreateDirectory(folderPath);
 
       var backupPath = "Data\\Monitors\\Backup";
-      var newDir = backupPath + $"\\Data_{ DateTime.Today.ToShortDateString()}";
+      var newDir = backupPath + $"\\Data_{ DateTime.Today.ToString("dd.MM.yyyy")}";
       ;
       if (!Directory.Exists(newDir))
       {

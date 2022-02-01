@@ -652,45 +652,49 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region Load
 
     private bool wasLoaded;
+    private object batton = new object();
     private void Load()
     {
-      try
+      lock (batton)
       {
-        if (File.Exists(filePath))
+        try
         {
-          var data = File.ReadAllText(filePath);
-
-          var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
-
-          if (serialized != null)
+          if (File.Exists(filePath))
           {
-            TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
-            TurnOffLimit = serialized.TurnOffLimit;
-            PowerOutput = serialized.PowerOutput;
-            StartDayOfCounting = serialized.StartDayOfCounting;
-            ShouldByValue = serialized.ShouldByValue;
+            var data = File.ReadAllText(filePath);
 
-            wasLoaded = true;
+            var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
 
-            if (StartDayOfCounting == DateTime.MinValue)
+            if (serialized != null)
             {
-              StartDayOfCounting = DateTime.Now;
+              TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
+              TurnOffLimit = serialized.TurnOffLimit;
+              PowerOutput = serialized.PowerOutput;
+              StartDayOfCounting = serialized.StartDayOfCounting;
+              ShouldByValue = serialized.ShouldByValue;
 
-              Save();
+              wasLoaded = true;
+
+              if (StartDayOfCounting == DateTime.MinValue)
+              {
+                StartDayOfCounting = DateTime.Now;
+
+                Save();
+              }
             }
           }
+          else
+          {
+            wasLoaded = true;
+
+            StartDayOfCounting = DateTime.Now;
+
+            Save();
+          }
         }
-        else
+        catch (JsonException ex)
         {
-          wasLoaded = true;
-
-          StartDayOfCounting = DateTime.Now;
-
-          Save();
-        }
-      }
-      catch (JsonException ex)
-      {
+        } 
       }
     }
 
