@@ -180,11 +180,12 @@
                                                 <Button Background="Transparent"
                                                         BorderThickness="0"
                                                         Command="{Binding DataContext.OpenInfoPage, ElementName=ParentBorder}"
+                                                        CommandParameter="{Binding InfoPageParameter}"
                                                         Content="{Binding InfoPageShort}"
                                                         Cursor="Hand"
                                                         FontSize="15"
                                                         FontWeight="Bold"
-                                                        ToolTip="{Binding DataContext.InfoPageFakeUrl, ElementName=ParentBorder}">
+                                                        ToolTip="{Binding InfoPageFakeUrl}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
                                                             <Setter Property="Template">

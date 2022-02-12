@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Windows.Input;
 using TorrentAPI;
+using TorrentAPI.Domain;
 using VCore.Standard;
 using VCore.WPF.Misc;
 using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
@@ -22,16 +23,16 @@ namespace WindowsManager.ViewModels.Torrents
 
     #region OpenInfoPage
 
-    private ActionCommand openInfoPage;
+    private ActionCommand<string> openInfoPage;
     public ICommand OpenInfoPage
     {
       get
       {
-        return openInfoPage ??= new ActionCommand(async () =>
+        return openInfoPage ??= new ActionCommand<string>(async (parameter) =>
         {
-          if (!string.IsNullOrEmpty(Model.InfoPageParameter))
+          if (!string.IsNullOrEmpty(parameter))
           {
-            var path = await rarbgApiClient.GetInfoPageLink(Model.InfoPageParameter);
+            var path = await rarbgApiClient.GetInfoPageLink(parameter);
 
             OnOpenInBrowser(path);
           }
@@ -167,17 +168,7 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
-    #region InfoPageFakeUrl
-
-    public string InfoPageFakeUrl
-    {
-      get
-      {
-        return "https://torrentapi.org/redirect_to_info.php?" + "p=" + Model?.InfoPageParameter;
-      }
-    }
-
-    #endregion
+ 
 
   }
 

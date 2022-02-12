@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logger", "..\CustomLibrarie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChromeDriverScrapper", "..\CustomLibraries\Custom\ChromeDriverScrapper\ChromeDriverScrapper.csproj", "{60EAB032-DF01-4C55-8C56-47051D04AEC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentAPI", "C:\Users\Roman Pecho\Desktop\csharp-torrentapi-master\TorrentAPI.csproj", "{EDEA20C5-8FFB-4761-9E17-FA52E8333301}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentAPI", "D:\Aplikacie\WindowsManager\csharp-torrentapi-master\TorrentAPI.csproj", "{EDEA20C5-8FFB-4761-9E17-FA52E8333301}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

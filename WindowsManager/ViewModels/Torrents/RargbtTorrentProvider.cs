@@ -146,7 +146,7 @@ namespace WindowsManager.ViewModels.Torrents
             torrent.CategoryObject = categories.SingleOrDefault(x => x.Name == torrent.Category);
           }
 
-          var videos = list.Where(x => x.EpisodeInfo != null).Select(x => new VideoRargbtTorrent(x));
+          var videos = list.Where(x => x.EpisodeInfo != null).Select(x => x.GetVideoRargbtTorrent());
           var videoGroups = videos.GroupBy(x => x.EpisodeInfo.Imdb).ToList();
           var videoVms = new List<VideoRargbtTorrentViewModel>();
 

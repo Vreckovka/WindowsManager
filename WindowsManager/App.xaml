@@ -497,11 +497,12 @@
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Command="{Binding ElementName=MainBorder, Path=DataContext.OpenInfoPage}"
+                                                    CommandParameter="{Binding InfoPageParameter}"
                                                     Content="{Binding InfoPageShort}"
                                                     Cursor="Hand"
                                                     FontSize="15"
                                                     FontWeight="Bold"
-                                                    ToolTip="{Binding ElementName=MainBorder, Path=DataContext.InfoPageFakeUrl}">
+                                                    ToolTip="{Binding InfoPageFakeUrl}">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
                                                         <Setter Property="Template">

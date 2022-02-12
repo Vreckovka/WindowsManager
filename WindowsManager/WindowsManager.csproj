@@ -53,7 +53,7 @@
 		<ProjectReference Include="..\..\CustomLibraries\VCore\VCore.WPF.csproj" />
 		<ProjectReference Include="..\..\VPlayer\VPlayer.AudioStorage\VPlayer.AudioStorage.csproj" />
 		<ProjectReference Include="..\..\VPlayer\VPlayer.DarkTheme\VPlayer.DarkTheme.csproj" />
-		<ProjectReference Include="C:\Users\Roman Pecho\Desktop\csharp-torrentapi-master\TorrentAPI.csproj" />
+		<ProjectReference Include="..\csharp-torrentapi-master\TorrentAPI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
