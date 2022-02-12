@@ -316,26 +316,14 @@ namespace WindowsManager.ViewModels.ScreenManagement
     {
       var isAllBlack = Screens.Where(x => x != actualScreen).All(x => x.IsDimmed);
 
+      IRuleAction rule = IRuleAction.ScreenDimmed;
 
-      if (Screens.IndexOf(screenViewModel) == 0)
+      if(!screenViewModel.IsDimmed)
       {
-        var screen = Screens[1];
-
-        if (screen.IsDimmed != screenViewModel.IsDimmed)
-        {
-          screen.DimmOrUnDimm();
-        }
-      }
-      else if (Screens.IndexOf(screenViewModel) == 1)
-      {
-        var screen = Screens[0];
-
-        if (screen.IsActive)
-        {
-          screenViewModel.StopTurnOffTimer();
-        }
+        rule = IRuleAction.ScreenUnDimmed;
       }
 
+      screenViewModel.Rules.Where(x => x.Types.Contains(rule)).ForEach(x => x.Execute());
 
       if (isAllBlack)
       {
@@ -353,7 +341,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnActiveChanged(ScreenViewModel screenViewModel)
     {
-      screenViewModel.Rules.ForEach(x => x.Execute());
+      screenViewModel.Rules.Where(x => x.Types.Contains(IRuleAction.ScreenActivated)).ForEach(x => x.Execute());
     }
 
     #endregion

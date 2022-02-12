@@ -40,11 +40,19 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
 
   }
 
+  public enum IRuleAction
+  {
+    ScreenDimmed,
+    ScreenUnDimmed,
+    ScreenActivated,
+    ScreenUnActivated,
+  }
+
   public interface IRule
   {
     string Name { get; }
     IList<IRuleParameter> Parameters { get; }
-
+    IEnumerable<IRuleAction> Types { get; }
 
     void Execute();
   }

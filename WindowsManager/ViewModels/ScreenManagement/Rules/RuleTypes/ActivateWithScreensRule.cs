@@ -7,6 +7,8 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
     public const string MainScreen = "Main screen";
     public const string SecondaryScreen = "Secondary screen";
   }
+
+
   public class ActivateWithScreensRule : Rule
   {
     public ActivateWithScreensRule()
@@ -17,6 +19,10 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
         new RuleParameterViewModel(RuleNames.SecondaryScreen)
       };
     }
+
+    public override IEnumerable<IRuleAction> Types { get; } = new List<IRuleAction>() { IRuleAction.ScreenActivated };
+
+    public override string Name { get; } = "Activate with";
 
     public override void Execute()
     {
@@ -46,10 +52,5 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
         }
       }
     }
-
-    public override string Name { get; } = "Activate with";
-
-
-
   }
 }
