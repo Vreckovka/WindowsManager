@@ -20,7 +20,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
 
     public override void Execute()
     {
-      if(Parameters.Count == 2 )
+      if (Parameters.Count == 2)
       {
         var mainScreen = (ScreenViewModel)Parameters[0].Value;
         var otherScreen = (ScreenViewModel)Parameters[1].Value;
@@ -40,7 +40,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
             otherScreen.StopTurnOffTimer();
           }
         }
-        else if (!mainScreen.IsActive)
+        else if (!otherScreen.IsActive)
         {
           mainScreen.StartTurnOffTimer();
         }
@@ -50,6 +50,6 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
     public override string Name { get; } = "Activate with";
 
 
-  
+
   }
 }
