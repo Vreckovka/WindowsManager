@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Disposables;
@@ -9,6 +10,7 @@ using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
+using WindowsManager.ViewModels.ScreenManagement.Rules;
 using WindowsManager.Windows;
 using VCore;
 using VCore.Standard;
@@ -361,6 +363,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     [JsonIgnore]
     public override Screen Model { get => base.Model; set => base.Model = value; }
+
+    public IList<IRule> Rules { get; set; } = new List<IRule>();
 
     #endregion
 

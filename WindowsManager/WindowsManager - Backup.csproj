@@ -1,0 +1,87 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>Icon.ico</ApplicationIcon>
+		<Platforms>AnyCPU;x64</Platforms>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<OutputPath></OutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<OutputPath></OutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="Icon.ico" />
+		<None Remove="utorrent_logo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<COMReference Include="{215d64d2-031c-33c7-96e3-61794cd1ee61}">
+			<Guid>215d64d2-031c-33c7-96e3-61794cd1ee61</Guid>
+			<VersionMajor>2</VersionMajor>
+			<VersionMinor>4</VersionMinor>
+			<WrapperTool>tlbimp</WrapperTool>
+		</COMReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
+		<PackageReference Include="NAudio" Version="2.0.0" />
+		<PackageReference Include="Ninject" Version="3.3.4" />
+		<PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
+		<PackageReference Include="System.Reactive" Version="5.0.0" />
+		<PackageReference Include="Prism.Ninject" Version="7.2.0.1422" />
+		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\CustomLibraries\Custom\ChromeDriverScrapper\ChromeDriverScrapper.csproj" />
+		<ProjectReference Include="..\..\CustomLibraries\Logger\Logger.csproj" />
+		<ProjectReference Include="..\..\CustomLibraries\SoundManagement\SoundManagement.csproj" />
+		<ProjectReference Include="..\..\CustomLibraries\VCore.Standard\VCore.Standard.csproj" />
+		<ProjectReference Include="..\..\CustomLibraries\VCore\VCore.WPF.csproj" />
+		<ProjectReference Include="..\..\VPlayer\VPlayer.AudioStorage\VPlayer.AudioStorage.csproj" />
+		<ProjectReference Include="..\..\VPlayer\VPlayer.DarkTheme\VPlayer.DarkTheme.csproj" />
+		<ProjectReference Include="..\csharp-torrentapi-master\TorrentAPI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Icon.ico" />
+		<Resource Include="utorrent_logo.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="VersionAutoIncrement.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>VersionAutoIncrement.tt</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="VersionAutoIncrement.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>VersionAutoIncrement.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ViewModels\ScreenManagement\Rule\" />
+	</ItemGroup>
+
+</Project>

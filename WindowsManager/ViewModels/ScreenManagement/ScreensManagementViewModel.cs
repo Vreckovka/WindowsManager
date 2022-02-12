@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using WindowsManager.Modularity;
+using WindowsManager.ViewModels.ScreenManagement.Rules;
 using WindowsManager.Views;
 using VCore;
 using VCore.ItemsCollections;
@@ -352,46 +353,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnActiveChanged(ScreenViewModel screenViewModel)
     {
-      ConnectScreens(screenViewModel, 0, 1);
-    }
-
-    #endregion
-
-    #region ConnectScreens
-
-    private void ConnectScreens(ScreenViewModel screenViewModel, int firstIndex, int secondIndex)
-    {
-      HookScreen(screenViewModel, firstIndex, secondIndex);
-      HookScreen(screenViewModel, secondIndex, firstIndex);
-    }
-
-    #endregion
-
-    #region HookScreen
-
-    private void HookScreen(ScreenViewModel screenViewModel, int yourIndex, int indexToHook)
-    {
-      if (Screens.IndexOf(screenViewModel) == yourIndex)
-      {
-        var screen = Screens[indexToHook];
-
-        if (screenViewModel.IsActive)
-        {
-          if (!screenViewModel.IsDimmed)
-          {
-            if (screen.IsDimmed)
-            {
-              screen.DimmOrUnDimm();
-            }
-
-            screen.StopTurnOffTimer();
-          }
-        }
-        else if (!screen.IsActive)
-        {
-          screen.StartTurnOffTimer();
-        }
-      }
+      screenViewModel.Rules.ForEach(x => x.Execute());
     }
 
     #endregion

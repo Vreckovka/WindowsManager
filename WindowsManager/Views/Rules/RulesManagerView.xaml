@@ -1,0 +1,97 @@
+﻿<UserControl x:Class="WindowsManager.Views.Rules.RulesManagerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:WindowsManager.Views.Rules"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:templateSelectors="clr-namespace:WindowsManager.TemplateSelectors"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <DataTemplate x:Key="ActivateWith">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Width="120"
+                               Margin="10,0"
+                               VerticalAlignment="Center"
+                               Text="Main monitor" />
+                    <ComboBox DisplayMemberPath="Name"
+                              ItemsSource="{Binding DataContext.Screens, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              SelectedItem="{Binding Parameters[0].Value}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,10" Orientation="Horizontal">
+                    <TextBlock Width="120"
+                               Margin="10,0"
+                               VerticalAlignment="Center"
+                               Text="Secondary monitor" />
+                    <ComboBox DisplayMemberPath="Name"
+                              ItemsSource="{Binding DataContext.Screens, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              SelectedItem="{Binding Parameters[1].Value}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <templateSelectors:RuleTypeTemplateSelector x:Key="RuleTypeTemplateSelector" ActivateWith="{StaticResource ActivateWith}" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="10,0"
+                           VerticalAlignment="Center"
+                           Text="Rule" />
+
+                <ComboBox x:Name="RuleTypes_ComboBox"
+                          DisplayMemberPath="Name"
+                          ItemsSource="{Binding RuleTypes}" />
+
+                <Button Margin="10,0"
+                        Padding="50,5"
+                        Command="{Binding AddCommand}"
+                        CommandParameter="{Binding ElementName=RuleTypes_ComboBox, Path=SelectedItem}">
+                    Add
+                </Button>
+            </StackPanel>
+
+        </Grid>
+
+        <ContentControl Grid.Row="1"
+                        Grid.Column="0"
+                        Margin="0,10"
+                        Content="{Binding ElementName=RuleTypes_ComboBox, Path=SelectedItem}"
+                        ContentTemplateSelector="{StaticResource RuleTypeTemplateSelector}" />
+
+        <ListView Grid.Row="1" Grid.Column="1" />
+
+        <!--<StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+            <TextBlock Margin="10,0"
+                       VerticalAlignment="Center"
+                       Text="Monitors" />
+            <ComboBox ItemsSource="{Binding RuleTypes}" />
+
+            <Button Margin="10,0" Padding="50,5">Add</Button>
+        </StackPanel>
+
+        <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+            <TextBlock Margin="10,0"
+                       VerticalAlignment="Center"
+                       Text="Rules" />
+            <ComboBox />
+
+            <Button Margin="10,0" Padding="50,5">Add</Button>
+        </StackPanel>-->
+
+
+    </Grid>
+</UserControl>
