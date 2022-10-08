@@ -43,7 +43,7 @@ namespace WindowsManager.ViewModels.Torrents
             Torrents.AddRange(torrents);
           });
 
-          await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
+          //await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
         }
       });
     }

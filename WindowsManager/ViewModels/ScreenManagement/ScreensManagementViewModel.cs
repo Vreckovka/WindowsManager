@@ -23,7 +23,14 @@ namespace WindowsManager.ViewModels.ScreenManagement
   public class ScreensManagementData
   {
     public DateTime StartDayOfUsingSoftware { get; set; }
+    public double KwhPriceEur { get; set; }
   }
+
+  public static class CommonSettings
+  {
+    public static double KwhPriceEur { get; set; }
+  }
+
 
   public class ScreensManagementViewModel : RegionViewModel<ScreensManagementView>
   {
@@ -445,6 +452,13 @@ namespace WindowsManager.ViewModels.ScreenManagement
           var data = File.ReadAllText(filePath);
 
           LoadedData = JsonSerializer.Deserialize<ScreensManagementData>(data);
+
+          if (LoadedData != null)
+          {
+            CommonSettings.KwhPriceEur = LoadedData.KwhPriceEur;
+            Screens.ForEach(x => x.RaiseTotalSaved());
+            wasLoaded = true;
+          }
         }
         else
         {
@@ -454,8 +468,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
           {
             StartDayOfUsingSoftware = DateTime.Now
           };
-
-          Save();
         }
       }
       catch (JsonException ex)

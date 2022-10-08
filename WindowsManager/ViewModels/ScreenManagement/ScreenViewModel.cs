@@ -49,6 +49,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region TotalDimmTime
 
     private TimeSpan totalDimmTime;
+    private int lastSavedTime;
 
     [JsonIgnore]
     public TimeSpan TotalDimmTime
@@ -61,13 +62,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
           totalDimmTime = value;
           TotalDimmTimeTicks = totalDimmTime.Ticks;
 
-          if (((int)totalDimmTime.TotalSeconds) % 5 == 0)
+          int totalSeconds = (int) totalDimmTime.TotalSeconds;
+
+          if (totalSeconds % 5 == 0 && totalSeconds != lastSavedTime)
           {
             Save();
+            lastSavedTime = totalSeconds;
           }
 
           RaisePropertyChanged(nameof(TotalSaved));
-
           RaisePropertyChanged();
         }
       }
@@ -313,15 +316,13 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #endregion
 
     #region TotalSaved
-
-    private double kwhCost = 0.09;
-
+    
     [JsonIgnore]
     public double TotalSaved
     {
       get
       {
-        return TotalDimmTime.TotalHours * (PowerOutput / 1000.0) * kwhCost;
+        return ((TotalDimmTime.TotalHours * PowerOutput) / 1000.0) * CommonSettings.KwhPriceEur;
       }
 
     }
@@ -647,6 +648,17 @@ namespace WindowsManager.ViewModels.ScreenManagement
           filePath.EnsureDirectoryExists();
 
           File.WriteAllText(filePath, json);
+
+          //Check save
+          try
+          {
+            var data = File.ReadAllText(filePath);
+            var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
+          }
+          catch (JsonException)
+          {
+            Save();
+          }
         }
       }
     }
@@ -703,6 +715,11 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
+
+    public void RaiseTotalSaved()
+    {
+      RaisePropertyChanged(nameof(TotalSaved));
+    }
 
     #region Dispose
 
