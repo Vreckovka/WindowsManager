@@ -255,11 +255,10 @@ namespace WindowsManager.ViewModels.Torrents
 
           if (data is CSFDTVShow cSFDTVShow &&
               cSFDTVShow.Seasons != null &&
-              cSFDTVShow.Seasons.Count == 1 &&
-              cSFDTVShow.Seasons[0].SeasonEpisodes != null &&
-              cSFDTVShow.Seasons[0].SeasonEpisodes.Count == 1)
+              cSFDTVShow.Seasons.Count(x => x.SeasonEpisodes != null) == 1 &&
+              cSFDTVShow.Seasons.First(x => x.SeasonEpisodes != null).SeasonEpisodes.Count == 1)
           {
-            data = cSFDTVShow.Seasons[0].SeasonEpisodes[0];
+            data = cSFDTVShow.Seasons.First(x => x.SeasonEpisodes != null).SeasonEpisodes[0];
           }
 
           Application.Current.Dispatcher.Invoke(() =>
