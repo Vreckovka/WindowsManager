@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 using System.Windows.Input;
 using WindowsManager.Modularity;
 using WindowsManager.Views;
 using WindowsManager.Views.ProcessManagement;
 using VCore;
 using VCore.ItemsCollections;
-using VCore.Standard;
 using VCore.Standard.Helpers;
 using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
@@ -24,117 +24,24 @@ namespace WindowsManager.ViewModels.ProcessManagement
   {
     Name,
     SubCount,
-    Size
-  }
-
-  public class ProcessViewModel : ViewModel
-  {
-    public string Name { get; set; }
-
-    public Process Process { get; set; }
-
-
-    public double TotalMemorySize
-    {
-      get
-      {
-        return ChildProcesses.Sum(x => x.Process.WorkingSet64) / (1024 * 1024);
-      }
-    }
-
-    #region IsLoading
-
-    private bool isLoading;
-
-    public bool IsLoading
-    {
-      get { return isLoading; }
-      set
-      {
-        if (value != isLoading)
-        {
-          isLoading = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region ChildProcesses
-
-    private IEnumerable<ProcessViewModel> childProcesses;
-
-    public IEnumerable<ProcessViewModel> ChildProcesses
-    {
-      get { return childProcesses; }
-      set
-      {
-        if (value != childProcesses)
-        {
-          childProcesses = value;
-          RaisePropertyChanged();
-          RaisePropertyChanged(nameof(TotalMemorySize));
-        }
-      }
-    }
-
-    #endregion
-
-    #region CloseCommand
-
-    private ActionCommand closeCommand;
-
-    public ICommand CloseCommand
-    {
-      get
-      {
-        return closeCommand ??= new ActionCommand(OnClose);
-      }
-    }
-
-
-    private async void OnClose()
-    {
-      try
-      {
-        IsLoading = true;
-
-        await Task.Run(() =>
-        {
-          Process process = new Process();
-          process.StartInfo.FileName = "cmd.exe";
-          process.StartInfo.CreateNoWindow = true;
-          process.StartInfo.RedirectStandardInput = true;
-          process.StartInfo.RedirectStandardOutput = true;
-          process.StartInfo.UseShellExecute = false;
-          process.Start();
-
-          string command = $"taskkill /IM \"{Name}.exe\" -f";
-
-          process.StandardInput.WriteLine(command);
-          process.StandardInput.Flush();
-          process.StandardInput.Close();
-          process.WaitForExit();
-        });
-      }
-      finally
-      {
-        IsLoading = false;
-      }
-
-    }
-
-    #endregion
+    Size,
+    IsFavorite,
+    None
   }
 
 
   public class ProcessesViewModel : RegionViewModel<ProcessesView>
   {
+    private string[] favoriteProcesess = new string[] {};
     private Subject<string> subject = new Subject<string>();
+    private string favoritesPath = "\\Data\\favorites.txt";
+    private SerialDisposable serialDisposable;
+
     public ProcessesViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
-      SetSort(SortBy.SubCount);
+      serialDisposable = new SerialDisposable().DisposeWith(this);
+
+      SetSort(SortBy.Size);
 
       Observable.Interval(TimeSpan.FromSeconds(1)).ObserveOnDispatcher().Subscribe((x) => UpdateProcesses()).DisposeWith(this);
 
@@ -151,6 +58,10 @@ namespace WindowsManager.ViewModels.ProcessManagement
           MainProcessesFiltered = new RxObservableCollection<ProcessViewModel>(MainProcesses.Where(p => IsInSearch(p.Name,x)));
         }
       });
+
+      favoriteProcesess = JsonSerializer.Deserialize<string[]>(File.ReadAllText(favoritesPath));
+
+      SubscribeToFavorites();
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
@@ -225,6 +136,8 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
     private void SetSort(SortBy sortBy)
     {
+      MainProcesses.SortType = new Comparison<ProcessViewModel>((x,y) => 0);
+
       switch (sortBy)
       {
         case SortBy.Name:
@@ -235,6 +148,9 @@ namespace WindowsManager.ViewModels.ProcessManagement
           break;
         case SortBy.Size:
           MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.TotalMemorySize.CompareTo(x.TotalMemorySize));
+          break;
+        case SortBy.IsFavorite:
+          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.IsFavorite.CompareTo(x.IsFavorite));
           break;
         default:
           throw new ArgumentOutOfRangeException(nameof(sortBy), sortBy, null);
@@ -274,6 +190,12 @@ namespace WindowsManager.ViewModels.ProcessManagement
         MainProcessesFiltered.RemoveRange(removed);
       }
 
+      serialDisposable.Disposable?.Dispose();
+
+      MainProcesses.Where(x => favoriteProcesess.Contains(x.Name)).ForEach(x => x.IsFavorite = true);
+      
+      SubscribeToFavorites();
+
       existing.ForEach(x =>
     {
       var newVersion = allProcesessesList.Single(p => p.Name == x.Name);
@@ -286,6 +208,22 @@ namespace WindowsManager.ViewModels.ProcessManagement
     private bool IsInSearch(string name, string predicate)
     {
       return name.Similarity(predicate) > 0.8 || name.Contains(predicate) || predicate.Contains(name);
+    }
+
+    private void SubscribeToFavorites()
+    {
+      serialDisposable.Disposable = MainProcesses.ItemUpdated
+        .Where(x => x.EventArgs.PropertyName == nameof(ProcessViewModel.IsFavorite))
+        .Throttle(TimeSpan.FromSeconds(0.15))
+        .Subscribe(x => { SaveFavorites(); });
+    }
+
+    private void SaveFavorites()
+    {
+      favoriteProcesess = MainProcesses.Where(x => x.IsFavorite).Select(x => x.Name).ToArray();
+      Directory.CreateDirectory("Data");
+
+      File.WriteAllText(favoritesPath, JsonSerializer.Serialize(favoriteProcesess));
     }
   }
 }
