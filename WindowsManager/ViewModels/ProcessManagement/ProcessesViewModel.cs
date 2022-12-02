@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
   public class ProcessesViewModel : RegionViewModel<ProcessesView>
   {
-    private string[] favoriteProcesess = new string[] {};
+    private List<string> favoriteProcesess = new List<string>();
     private Subject<string> subject = new Subject<string>();
     private string favoritesPath = "\\Data\\favorites.txt";
     private SerialDisposable serialDisposable;
@@ -41,7 +42,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
     {
       serialDisposable = new SerialDisposable().DisposeWith(this);
 
-      SetSort(SortBy.Size);
+      SetSort(SortBy.IsFavorite);
 
       Observable.Interval(TimeSpan.FromSeconds(1)).ObserveOnDispatcher().Subscribe((x) => UpdateProcesses()).DisposeWith(this);
 
@@ -55,11 +56,11 @@ namespace WindowsManager.ViewModels.ProcessManagement
         }
         else
         {
-          MainProcessesFiltered = new RxObservableCollection<ProcessViewModel>(MainProcesses.Where(p => IsInSearch(p.Name,x)));
+          MainProcessesFiltered = new RxObservableCollection<ProcessViewModel>(MainProcesses.Where(p => IsInSearch(p.Name, x)));
         }
       });
 
-      favoriteProcesess = JsonSerializer.Deserialize<string[]>(File.ReadAllText(favoritesPath));
+      favoriteProcesess = JsonSerializer.Deserialize<List<string>>(File.ReadAllText(favoritesPath));
 
       SubscribeToFavorites();
     }
@@ -134,9 +135,11 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
     #region SetSort
 
+    private SortBy acutalSortBy;
     private void SetSort(SortBy sortBy)
     {
-      MainProcesses.SortType = new Comparison<ProcessViewModel>((x,y) => 0);
+      MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => 0);
+      acutalSortBy = sortBy;
 
       switch (sortBy)
       {
@@ -150,7 +153,11 @@ namespace WindowsManager.ViewModels.ProcessManagement
           MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.TotalMemorySize.CompareTo(x.TotalMemorySize));
           break;
         case SortBy.IsFavorite:
-          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.IsFavorite.CompareTo(x.IsFavorite));
+          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) =>
+          {
+            var result = y.IsFavorite.CompareTo(x.IsFavorite);
+            return result != 0 ? result : y.TotalMemorySize.CompareTo(x.TotalMemorySize);
+          });
           break;
         default:
           throw new ArgumentOutOfRangeException(nameof(sortBy), sortBy, null);
@@ -193,8 +200,9 @@ namespace WindowsManager.ViewModels.ProcessManagement
       serialDisposable.Disposable?.Dispose();
 
       MainProcesses.Where(x => favoriteProcesess.Contains(x.Name)).ForEach(x => x.IsFavorite = true);
-      
+
       SubscribeToFavorites();
+      SetSort(acutalSortBy);
 
       existing.ForEach(x =>
     {
@@ -220,10 +228,19 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
     private void SaveFavorites()
     {
-      favoriteProcesess = MainProcesses.Where(x => x.IsFavorite).Select(x => x.Name).ToArray();
-      Directory.CreateDirectory("Data");
+      var newFavoriteProcesess = favoriteProcesess.ToList();
 
-      File.WriteAllText(favoritesPath, JsonSerializer.Serialize(favoriteProcesess));
+      var existingFavoriteProcesses = MainProcesses.Where(x => favoriteProcesess.Contains(x.Name));
+
+      var removed = existingFavoriteProcesses.Where(x => !x.IsFavorite);
+      var added = MainProcesses.Where(x => x.IsFavorite).Where(x => !favoriteProcesess.Contains(x.Name));
+
+      newFavoriteProcesess.RemoveAll(x => removed.Select(x => x.Name).Contains(x));
+      newFavoriteProcesess.AddRange(added.Select(x => x.Name));
+      favoriteProcesess = newFavoriteProcesess;
+
+      Directory.CreateDirectory("Data");
+      File.WriteAllText(favoritesPath, JsonSerializer.Serialize(newFavoriteProcesess));
     }
   }
 }

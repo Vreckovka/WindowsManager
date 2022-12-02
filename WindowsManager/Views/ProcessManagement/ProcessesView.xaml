@@ -91,6 +91,7 @@
                                     <ColumnDefinition Width="250" />
                                     <ColumnDefinition Width="150" />
                                     <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="150" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid.Resources>
@@ -115,7 +116,6 @@
                                                      ToolTip="Favorite" />
 
 
-
                                 <TextBlock Grid.Column="1"
                                            FontSize="15"
                                            FontWeight="SemiBold"
@@ -136,7 +136,7 @@
                                            Text="{Binding TotalMemorySize, StringFormat={}{0:#  ###} M}" />
 
 
-                                <Grid Grid.Column="3">
+                                <Grid Grid.Column="4">
                                     <controls:PathButton HorizontalAlignment="Left"
                                                          Command="{Binding CloseCommand}"
                                                          Glyph="{StaticResource xmark-glyph}"
