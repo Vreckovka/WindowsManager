@@ -347,7 +347,7 @@ namespace WindowsManager.ViewModels.Home.Scrapers
             //var parameters = $"torrents.php?order=seeders&by=DESC&page={pageNumber}";
             var parameters = "top100?category=movies";
 
-            chromeDriverProvider.SafeNavigate($"{host}/{parameters}");
+            chromeDriverProvider.SafeNavigate($"{host}/{parameters}", out var redirectedUrl);
 
             html = chromeDriverProvider.ChromeDriver.PageSource;
 

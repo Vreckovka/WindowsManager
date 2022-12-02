@@ -1,10 +1,12 @@
 ﻿<UserControl x:Class="WindowsManager.Views.Home.HomeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:WindowsManager.Views.Behaviors"
              xmlns:controls="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              xmlns:controls2="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF"
              xmlns:converters="clr-namespace:VCore.WPF.Converters;assembly=VCore.WPF"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:soundManagement="clr-namespace:SoundManagement;assembly=SoundManagement"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -683,10 +685,18 @@
                                     </controls2:PathButton>
                                 </StackPanel>
 
-                                <Slider DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
-                                        Maximum="100"
-                                        Value="{Binding ActualVolume}" />
+                                <Border Padding="5,5"
+                                        Background="Transparent"
+                                        Cursor="Hand">
+                                    <Slider x:Name="slider_volume"
+                                            DataContext="{x:Static soundManagement:AudioDeviceManager.Instance}"
+                                            Maximum="100"
+                                            Value="{Binding ActualVolume}" />
 
+                                    <i:Interaction.Behaviors>
+                                        <behaviors:ContainerSliderValueBehavior Slider="{Binding ElementName=slider_volume}" />
+                                    </i:Interaction.Behaviors>
+                                </Border>
                             </StackPanel>
 
                         </StackPanel>
