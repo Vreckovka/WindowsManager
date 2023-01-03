@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Windows.Forms;
 using VCore.Standard;
 
 namespace WindowsManager.ViewModels.ScreenManagement.Rules
@@ -18,7 +19,6 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
 
     public string Name { get; }
 
-
     #region Value
 
     private object pValue;
@@ -30,14 +30,21 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
       {
         if (value != pValue)
         {
-          pValue = value;
+          if (value is ScreenViewModel screen)
+          {
+            pValue = screen.Model.DeviceName;
+          }
+          else
+          {
+            pValue = value;
+          }
+         
           RaisePropertyChanged();
         }
       }
     }
     
     #endregion
-
   }
 
   public enum IRuleAction
@@ -51,9 +58,9 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
   public interface IRule
   {
     string Name { get; }
-    IList<IRuleParameter> Parameters { get; }
+    IList<RuleParameterViewModel> Parameters { get; }
     IEnumerable<IRuleAction> Types { get; }
 
-    void Execute();
+    void Execute(ScreenViewModel[] screens);
   }
 }

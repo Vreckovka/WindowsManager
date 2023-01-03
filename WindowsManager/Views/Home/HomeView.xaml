@@ -231,8 +231,17 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <Grid Grid.Row="1">
+            <controls2:PathButton Grid.Row="0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  Background="#151515"
+                                  Command="{Binding RefreshTorrents}"
+                                  Glyph="{StaticResource arrows-rotate-glyph}"
+                                  IconMargin="0"
+                                  Style="{StaticResource FontAwesomeGlyphStyle}"
+                                  ToolTip="Refresh torrents" />
 
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition />

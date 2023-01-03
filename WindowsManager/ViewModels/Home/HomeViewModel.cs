@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.ScreenManagement;
@@ -19,6 +20,7 @@ using Logger;
 using TorrentAPI;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
+using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
@@ -74,14 +76,42 @@ namespace WindowsManager.ViewModels.Home
 
     #endregion
 
+
+    #region RefreshTorrents
+
+    private ActionCommand refreshTorrents;
+
+    public ICommand RefreshTorrents
+    {
+      get
+      {
+        return refreshTorrents ??= new ActionCommand(OnRefreshTorrents);
+      }
+    }
+
+
+    private void OnRefreshTorrents()
+    {
+      RargbtTorrrents = null;
+      torrentProvider.CancelDownloads();
+
+      LoadTorrents(true);
+    }
+
+    #endregion
+
     public override void Initialize()
     {
       base.Initialize();
 
+      LoadTorrents();
+    }
 
+    private void LoadTorrents(bool force = false)
+    {
       Task.Run(async () =>
       {
-        var torrents = await torrentProvider.LoadBestTorrents();
+        var torrents = await torrentProvider.LoadBestTorrents(force);
 
         if (torrents != null)
         {
@@ -89,6 +119,8 @@ namespace WindowsManager.ViewModels.Home
           {
             RargbtTorrrents = torrents;
           });
+
+          await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
         }
       });
     }

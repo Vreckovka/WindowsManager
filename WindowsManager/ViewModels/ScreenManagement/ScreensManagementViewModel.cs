@@ -34,12 +34,14 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
   public class ScreensManagementViewModel : RegionViewModel<ScreensManagementView>
   {
+    private readonly RuleManagerViewModel ruleManagerViewModel;
 
     private string filePath;
     private string folderPath = "Data\\Monitors";
 
-    public ScreensManagementViewModel(IRegionProvider regionProvider) : base(regionProvider)
+    public ScreensManagementViewModel(IRegionProvider regionProvider, RuleManagerViewModel ruleManagerViewModel) : base(regionProvider)
     {
+      this.ruleManagerViewModel = ruleManagerViewModel ?? throw new ArgumentNullException(nameof(ruleManagerViewModel));
       filePath = folderPath + "\\monitors_data.txt";
     }
 
@@ -196,8 +198,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       var screensArry = System.Windows.Forms.Screen.AllScreens.ToList();
 
-      var scresnsVm = screensArry.Select(x => new ScreenViewModel(x, folderPath + "\\Monitor_" + screensArry.IndexOf(x) + ".txt"));
+      var scresnsVm = screensArry.Select(x => new ScreenViewModel(x, folderPath + "\\Monitor_" + screensArry.IndexOf(x) + ".txt")).ToList();
 
+      ruleManagerViewModel.Screens = scresnsVm;
       Screens.AddRange(scresnsVm);
 
       if (Screens.Count > 0)
@@ -212,6 +215,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
       Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.TotalDimmTime)).Subscribe((x) => OnDimmedTimeChagend()).DisposeWith(this);
       Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.TotalSaved)).Subscribe((x) => OnSavedChagend()).DisposeWith(this);
 
+      Screens.ItemAdded.Subscribe(x => { ruleManagerViewModel.Screens = Screens.ToList(); }).DisposeWith(this);
+      Screens.ItemRemoved.Subscribe(x => { ruleManagerViewModel.Screens = Screens.ToList(); }).DisposeWith(this);
+
       foreach (var screen in Screens)
       {
         screen.Initialize();
@@ -220,6 +226,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
       UpdateActualScreen();
 
       Observable.Interval(TimeSpan.FromSeconds(0.2)).ObserveOnDispatcher().Subscribe(x => UpdateActualScreen()).DisposeWith(this);
+      Observable.Interval(TimeSpan.FromSeconds(1)).ObserveOnDispatcher().Subscribe(x => UpdateRules()).DisposeWith(this);
 
       Application.Current.MainWindow.Closing += MainWindow_Closing;
 
@@ -323,14 +330,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     {
       var isAllBlack = Screens.Where(x => x != actualScreen).All(x => x.IsDimmed);
 
-      IRuleAction rule = IRuleAction.ScreenDimmed;
-
-      if(!screenViewModel.IsDimmed)
-      {
-        rule = IRuleAction.ScreenUnDimmed;
-      }
-
-      screenViewModel.Rules.Where(x => x.Types.Contains(rule)).ForEach(x => x.Execute());
+      UpdateRules();
 
       if (isAllBlack)
       {
@@ -348,17 +348,21 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnActiveChanged(ScreenViewModel screenViewModel)
     {
-      screenViewModel.Rules.Where(x => x.Types.Contains(IRuleAction.ScreenActivated)).ForEach(x => x.Execute());
+      UpdateRules();
     }
 
     #endregion
+
+    private void UpdateRules()
+    {
+      ruleManagerViewModel.Rules.Where(x => x.Types.Contains(IRuleAction.ScreenActivated)).ForEach(x => x.Execute(Screens.ToArray()));
+    }
 
     #region UpdateActualScreen
 
     ScreenViewModel actualScreen;
     private void UpdateActualScreen()
     {
-
       var newAcutalScreen = GetCurrentScreen();
 
       if (newAcutalScreen != actualScreen)

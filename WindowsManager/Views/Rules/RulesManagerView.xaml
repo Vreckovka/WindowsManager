@@ -72,7 +72,25 @@
                         Content="{Binding ElementName=RuleTypes_ComboBox, Path=SelectedItem}"
                         ContentTemplateSelector="{StaticResource RuleTypeTemplateSelector}" />
 
-        <ListView Grid.Row="1" Grid.Column="1" />
+        <ListView Grid.Row="1"
+                  Grid.Column="1"
+                  ItemsSource="{Binding Rules}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}" />
+
+                        <ItemsControl ItemsSource="{Binding Parameters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Value}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <!--<StackPanel VerticalAlignment="Top" Orientation="Horizontal">
             <TextBlock Margin="10,0"

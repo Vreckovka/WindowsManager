@@ -16,5 +16,7 @@ namespace WindowsManager.ViewModels.Torrents
       params Filter[] filters);
 
     Task LoadCsfdForTorrents(IEnumerable<VideoRargbtTorrentViewModel> videoRargbtTorrentViewModels);
+
+    void CancelDownloads();
   }
 }

@@ -6,17 +6,17 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
   {
     public DimmWithScreenRule()
     {
-      Parameters = new List<IRuleParameter>()
+      Parameters = new List<RuleParameterViewModel>()
       {
         new RuleParameterViewModel(RuleNames.MainScreen),
         new RuleParameterViewModel(RuleNames.SecondaryScreen)
       };
     }
 
-    public override IEnumerable<IRuleAction> Types { get; } = new List<IRuleAction>() { IRuleAction.ScreenDimmed, IRuleAction.ScreenUnDimmed };
-    public override string Name { get; } = "Deactive with";
+    public override IEnumerable<IRuleAction> Types { get; set; } = new List<IRuleAction>() { IRuleAction.ScreenDimmed, IRuleAction.ScreenUnDimmed };
+    public override string Name { get; set; } = "Deactive with";
 
-    public override void Execute()
+    public override void Execute(ScreenViewModel[] screens)
     {
       if (Parameters.Count == 2)
       {

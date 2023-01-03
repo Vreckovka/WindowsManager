@@ -67,6 +67,10 @@ namespace WindowsManager.ViewModels.Torrents
 
         return bestTorrents;
       }
+      catch (Exception ex)
+      {
+        return null;
+      }
       finally 
       {
         semaphoreSlim.Release();
@@ -243,15 +247,26 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
+    public void CancelDownloads()
+    {
+      cancellationTokens.ForEach(x => x.Cancel());
+    }
+
     #region LoadCsfdForTorrents
 
+    private List<CancellationTokenSource> cancellationTokens = new List<CancellationTokenSource>();
     public async Task LoadCsfdForTorrents(IEnumerable<VideoRargbtTorrentViewModel> videoRargbtTorrentViewModels)
     {
+      CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+      CancelDownloads();
+      cancellationTokens.Add(cancellationTokenSource);
+
       foreach (VideoRargbtTorrentViewModel videoRargbt in videoRargbtTorrentViewModels)
       {
         try
         {
-          var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.VideoRargbtTorrent.ParsedName, CancellationToken.None);
+          var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.VideoRargbtTorrent.ParsedName, cancellationTokenSource.Token);
 
           if (data is CSFDTVShow cSFDTVShow &&
               cSFDTVShow.Seasons != null &&

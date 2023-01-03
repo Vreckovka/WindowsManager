@@ -14,7 +14,7 @@ namespace WindowsManager.TemplateSelectors
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-      if (item is ActivateWithScreensRule vm)
+      if (item is LinkMonitorsRule vm)
       {
         return ActivateWith;
       }

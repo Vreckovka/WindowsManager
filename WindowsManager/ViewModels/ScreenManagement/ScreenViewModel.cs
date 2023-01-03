@@ -361,11 +361,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #endregion
 
-
     [JsonIgnore]
     public override Screen Model { get => base.Model; set => base.Model = value; }
-
-    public IList<IRule> Rules { get; set; } = new List<IRule>();
 
     #endregion
 
