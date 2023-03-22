@@ -20,6 +20,7 @@ using Logger;
 using TorrentAPI;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
+using VCore.WPF;
 using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
@@ -31,6 +32,7 @@ namespace WindowsManager.ViewModels.Home
   public class HomeViewModel : RegionViewModel<HomeView>
   {
     private readonly ILogger logger;
+    private readonly TorrentsViewModel torrentsViewModel;
     private readonly ITorrentProvider torrentProvider;
 
 
@@ -39,14 +41,23 @@ namespace WindowsManager.ViewModels.Home
       ILogger logger,
       ScreensManagementViewModel screensManagementViewModel,
       SoundManagerViewModel soundManagerViewModel,
+      TorrentsViewModel torrentsViewModel,
         ITorrentProvider torrentProvider
      ) : base(regionProvider)
     {
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+      this.torrentsViewModel = torrentsViewModel ?? throw new ArgumentNullException(nameof(torrentsViewModel));
       this.torrentProvider = torrentProvider ?? throw new ArgumentNullException(nameof(torrentProvider));
 
       ScreensManagementViewModel = screensManagementViewModel;
       SoundManagerViewModel = soundManagerViewModel;
+
+      torrentsViewModel.Torrents.CollectionChanged += Torrents_CollectionChanged;
+    }
+
+    private void Torrents_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+      VSynchronizationContext.PostOnUIThread(() => { RargbtTorrrents = torrentsViewModel.Torrents; });
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
@@ -54,7 +65,6 @@ namespace WindowsManager.ViewModels.Home
     public override string Header => "Home";
 
     public ScreensManagementViewModel ScreensManagementViewModel { get; }
-
     public SoundManagerViewModel SoundManagerViewModel { get; }
 
     #region RargbtTorrrents
@@ -93,38 +103,29 @@ namespace WindowsManager.ViewModels.Home
     private void OnRefreshTorrents()
     {
       RargbtTorrrents = null;
-      torrentProvider.CancelDownloads();
-
-      LoadTorrents(true);
+      torrentsViewModel.LoadTorrents(true);
     }
 
     #endregion
 
-    public override void Initialize()
-    {
-      base.Initialize();
+    #region RemoveSoundItem
 
-      LoadTorrents();
-    }
+    private ActionCommand<BlankSoundDeviceViewModel> removeSoundItem;
 
-    private void LoadTorrents(bool force = false)
+    public ICommand RemoveSoundItem
     {
-      Task.Run(async () =>
+      get
       {
-        var torrents = await torrentProvider.LoadBestTorrents(force);
-
-        if (torrents != null)
-        {
-          Application.Current.Dispatcher.Invoke(() =>
-          {
-            RargbtTorrrents = torrents;
-          });
-
-          await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
-        }
-      });
+        return removeSoundItem ??= new ActionCommand<BlankSoundDeviceViewModel>(OnRemoveSoundItem);
+      }
     }
 
-  }
 
+    #endregion
+
+    private void OnRemoveSoundItem(BlankSoundDeviceViewModel blankSoundDeviceViewModel)
+    {
+      SoundManagerViewModel?.RemoveKnownDevice(blankSoundDeviceViewModel);
+    }
+  }
 }

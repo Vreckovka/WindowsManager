@@ -26,7 +26,6 @@ using VCore.WPF.ViewModels.Navigation;
 
 namespace WindowsManager.ViewModels
 {
-  //TODO: Monitor group - linkovat monitory (Predator ak bol aktivny tak nevyplne ten 19')
   //TODO: Fast panel (horiaci tachometer iconka) 
   public class WindowManagerMainWindowViewModel : BaseMainWindowViewModel
   {
@@ -51,6 +50,9 @@ namespace WindowsManager.ViewModels
       ScreensManagementViewModel = screensManagementViewModel;
       TurnOffViewModel = turnOffViewModel;
       SoundManagerViewModel = soundManagerViewModel;
+
+      var timezime = "Pacific Standard Time";
+      Console.WriteLine(timezime);
     }
 
     #endregion

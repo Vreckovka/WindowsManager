@@ -752,7 +752,7 @@
                                                                               Style="{StaticResource link-horizontal-slash}"
                                                                               ToolTip="DISABLE/ENABLE Automatic connect (When device is connect is set as DEFAULT)" />
 
-                                                        <controls2:PathButton Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveItem}"
+                                                        <controls2:PathButton Command="{Binding RelativeSource={RelativeSource AncestorType=ListView, Mode=FindAncestor}, Path=DataContext.RemoveSoundItem}"
                                                                               CommandParameter="{Binding}"
                                                                               IconHeight="18"
                                                                               IconHoverColor="{StaticResource DefaultRedColor}"

@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChromeDriverScrapper", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TorrentAPI", "D:\Aplikacie\WindowsManager\csharp-torrentapi-master\TorrentAPI.csproj", "{EDEA20C5-8FFB-4761-9E17-FA52E8333301}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VPlayer.Core", "..\VPlayer\VPlayer.Core\VPlayer.Core.csproj", "{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +141,18 @@ Global
 		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x64.Build.0 = Release|Any CPU
 		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x86.ActiveCfg = Release|Any CPU
 		{EDEA20C5-8FFB-4761-9E17-FA52E8333301}.Release|x86.Build.0 = Release|Any CPU
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|x64.ActiveCfg = Debug|x64
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|x64.Build.0 = Debug|x64
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|x86.ActiveCfg = Debug|x86
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Debug|x86.Build.0 = Debug|x86
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|x64.ActiveCfg = Release|x64
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|x64.Build.0 = Release|x64
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|x86.ActiveCfg = Release|x86
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,6 +166,7 @@ Global
 		{F915254B-8B21-485F-9F97-9519B577A013} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 		{0118000F-7D9F-4387-A0D6-FBF176911F29} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 		{60EAB032-DF01-4C55-8C56-47051D04AEC9} = {6C1F2D29-2698-40B8-9E57-50286E168758}
+		{77908EF8-02FF-4A72-9EC4-DB1782CD0B6A} = {6C1F2D29-2698-40B8-9E57-50286E168758}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9EF278F8-352D-46D0-AB54-E86C83C78EB7}

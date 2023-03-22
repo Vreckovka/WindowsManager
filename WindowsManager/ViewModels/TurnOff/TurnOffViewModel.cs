@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Timers;
 using System.Windows;
@@ -20,6 +21,7 @@ namespace WindowsManager.ViewModels.TurnOff
     #region Fields
 
     private Timer timer = new Timer();
+    private string fileName = "turnOff.txt";
 
     #endregion
 
@@ -163,6 +165,7 @@ namespace WindowsManager.ViewModels.TurnOff
           TimeLeft = new TimeSpan(SelectedHours, SelectedMinutes, 0);
         }
 
+        SaveTime();
         timer.Enabled = true;
         IsPaused = false;
         CanChangedTime = false;
@@ -216,7 +219,7 @@ namespace WindowsManager.ViewModels.TurnOff
     #endregion
 
     #region PauseCommand
-   
+
     private ActionCommand pauseCommand;
 
     public ICommand PauseCommand
@@ -253,9 +256,29 @@ namespace WindowsManager.ViewModels.TurnOff
 
       timer.Elapsed += OnTimedEvent;
       timer.Interval = 1000;
+      LoadTime();
     }
 
     #endregion
+
+    private void LoadTime()
+    {
+      if (File.Exists(fileName))
+      {
+        var time = File.ReadAllText(fileName)?.Split(":");
+
+        if (time != null && time.Length > 1)
+        {
+          SelectedHours = int.Parse(time[0]);
+          SelectedMinutes = int.Parse(time[1]);
+        }
+      }
+    }
+
+    private void SaveTime()
+    {
+      File.WriteAllText(fileName, $"{SelectedHours}:{SelectedMinutes}");
+    }
 
     #region InitilizeTimeCollections
 
@@ -284,7 +307,7 @@ namespace WindowsManager.ViewModels.TurnOff
 
     private void OnTimedEvent(object source, ElapsedEventArgs e)
     {
-      if(TimeLeft != null)
+      if (TimeLeft != null)
       {
         TimeLeft = new TimeSpan(TimeLeft.Value.Hours, TimeLeft.Value.Minutes, TimeLeft.Value.Seconds - 1);
 
@@ -340,6 +363,6 @@ namespace WindowsManager.ViewModels.TurnOff
 
     #endregion
 
-    
+
   }
 }

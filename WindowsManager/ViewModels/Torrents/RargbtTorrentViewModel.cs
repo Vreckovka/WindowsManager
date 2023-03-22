@@ -6,6 +6,7 @@ using TorrentAPI.Domain;
 using VCore.Standard;
 using VCore.WPF.Misc;
 using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
+using VPlayer.Core.ViewModels.TvShows;
 
 namespace WindowsManager.ViewModels.Torrents
 {
@@ -73,11 +74,11 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
-    #region ItemExtraData
+    #region CsfdData
 
-    private object itemExtraData;
+    private CSFDItemViewModel itemExtraData;
 
-    public object ItemExtraData
+    public CSFDItemViewModel ItemExtraData
     {
       get { return itemExtraData; }
       set
@@ -178,32 +179,6 @@ namespace WindowsManager.ViewModels.Torrents
     {
       Name = model.ParsedName;
     }
-
-    #region OpenInBrowser
-
-    private ActionCommand openCsfd;
-    public ICommand OpenCsfd
-    {
-      get
-      {
-        return openCsfd ??= new ActionCommand(OnOpenCsfd);
-      }
-    }
-
-    private void OnOpenCsfd()
-    {
-      if (ItemExtraData is CSFDItem cSFDItem && !string.IsNullOrEmpty(cSFDItem.Url))
-      {
-        Process.Start(new ProcessStartInfo()
-        {
-          FileName = cSFDItem.Url,
-          UseShellExecute = true,
-          Verb = "open"
-        });
-      }
-    }
-
-    #endregion
 
     public VideoRargbtTorrent VideoRargbtTorrent
     {

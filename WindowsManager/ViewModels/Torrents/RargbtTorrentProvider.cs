@@ -11,6 +11,7 @@ using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
 using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
+using VPlayer.Core.ViewModels.TvShows;
 
 namespace WindowsManager.ViewModels.Torrents
 {
@@ -278,7 +279,7 @@ namespace WindowsManager.ViewModels.Torrents
 
           Application.Current.Dispatcher.Invoke(() =>
           {
-            videoRargbt.ItemExtraData = data;
+            videoRargbt.ItemExtraData = viewModelsFactory.Create<CSFDItemViewModel>(data);
           });
         }
         catch (Exception ex)

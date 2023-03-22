@@ -38,6 +38,7 @@ namespace WindowsManager
       Kernel.Bind<ScreensManagementViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<SoundManagerViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<RuleManagerViewModel>().ToSelf().InSingletonScope();
+      Kernel.Bind<TorrentsViewModel>().ToSelf().InSingletonScope();
 
       Kernel.Bind<IRarbgApiClient>().To<RarbgApiClient>().InSingletonScope()
         .WithConstructorArgument("baseUrl", "https://torrentapi.org/pubapi_v2.php")

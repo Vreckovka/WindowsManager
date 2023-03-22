@@ -8,6 +8,7 @@ using WindowsManager.Views;
 using VCore.ItemsCollections;
 using VCore.Standard.Factories.ViewModels;
 using VCore.Standard.Helpers;
+using VCore.WPF;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
 
@@ -33,13 +34,26 @@ namespace WindowsManager.ViewModels.Torrents
     {
       base.Initialize();
 
+      LoadTorrents();
+    }
+
+    public void LoadTorrents(bool clear = false)
+    {
       Task.Run(async () =>
       {
+        if (clear)
+        {
+          VSynchronizationContext.PostOnUIThread(() =>
+          {
+            Torrents.Clear();
+          });
+        }
+
         var torrents = (await torrentProvider.LoadBestTorrents())?.ToList();
 
         if (torrents != null)
         {
-          Application.Current.Dispatcher.Invoke(() =>
+          VSynchronizationContext.PostOnUIThread(() =>
           {
             Torrents.AddRange(torrents);
           });

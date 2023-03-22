@@ -2,17 +2,21 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF"
+        xmlns:converters="clr-namespace:VPlayer.Home.Converters;assembly=VCore.WPF"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:WindowsManager.Windows"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         d:Height="1080"
         d:Width="1920"
+        AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="NoResize"
         WindowStyle="None"
         mc:Ignorable="d">
     <Grid Name="GridParent"
           Background="Black"
-          MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+          MouseLeftButtonDown="Grid_MouseLeftButtonDown"
+          Opacity="{Binding DimmerOpacity}">
         <controls:PathButton HorizontalAlignment="Center"
                              VerticalAlignment="Center"
                              FontSize="17"
@@ -40,7 +44,7 @@
                                             <RowDefinition />
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock HorizontalAlignment="Center" Text="Double click for turn" />
+                                        <TextBlock HorizontalAlignment="Center" Text="Double click for turn on" />
                                         <TextBlock Grid.Row="1"
                                                    HorizontalAlignment="Center"
                                                    Text="(Dvojklik pre zapnutie)" />
@@ -56,6 +60,38 @@
             </controls:PathButton.Style>
         </controls:PathButton>
 
+        <Grid Margin="0,0,150,105"
+              HorizontalAlignment="Right"
+              VerticalAlignment="Bottom">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
+            <Slider Width="150"
+                    Height="2"
+                    Background="#ccc"
+                    Maximum="1"
+                    Minimum="0.3"
+                    SmallChange="0.1"
+                    Value="{Binding DimmerOpacity}" />
+
+            <TextBlock Grid.Row="1"
+                       HorizontalAlignment="Center"
+                       FontWeight="SemiBold"
+                       Foreground="#757575"
+                       Text="{Binding DimmerOpacity, Converter={converters:MultiplyValueConverter}, ConverterParameter=100, StringFormat={}{0:N0}}" />
+
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Opacity" Value="0.1" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=GridParent, Path=IsMouseOver}" Value="true">
+                            <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+        </Grid>
     </Grid>
 </Window>

@@ -7,6 +7,8 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -26,7 +28,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private string filePath;
 
-    private ActionTimer automaticTurnOffTimer;
+    public ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
 
     public ScreenViewModel() : base(null)
@@ -62,9 +64,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
           totalDimmTime = value;
           TotalDimmTimeTicks = totalDimmTime.Ticks;
 
-          int totalSeconds = (int) totalDimmTime.TotalSeconds;
+          int totalSeconds = (int)totalDimmTime.TotalSeconds;
 
-          if (totalSeconds % 5 == 0 && totalSeconds != lastSavedTime)
+          if (totalSeconds % 30 == 0 && totalSeconds != lastSavedTime)
           {
             Save();
             lastSavedTime = totalSeconds;
@@ -316,7 +318,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #endregion
 
     #region TotalSaved
-    
+
     [JsonIgnore]
     public double TotalSaved
     {
@@ -363,6 +365,25 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     [JsonIgnore]
     public override Screen Model { get => base.Model; set => base.Model = value; }
+
+    #region DimmerOpacity
+
+    private double dimmerOpacity = 1;
+
+    public double DimmerOpacity
+    {
+      get { return dimmerOpacity; }
+      set
+      {
+        if (value != dimmerOpacity)
+        {
+          dimmerOpacity = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
 
     #endregion
 
@@ -436,7 +457,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
         Width = 100,
         Height = 100,
         ShowInTaskbar = false,
-        Topmost = true
+        Topmost = true,
+        DataContext = this
       };
 
       dimmer.Left = Model.Bounds.X + (Model.Bounds.Width / 2) - (dimmer.Width / 2);
@@ -627,37 +649,45 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #region Save
 
+    private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     private void Save()
     {
-      if (string.IsNullOrEmpty(filePath))
+      Task.Run(async () =>
       {
-        return;
-      }
-
-      var fileExists = File.Exists(filePath);
-
-      if ((fileExists && wasLoaded ) || !fileExists)
-      {
-        var json = JsonSerializer.Serialize(this);
-
-        if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
+        try
         {
-          filePath.EnsureDirectoryExists();
+          await semaphoreSlim.WaitAsync();
 
-          File.WriteAllText(filePath, json);
-
-          //Check save
-          try
+          if (string.IsNullOrEmpty(filePath))
           {
-            var data = File.ReadAllText(filePath);
-            var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
+            return;
           }
-          catch (JsonException)
+
+          var fileExists = File.Exists(filePath);
+
+          if ((fileExists && wasLoaded) || !fileExists)
           {
-            Save();
+            var json = JsonSerializer.Serialize(this);
+
+            if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
+            {
+              filePath.EnsureDirectoryExists();
+
+              var serialized = JsonSerializer.Deserialize<ScreenViewModel>(json);
+
+              if(serialized != null)
+              {
+                File.WriteAllText(filePath, json);
+              }
+            }
           }
         }
-      }
+        finally
+        {
+          semaphoreSlim.Release();
+        }
+      });
+
     }
 
     #endregion
@@ -707,7 +737,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         }
         catch (JsonException ex)
         {
-        } 
+        }
       }
     }
 

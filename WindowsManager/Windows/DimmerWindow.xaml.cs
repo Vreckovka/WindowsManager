@@ -9,13 +9,14 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using VCore.Standard.Modularity.Interfaces;
 
 namespace WindowsManager.Windows
 {
   /// <summary>
   /// Interaction logic for DimmerWindow.xaml
   /// </summary>
-  public partial class DimmerWindow : Window
+  public partial class DimmerWindow : Window, IView
   {
     public DimmerWindow()
     {

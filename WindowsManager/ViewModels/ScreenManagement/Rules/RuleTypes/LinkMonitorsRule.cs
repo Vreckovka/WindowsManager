@@ -39,12 +39,14 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
         {
           if (!mainScreen.IsDimmed)
           {
-            //if (otherScreen.IsDimmed)
-            //{
-            //  otherScreen.DimmOrUnDimm();
-            //}
-
-            otherScreen.StopTurnOffTimer();
+            if (!otherScreen.IsDimmed)
+            {
+              otherScreen.StopTurnOffTimer();
+            }
+            else
+            {
+              otherScreen.automaticTurnOffTimer.StopTimer();
+            }
           }
         }
         else if (otherScreen.IsActive)
