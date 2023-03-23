@@ -71,7 +71,7 @@ namespace WindowsManager.ViewModels.TurnOff
         if (value != selectedHours)
         {
           selectedHours = value;
-          startCommand.RaiseCanExecuteChanged();
+          startCommand?.RaiseCanExecuteChanged();
           RaisePropertyChanged();
         }
       }
@@ -91,7 +91,7 @@ namespace WindowsManager.ViewModels.TurnOff
         if (value != selectedMinutes)
         {
           selectedMinutes = value;
-          startCommand.RaiseCanExecuteChanged();
+          startCommand?.RaiseCanExecuteChanged();
           RaisePropertyChanged();
         }
       }

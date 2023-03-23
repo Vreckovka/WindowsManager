@@ -43,6 +43,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
     {
       this.ruleManagerViewModel = ruleManagerViewModel ?? throw new ArgumentNullException(nameof(ruleManagerViewModel));
       filePath = folderPath + "\\monitors_data.txt";
+
+      ruleManagerViewModel.Rules.ItemUpdated
+        .Where(x => x.EventArgs.PropertyName == nameof(RuleViewModel.IsRuleEnabled))
+        .Where(x => x.Sender is RuleViewModel rule && !rule.IsRuleEnabled)
+        .Subscribe(x =>
+        {
+          ((RuleViewModel)x.Sender)?.Model.Revert(Screens.ToArray());
+          ruleManagerViewModel.SaveRules();
+        });
     }
 
     #region Properties
@@ -355,7 +364,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void UpdateRules()
     {
-      ruleManagerViewModel.Rules.Where(x => x.Types.Contains(IRuleAction.ScreenActivated)).ForEach(x => x.Execute(Screens.ToArray()));
+      ruleManagerViewModel.Rules
+        .Where(x => x.Model.Types.Contains(IRuleAction.ScreenActivated))
+        .Where(x => x.IsRuleEnabled)
+        .ForEach(x => x.Model.Execute(Screens.ToArray()));
     }
 
     #region UpdateActualScreen

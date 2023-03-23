@@ -60,7 +60,10 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
     string Name { get; }
     IList<RuleParameterViewModel> Parameters { get; }
     IEnumerable<IRuleAction> Types { get; }
+    bool IsRuleEnabled { get; set; }
+
 
     void Execute(ScreenViewModel[] screens);
+    void Revert(ScreenViewModel[] screens);
   }
 }

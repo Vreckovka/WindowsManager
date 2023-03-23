@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Input;
@@ -11,6 +12,8 @@ using WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes;
 using WindowsManager.Views;
 using WindowsManager.Views.Rules;
 using VCore;
+using VCore.ItemsCollections;
+using VCore.Standard;
 using VCore.Standard.Helpers;
 using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
@@ -18,11 +21,41 @@ using VCore.WPF.ViewModels;
 
 namespace WindowsManager.ViewModels.ScreenManagement.Rules
 {
+  public class RuleViewModel : ViewModel<IRule>
+  {
+    public RuleViewModel(IRule model) : base(model)
+    {
+    }
+
+
+
+    #region IsRuleEnabled
+
+    public bool IsRuleEnabled
+    {
+      get { return Model.IsRuleEnabled; }
+      set
+      {
+        if (value != Model.IsRuleEnabled)
+        {
+          Model.IsRuleEnabled = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+
+
+  }
+
   public class RuleManagerViewModel : RegionViewModel<RulesManagerView>
   {
     private string filePath = "Data\\rules.txt";
     public RuleManagerViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
+     
     }
 
     #region Properties
@@ -32,9 +65,9 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
 
     #region Rules
 
-    private ObservableCollection<IRule> rules = new ObservableCollection<IRule>();
+    private RxObservableCollection<RuleViewModel> rules = new RxObservableCollection<RuleViewModel>();
 
-    public ObservableCollection<IRule> Rules
+    public RxObservableCollection<RuleViewModel> Rules
     {
       get { return rules; }
       private set
@@ -67,6 +100,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
     }
 
     #endregion
+
     public IEnumerable<IRule> RuleTypes
     {
       get
@@ -85,6 +119,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
     #region AddCommand
 
     private ActionCommand<IRule> addCommand;
+
     public ICommand AddCommand
     {
       get
@@ -95,7 +130,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
 
     private void OnAdd(IRule rule)
     {
-      Rules.Add(rule);
+      Rules.Add(new RuleViewModel(rule));
 
       SaveRules();
     }
@@ -113,11 +148,11 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
       LoadRules();
     }
 
-    private void SaveRules()
+    public void SaveRules()
     {
       filePath.EnsureDirectoryExists();
 
-      File.WriteAllText(filePath, JsonSerializer.Serialize(Rules.Select(x => (Rule)x)));
+      File.WriteAllText(filePath, JsonSerializer.Serialize(Rules.Select(x => (Rule)x.Model)));
 
     }
 
@@ -137,13 +172,14 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
             newOne.Name = x.Name;
             newOne.Parameters = x.Parameters;
             newOne.Types = x.Types;
+            newOne.IsRuleEnabled = x.IsRuleEnabled;
 
             newOne.Parameters.ForEach(par => par.Value = par.Value.ToString());
 
             return newOne;
-          });
+          }).Select(x => new RuleViewModel(x));
 
-          Rules = new ObservableCollection<IRule>(linkMonitorsRules);
+          Rules = new RxObservableCollection<RuleViewModel>(linkMonitorsRules);
         }
       }
     }

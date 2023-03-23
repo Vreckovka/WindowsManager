@@ -32,5 +32,10 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
         }
       }
     }
+
+    public override void Revert(ScreenViewModel[] screens)
+    {
+      //TODO
+    }
   }
 }

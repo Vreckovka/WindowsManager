@@ -144,6 +144,8 @@ namespace WindowsManager.ViewModels
 
     private void SoundDevices_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+      AudioDeviceManager.Instance.UpdateIndexes();
+
       if (e.NewItems != null)
       {
         foreach (var device in e.NewItems.OfType<SoundDevice>())
@@ -152,9 +154,8 @@ namespace WindowsManager.ViewModels
 
           if (AudioDeviceManager.Instance.WasLoaded && blankDevice != null && !blankDevice.DisableAutomaticConnect)
           {
-            AudioDeviceManager.Instance.SetSelectedSoundDevice(device, false);
+            AudioDeviceManager.Instance.SetSelectedSoundDevice(AudioDeviceManager.Instance.SoundDevices.SingleOrDefault(y => y.Description == blankDevice.Model.Description), false);
           }
-
 
           var newlyConnectedDevice = KnownSoundDevices.SingleOrDefault(x => x.Model.Description == device.Description);
 
@@ -226,8 +227,6 @@ namespace WindowsManager.ViewModels
     private void OnSelectedSoundDevice(SoundDevice soundDevice)
     {
       DefaultDevice = new SoundDeviceViewModel(soundDevice);
-
-
     }
 
     #endregion

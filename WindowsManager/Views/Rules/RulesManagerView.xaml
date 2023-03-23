@@ -78,16 +78,21 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
-                        <TextBlock Text="{Binding Name}" />
+                        <StackPanel DataContext="{Binding Model}">
+                            <TextBlock Text="{Binding Name}" />
 
-                        <ItemsControl ItemsSource="{Binding Parameters}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Value}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                            <ItemsControl ItemsSource="{Binding Parameters}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Value}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <CheckBox Content="Is Enabled" IsChecked="{Binding IsRuleEnabled}" />
                     </StackPanel>
+
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
