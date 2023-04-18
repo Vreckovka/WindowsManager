@@ -11,6 +11,7 @@ using WindowsManager.ViewModels;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.ViewModels.ScreenManagement.Rules;
 using WindowsManager.ViewModels.Torrents;
+using WindowsManager.ViewModels.TurnOff;
 using Logger;
 using Ninject;
 using Prism.Ioc;
@@ -39,6 +40,7 @@ namespace WindowsManager
       Kernel.Bind<SoundManagerViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<RuleManagerViewModel>().ToSelf().InSingletonScope();
       Kernel.Bind<TorrentsViewModel>().ToSelf().InSingletonScope();
+      Kernel.Bind<TurnOffViewModel>().ToSelf().InSingletonScope();
 
       Kernel.Bind<IRarbgApiClient>().To<RarbgApiClient>().InSingletonScope()
         .WithConstructorArgument("baseUrl", "https://torrentapi.org/pubapi_v2.php")

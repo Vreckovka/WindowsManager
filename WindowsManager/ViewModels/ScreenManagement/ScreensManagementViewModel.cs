@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using WindowsManager.Modularity;
 using WindowsManager.ViewModels.ScreenManagement.Rules;
+using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Views;
 using VCore;
 using VCore.ItemsCollections;
@@ -35,13 +36,18 @@ namespace WindowsManager.ViewModels.ScreenManagement
   public class ScreensManagementViewModel : RegionViewModel<ScreensManagementView>
   {
     private readonly RuleManagerViewModel ruleManagerViewModel;
+    private readonly TurnOffViewModel turnOffViewModel;
 
     private string filePath;
     private string folderPath = "Data\\Monitors";
 
-    public ScreensManagementViewModel(IRegionProvider regionProvider, RuleManagerViewModel ruleManagerViewModel) : base(regionProvider)
+    public ScreensManagementViewModel(
+      IRegionProvider regionProvider, 
+      RuleManagerViewModel ruleManagerViewModel,
+      TurnOffViewModel turnOffViewModel) : base(regionProvider)
     {
       this.ruleManagerViewModel = ruleManagerViewModel ?? throw new ArgumentNullException(nameof(ruleManagerViewModel));
+      this.turnOffViewModel = turnOffViewModel ?? throw new ArgumentNullException(nameof(turnOffViewModel));
       filePath = folderPath + "\\monitors_data.txt";
 
       ruleManagerViewModel.Rules.ItemUpdated
@@ -93,6 +99,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
+
 
     public enum MonitorState
     {
@@ -207,7 +214,11 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       var screensArry = System.Windows.Forms.Screen.AllScreens.ToList();
 
-      var scresnsVm = screensArry.Select(x => new ScreenViewModel(x, folderPath + "\\Monitor_" + screensArry.IndexOf(x) + ".txt")).ToList();
+      var scresnsVm = screensArry.Select(x => 
+        new ScreenViewModel(new ScreenModel()
+        {
+          Screen = x
+        }, folderPath + "\\Monitor_" + screensArry.IndexOf(x) + ".txt", turnOffViewModel)).ToList();
 
       ruleManagerViewModel.Screens = scresnsVm;
       Screens.AddRange(scresnsVm);
@@ -401,10 +412,12 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       foreach (var screen in Screens)
       {
-        double topLeftX = screen.Model.Bounds.X;
-        double topLeftY = screen.Model.Bounds.Y;
-        double bottomRightX = screen.Model.Bounds.X + screen.Model.Bounds.Width;
-        double bottomRightY = screen.Model.Bounds.Y + screen.Model.Bounds.Height;
+        var screenModel = screen.Model.Screen;
+
+        double topLeftX = screenModel.Bounds.X;
+        double topLeftY = screenModel.Bounds.Y;
+        double bottomRightX = screenModel.Bounds.X + screenModel.Bounds.Width;
+        double bottomRightY = screenModel.Bounds.Y + screenModel.Bounds.Height;
 
         if (topLeftX <= mousePostion.X && mousePostion.X <= bottomRightX && topLeftY <= mousePostion.Y && mousePostion.Y <= bottomRightY)
         {

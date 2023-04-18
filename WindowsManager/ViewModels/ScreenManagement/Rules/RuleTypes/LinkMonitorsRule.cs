@@ -29,8 +29,8 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
     {
       if (Parameters.Count == 2)
       {
-        var mainScreen = screens.FirstOrDefault(x => x.Model.DeviceName == (string)Parameters[0].Value);
-        var otherScreen = screens.FirstOrDefault(x => x.Model.DeviceName == (string)Parameters[1].Value);
+        var mainScreen = screens.FirstOrDefault(x => x.Name == (string)Parameters[0].Value);
+        var otherScreen = screens.FirstOrDefault(x => x.Name == (string)Parameters[1].Value);
 
         if (mainScreen == null || otherScreen == null)
           return;
@@ -68,8 +68,8 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules.RuleTypes
     {
       if (Parameters.Count == 2)
       {
-        var mainScreen = screens.FirstOrDefault(x => x.Model.DeviceName == (string)Parameters[0].Value);
-        var otherScreen = screens.FirstOrDefault(x => x.Model.DeviceName == (string)Parameters[1].Value);
+        var mainScreen = screens.FirstOrDefault(x => x.Name == (string)Parameters[0].Value);
+        var otherScreen = screens.FirstOrDefault(x => x.Name == (string)Parameters[1].Value);
 
         if (mainScreen == null || otherScreen == null)
           return;

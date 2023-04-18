@@ -276,9 +276,9 @@
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
                                                Foreground="#ccc">
-                                        <Run Text="{Binding Model.Bounds.Width}" />
+                                        <Run Text="{Binding Model.Screen.Bounds.Width}" />
                                         <Run Text="x" />
-                                        <Run Text="{Binding Model.Bounds.Height}" />
+                                        <Run Text="{Binding Model.Screen.Bounds.Height}" />
                                     </TextBlock>
 
                                     <Border Grid.Row="2"
@@ -547,7 +547,7 @@
 
                         <TextBox Grid.Row="1"
                                  Grid.Column="2"
-                                 Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TurnOffLimit, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                 Text="{Binding ElementName=monitorsListView, Path=SelectedItem.TurnOffValue, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
 
 
                         <controls1:PathButton Grid.Row="1"

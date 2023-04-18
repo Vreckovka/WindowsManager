@@ -30,6 +30,11 @@ namespace WindowsManager.ViewModels.TurnOff
     public TurnOffViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
       InitilizeTimeCollections();
+
+      //Init commands
+      var cmd = PauseCommand;
+      var cmd1 = StartCommand;
+      var cmd2 = StopCommand;
     }
 
     #endregion

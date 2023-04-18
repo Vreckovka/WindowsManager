@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:VCore.WPF.Controls;assembly=VCore.WPF"
         xmlns:converters="clr-namespace:VPlayer.Home.Converters;assembly=VCore.WPF"
+        xmlns:converters1="clr-namespace:VCore.WPF.Converters;assembly=VCore.WPF"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:WindowsManager.Windows"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -53,9 +54,11 @@
                             </Setter>
                             <Setter Property="ForegroundDefaultColor" Value="White" />
                         </DataTrigger>
+
+                        <DataTrigger Binding="{Binding DimmerOpacity, Converter={converters1:IsLesserConverter}, ConverterParameter=0.97}" Value="true">
+                            <Setter Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
                     </Style.Triggers>
-
-
                 </Style>
             </controls:PathButton.Style>
         </controls:PathButton>
@@ -65,7 +68,8 @@
               VerticalAlignment="Bottom">
             <Grid.RowDefinitions>
                 <RowDefinition />
-                <RowDefinition />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
 
             <Slider Width="150"
@@ -81,6 +85,25 @@
                        FontWeight="SemiBold"
                        Foreground="#757575"
                        Text="{Binding DimmerOpacity, Converter={converters:MultiplyValueConverter}, ConverterParameter=100, StringFormat={}{0:N0}}" />
+
+            <TextBlock Grid.Row="2"
+                       Margin="0,20,0,0"
+                       HorizontalAlignment="Center"
+                       DataContext="{Binding TurnOffViewModel}"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource YellowBrush}"
+                       Text="{Binding TimeLeft}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPaused}" Value="true">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <Grid.Style>
                 <Style TargetType="Grid">

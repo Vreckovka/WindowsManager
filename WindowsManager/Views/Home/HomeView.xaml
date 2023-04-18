@@ -83,11 +83,11 @@
 
 
                                                 <Grid>
-                                                    <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
+                                                    <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.Model.ImagePath, IsAsync=True, Mode=OneWay}" />
 
 
                                                     <Grid.ToolTip>
-                                                        <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.ImagePath, IsAsync=True, Mode=OneWay}" />
+                                                        <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.Model.ImagePath, IsAsync=True, Mode=OneWay}" />
                                                     </Grid.ToolTip>
                                                 </Grid>
 
@@ -257,6 +257,7 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
 
                         <Border VerticalAlignment="Top" Cursor="Hand">
@@ -391,6 +392,53 @@
 
 
                         </Border>
+
+                        <Border Grid.Column="2"
+                                Margin="-15,0,0,0"
+                                Padding="10 10"
+                                VerticalAlignment="Center"
+                                Background="#10ffffff"
+                                CornerRadius="0"
+                                DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                ToolTip="Start turn off">
+                            <StackPanel>
+                                <controls2:PathButton Padding="15"
+                                                      HorizontalAlignment="Center"
+                                                      BorderHoverColor="{StaticResource DefaultRedColor}"
+                                                      BorderThickness="1"
+                                                      Command="{Binding StartTurnOff}"
+                                                      CornerRadius="15"
+                                                      EnableBorderAnimation="True"
+                                                      Glyph="{StaticResource power-off}"
+                                                      GlyphFontSize="20"
+                                                      IconHoverColor="{StaticResource DefaultRedColor}"
+                                                      IconMargin="0"
+                                                      IsReadOnly="True" />
+
+                                <TextBlock Margin="0,10,0,0"
+                                           HorizontalAlignment="Center"
+                                           DataContext="{Binding TurnOffViewModel}"
+                                           FontSize="15"
+                                           FontWeight="SemiBold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding TimeLeft}" />
+                                            <Setter Property="Foreground" Value="{StaticResource DefaultRedBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding TimeLeft}" Value="{x:Null}">
+                                                    <Setter Property="Text" Value="--:--:--" />
+                                                </DataTrigger>
+
+                                                <DataTrigger Binding="{Binding IsPaused}" Value="True">
+                                                    <Setter Property="Foreground" Value="#ccf2d73d" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+
+                        </Border>
                     </Grid>
 
                     <ListView Grid.Row="1"
@@ -453,9 +501,9 @@
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Top"
                                                    Foreground="#ccc">
-                                            <Run Text="{Binding Model.Bounds.Width}" />
+                                            <Run Text="{Binding Model.Screen.Bounds.Width}" />
                                             <Run Text="x" />
-                                            <Run Text="{Binding Model.Bounds.Height}" />
+                                            <Run Text="{Binding Model.Screen.Bounds.Height}" />
                                         </TextBlock>
 
                                         <Border Grid.Row="2"
@@ -549,19 +597,36 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
 
-                                            <controls2:PathButton Width="auto"
-                                                                  Height="auto"
-                                                                  Margin="5"
-                                                                  HorizontalAlignment="Left"
-                                                                  Command="{Binding TurnOffCommand}"
-                                                                  IconCheckedColor="{StaticResource DefaultRedColor}"
-                                                                  IconDefaultColor="#353535"
-                                                                  IconHeight="20"
-                                                                  IconHoverColor="{StaticResource DefaultRedColor}"
-                                                                  IconWidth="25"
-                                                                  IsChecked="{Binding IsDimmed, Mode=OneWay}"
-                                                                  PathStyle="{StaticResource BulbOff}"
-                                                                  ToolTip="Black out" />
+                                            <StackPanel Margin="0,5" Orientation="Horizontal">
+                                                <controls2:PathButton Width="auto"
+                                                                      Height="auto"
+                                                                      Margin="5,0,0,0"
+                                                                      HorizontalAlignment="Left"
+                                                                      Command="{Binding TurnOffCommand}"
+                                                                      IconCheckedColor="{StaticResource DefaultRedColor}"
+                                                                      IconDefaultColor="#353535"
+                                                                      IconHeight="20"
+                                                                      IconHoverColor="{StaticResource DefaultRedColor}"
+                                                                      IconWidth="25"
+                                                                      IsChecked="{Binding IsDimmed, Mode=OneWay}"
+                                                                      PathStyle="{StaticResource BulbOff}"
+                                                                      ToolTip="Black out" />
+
+                                                <controls2:PathButton Width="auto"
+                                                                      Height="auto"
+                                                                      Margin="0,0,0,0"
+                                                                      HorizontalAlignment="Left"
+                                                                      Glyph="{StaticResource rabbit-running}"
+                                                                      GlyphFontSize="20"
+                                                                      IconCheckedColor="{StaticResource DefaultRedColor}"
+                                                                      IconDefaultColor="#353535"
+                                                                      IconHeight="20"
+                                                                      IconHoverColor="{StaticResource DefaultRedColor}"
+                                                                      IconWidth="25"
+                                                                      IsChecked="{Binding IsSpeedOn, Mode=TwoWay}"
+                                                                      ToolTip="Quick turn off" />
+                                            </StackPanel>
+
 
                                             <Grid Grid.Column="1"
                                                   Margin="5,0,0,0"

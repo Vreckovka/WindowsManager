@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using WindowsManager.ViewModels.ScreenManagement.Rules;
+using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Windows;
 using VCore;
 using VCore.Standard;
@@ -21,7 +22,30 @@ using VCore.WPF.Misc;
 
 namespace WindowsManager.ViewModels.ScreenManagement
 {
-  public class ScreenViewModel : ViewModel<Screen>
+  public class ScreenModel
+  {
+    public long TotalDimmTimeTicks { get; set; }
+
+    public string Name
+    {
+      get { return Screen?.DeviceName; }
+    }
+
+    public bool ShouldByValue { get; set; }
+
+    public double? TurnOffLimit { get; set; }
+
+    public double PowerOutput { get; set; }
+
+    public DateTime StartDayOfCounting { get; set; }
+
+    [JsonIgnore]
+    public Screen Screen { get; set; }
+    public double DimmerOpacity { get; set; } = 1;
+
+  }
+
+  public class ScreenViewModel : ViewModel<ScreenModel>
   {
     private BrightnessController brightnessController;
     private ReplaySubject<int> brightnessSubject = new ReplaySubject<int>(1);
@@ -31,12 +55,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     public ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
 
-    public ScreenViewModel() : base(null)
-    {
-
-    }
-
-    public ScreenViewModel(Screen model, string fileName) : base(model)
+    public ScreenViewModel(ScreenModel model, string fileName, TurnOffViewModel turnOffViewModel) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
 
@@ -44,16 +63,18 @@ namespace WindowsManager.ViewModels.ScreenManagement
       dimmerTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
 
       filePath = fileName;
+      TurnOffViewModel = turnOffViewModel;
     }
 
     #region Properties
 
+    public TurnOffViewModel TurnOffViewModel { get; set; }
+
     #region TotalDimmTime
 
     private TimeSpan totalDimmTime;
-    private int lastSavedTime;
+    private double lastSavedTime;
 
-    [JsonIgnore]
     public TimeSpan TotalDimmTime
     {
       get { return totalDimmTime; }
@@ -64,12 +85,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
           totalDimmTime = value;
           TotalDimmTimeTicks = totalDimmTime.Ticks;
 
-          int totalSeconds = (int)totalDimmTime.TotalSeconds;
+          if (lastSavedTime == 0)
+          {
+            lastSavedTime = totalDimmTime.TotalSeconds;
+          }
 
-          if (totalSeconds % 30 == 0 && totalSeconds != lastSavedTime)
+          if (totalDimmTime.TotalSeconds - lastSavedTime>= 30 )
           {
             Save();
-            lastSavedTime = totalSeconds;
+            lastSavedTime = totalDimmTime.TotalSeconds;
           }
 
           RaisePropertyChanged(nameof(TotalSaved));
@@ -80,7 +104,22 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #endregion
 
-    public long TotalDimmTimeTicks { get; set; }
+    #region TotalDimmTimeTicks
+
+    public long TotalDimmTimeTicks
+    {
+      get { return Model.TotalDimmTimeTicks; }
+      set
+      {
+        if (value != Model.TotalDimmTimeTicks)
+        {
+          Model.TotalDimmTimeTicks = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
 
     #region IsDimmed
 
@@ -88,7 +127,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private SerialDisposable isDimmedDisposable = new SerialDisposable();
 
-    [JsonIgnore]
     public bool IsDimmed
     {
       get { return isDimmed; }
@@ -126,32 +164,79 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public string Name
     {
-      get { return Model?.DeviceName; }
+      get { return Model?.Screen.DeviceName; }
 
     }
 
     #endregion
+    
+    #region ShouldByValue
 
-    public bool ShouldByValue { get; set; }
-
-    #region TurnOffLimit
-
-    private double? turnOffLimit = null;
-
-    public double? TurnOffLimit
+    public bool ShouldByValue
     {
-      get { return turnOffLimit; }
+      get { return Model.ShouldByValue; }
       set
       {
-        if (value != turnOffLimit)
+        if (value != Model.ShouldByValue)
         {
-          turnOffLimit = value;
+          Model.ShouldByValue = value;
+          RaisePropertyChanged();
+        }
+      }
+    }
 
-          if (turnOffLimit == 0)
+    #endregion
+
+    #region IsSpeedOn
+
+    private bool isSpeedOn;
+
+    public bool IsSpeedOn
+    {
+      get { return isSpeedOn; }
+      set
+      {
+        if (value != isSpeedOn)
+        {
+          isSpeedOn = value;
+
+          if (isSpeedOn)
+          {
+            TurnOffValue = TimeSpan.FromSeconds(15).TotalMinutes;
+
+            if (!IsDimmed)
+            {
+              ShouldByValue = true;
+              StartTurnOffTimer();
+            }
+          }
+          else
+            TurnOffValue = TurnOffLimit;
+
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TurnOffValue
+
+    private double? turnOffValue;
+
+    public double? TurnOffValue
+    {
+      get { return turnOffValue; }
+      set
+      {
+        if (value != turnOffValue)
+        {
+          turnOffValue = value;
+
+          if (turnOffValue == 0)
           {
             StopTurnOffTimer();
             ShouldByValue = false;
-            File.Delete(filePath);
           }
           else
           {
@@ -160,11 +245,76 @@ namespace WindowsManager.ViewModels.ScreenManagement
               ShouldByValue = true;
               StartTurnOffTimer();
             }
+          }
 
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region TurnOffLimit
+
+    public double? TurnOffLimit
+    {
+      get { return Model.TurnOffLimit; }
+      set
+      {
+        if (value != Model.TurnOffLimit)
+        {
+          Model.TurnOffLimit = value;
+
+          if (Model.TurnOffLimit == 0)
+          {
+            File.Delete(filePath);
+          }
+          else
+          {
             Save();
           }
 
           RaisePropertyChanged();
+
+          TurnOffValue = Model.TurnOffLimit;
+        }
+      }
+    }
+
+    #endregion
+
+    #region PowerOutput
+
+    public double PowerOutput
+    {
+      get { return Model.PowerOutput; }
+      set
+      {
+        if (value != Model.PowerOutput)
+        {
+          Model.PowerOutput = value;
+          Save();
+          RaisePropertyChanged(nameof(TotalSaved));
+          RaisePropertyChanged();
+        }
+      }
+    }
+
+    #endregion
+
+    #region StartDayOfCounting
+
+    public DateTime StartDayOfCounting
+    {
+      get { return Model.StartDayOfCounting; }
+      set
+      {
+        if (value != Model.StartDayOfCounting)
+        {
+          Model.StartDayOfCounting = value;
+
+          RaisePropertyChanged();
+          RaisePropertyChanged(nameof(DaysOfUsingSoftware));
         }
       }
     }
@@ -176,7 +326,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
     private bool isActive;
     private SerialDisposable isActiveSerialDisposable = new SerialDisposable();
 
-    [JsonIgnore]
     public bool IsActive
     {
       get { return isActive; }
@@ -215,8 +364,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region Brightness
 
     private int? brightness;
-
-    [JsonIgnore]
     public int? Brightness
     {
       get { return brightness; }
@@ -239,8 +386,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region IsSelected
 
     private bool isSelected;
-
-    [JsonIgnore]
     public bool IsSelected
     {
       get { return isSelected; }
@@ -260,7 +405,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private double? timeSinceActive;
 
-    [JsonIgnore]
     public double? TimeSinceActive
     {
       get { return timeSinceActive; }
@@ -280,7 +424,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private TimeSpan? actualTimerTime;
 
-    [JsonIgnore]
     public TimeSpan? ActualTimerTime
     {
       get { return actualTimerTime; }
@@ -295,31 +438,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-
-    #region PowerOutput
-
-    private double powerOutput;
-
-    public double PowerOutput
-    {
-      get { return powerOutput; }
-      set
-      {
-        if (value != powerOutput)
-        {
-          powerOutput = value;
-          Save();
-          RaisePropertyChanged(nameof(TotalSaved));
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
+    
     #region TotalSaved
 
-    [JsonIgnore]
     public double TotalSaved
     {
       get
@@ -330,31 +451,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-
-    #region StartDayOfCounting
-
-    private DateTime startDayOfCounting;
-
-    public DateTime StartDayOfCounting
-    {
-      get { return startDayOfCounting; }
-      set
-      {
-        if (value != startDayOfCounting)
-        {
-          startDayOfCounting = value;
-
-          RaisePropertyChanged();
-          RaisePropertyChanged(nameof(DaysOfUsingSoftware));
-        }
-      }
-    }
-
-    #endregion
-
+    
     #region DaysOfUsingSoftware
 
-    [JsonIgnore]
     public int DaysOfUsingSoftware
     {
       get { return (int)(DateTime.Now - StartDayOfCounting).TotalDays; }
@@ -362,22 +461,17 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-
-    [JsonIgnore]
-    public override Screen Model { get => base.Model; set => base.Model = value; }
-
+    
     #region DimmerOpacity
-
-    private double dimmerOpacity = 1;
 
     public double DimmerOpacity
     {
-      get { return dimmerOpacity; }
+      get { return Model.DimmerOpacity; }
       set
       {
-        if (value != dimmerOpacity)
+        if (value != Model.DimmerOpacity)
         {
-          dimmerOpacity = value;
+          Model.DimmerOpacity = value;
           RaisePropertyChanged();
         }
       }
@@ -390,8 +484,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region TurnOffCommand
 
     private ActionCommand turnOffCommand;
-
-    [JsonIgnore]
     public ICommand TurnOffCommand
     {
       get
@@ -411,11 +503,11 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #region Initialize
 
-    public override async void Initialize()
+    public override void Initialize()
     {
       base.Initialize();
 
-      var handle = MonitorHelper.GetHWMonitor(Model);
+      var handle = MonitorHelper.GetHWMonitor(Model.Screen);
 
       Brightness = brightnessController.Initilize(handle);
 
@@ -461,8 +553,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
         DataContext = this
       };
 
-      dimmer.Left = Model.Bounds.X + (Model.Bounds.Width / 2) - (dimmer.Width / 2);
-      dimmer.Top = Model.Bounds.Y + (Model.Bounds.Height / 2) - (dimmer.Height / 2);
+      var screen = Model.Screen;
+
+      dimmer.Left = screen.Bounds.X + (screen.Bounds.Width / 2) - (dimmer.Width / 2);
+      dimmer.Top = screen.Bounds.Y + (screen.Bounds.Height / 2) - (dimmer.Height / 2);
 
       if (Brightness != null)
       {
@@ -471,6 +565,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       dimmer.Loaded += Dimmer_Loaded;
       dimmer.Closed += Dimmer_Closed;
+
+      if (!IsSpeedOn)
+        DimmerOpacity = 1;
 
       dimmer.Show();
     }
@@ -527,12 +624,12 @@ namespace WindowsManager.ViewModels.ScreenManagement
         return;
       }
 
-      if (TurnOffLimit == null && ShouldByValue)
+      if (TurnOffValue == null && ShouldByValue)
       {
-        TurnOffLimit = 0;
+        TurnOffValue = 0;
       }
 
-      if (TurnOffLimit != null && Model != null)
+      if (TurnOffValue != null && Model != null)
       {
         Debug.WriteLine($"{Name} - StartTurnOffTimer");
 
@@ -573,7 +670,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         TimeSinceActive = automaticTurnOffTimer.ActualTime;
 
 
-        var milsLimit = (TurnOffLimit * 60 * 1000);
+        var milsLimit = TurnOffValue * 60 * 1000;
         var milis = milsLimit - TimeSinceActive;
 
         if (milis != null)
@@ -582,9 +679,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
         if (TimeSinceActive > milsLimit)
         {
-          if (!IsDimmed && !IsActive)
+          if (!IsDimmed)
           {
-            Dimm();
+            if (!IsActive || IsSpeedOn)
+              Dimm();
           }
         }
       });
@@ -667,15 +765,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
           if ((fileExists && wasLoaded) || !fileExists)
           {
-            var json = JsonSerializer.Serialize(this);
+            var json = JsonSerializer.Serialize(Model);
 
             if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
             {
               filePath.EnsureDirectoryExists();
 
-              var serialized = JsonSerializer.Deserialize<ScreenViewModel>(json);
+              var serialized = JsonSerializer.Deserialize<ScreenModel>(json);
 
-              if(serialized != null)
+              if (serialized != null)
               {
                 File.WriteAllText(filePath, json);
               }
@@ -706,15 +804,21 @@ namespace WindowsManager.ViewModels.ScreenManagement
           {
             var data = File.ReadAllText(filePath);
 
-            var serialized = JsonSerializer.Deserialize<ScreenViewModel>(data);
+            var serialized = JsonSerializer.Deserialize<ScreenModel>(data);
 
             if (serialized != null)
             {
+              serialized.Screen = Model.Screen;
+
+              Model = serialized;
               TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
-              TurnOffLimit = serialized.TurnOffLimit;
-              PowerOutput = serialized.PowerOutput;
-              StartDayOfCounting = serialized.StartDayOfCounting;
-              ShouldByValue = serialized.ShouldByValue;
+              TurnOffValue = TurnOffLimit;
+
+              RaisePropertyChanged(nameof(TurnOffLimit));
+              RaisePropertyChanged(nameof(PowerOutput));
+              RaisePropertyChanged(nameof(StartDayOfCounting));
+              RaisePropertyChanged(nameof(ShouldByValue));
+              RaisePropertyChanged(nameof(Model));
 
               wasLoaded = true;
 

@@ -32,7 +32,7 @@ namespace WindowsManager.ViewModels.ScreenManagement.Rules
         {
           if (value is ScreenViewModel screen)
           {
-            pValue = screen.Model.DeviceName;
+            pValue = screen.Name;
           }
           else
           {

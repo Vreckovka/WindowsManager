@@ -13,6 +13,7 @@ using WindowsManager.Modularity;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.ScreenManagement;
 using WindowsManager.ViewModels.Torrents;
+using WindowsManager.ViewModels.TurnOff;
 using WindowsManager.Views.Home;
 using ChromeDriverScrapper;
 using HtmlAgilityPack;
@@ -21,6 +22,7 @@ using TorrentAPI;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
 using VCore.WPF;
+using VCore.WPF.Interfaces.Managers;
 using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
 using VCore.WPF.ViewModels;
@@ -33,7 +35,7 @@ namespace WindowsManager.ViewModels.Home
   {
     private readonly ILogger logger;
     private readonly TorrentsViewModel torrentsViewModel;
-    private readonly ITorrentProvider torrentProvider;
+    private readonly IWindowManager windowManager;
 
 
     public HomeViewModel(
@@ -42,15 +44,18 @@ namespace WindowsManager.ViewModels.Home
       ScreensManagementViewModel screensManagementViewModel,
       SoundManagerViewModel soundManagerViewModel,
       TorrentsViewModel torrentsViewModel,
-        ITorrentProvider torrentProvider
+      TurnOffViewModel turnOffViewModel,
+      IWindowManager windowManager
      ) : base(regionProvider)
     {
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
       this.torrentsViewModel = torrentsViewModel ?? throw new ArgumentNullException(nameof(torrentsViewModel));
-      this.torrentProvider = torrentProvider ?? throw new ArgumentNullException(nameof(torrentProvider));
+   
+      this.windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
 
       ScreensManagementViewModel = screensManagementViewModel;
       SoundManagerViewModel = soundManagerViewModel;
+      TurnOffViewModel = turnOffViewModel;
 
       torrentsViewModel.Torrents.CollectionChanged += Torrents_CollectionChanged;
     }
@@ -66,6 +71,7 @@ namespace WindowsManager.ViewModels.Home
 
     public ScreensManagementViewModel ScreensManagementViewModel { get; }
     public SoundManagerViewModel SoundManagerViewModel { get; }
+    public TurnOffViewModel TurnOffViewModel { get; }
 
     #region RargbtTorrrents
 
@@ -86,7 +92,6 @@ namespace WindowsManager.ViewModels.Home
 
     #endregion
 
-
     #region RefreshTorrents
 
     private ActionCommand refreshTorrents;
@@ -104,6 +109,51 @@ namespace WindowsManager.ViewModels.Home
     {
       RargbtTorrrents = null;
       torrentsViewModel.LoadTorrents(true);
+    }
+
+    #endregion
+
+    #region StartTurnOff
+
+    private ActionCommand startTurnOff;
+
+    public ICommand StartTurnOff
+    {
+      get
+      {
+        return startTurnOff ??= new ActionCommand(OnStartTurnOff);
+      }
+    }
+
+
+    private void OnStartTurnOff()
+    {
+      if(TurnOffViewModel.TimeLeft == null)
+      {
+        var result = windowManager.ShowQuestionPrompt(afterText: "Start turn off ?");
+
+        var activeScreen = ScreensManagementViewModel.Screens.FirstOrDefault(x => x.IsActive);
+
+        if (activeScreen != null)
+        {
+          activeScreen.DimmerOpacity = 0.75;
+        }
+
+        if (result == VCore.WPF.ViewModels.Prompt.PromptResult.Ok)
+        {
+          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = true);
+          TurnOffViewModel.StartCommand.Execute(null);
+        }
+      }
+      else 
+      {
+        if (TurnOffViewModel.IsPaused == true)
+        {
+          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = true);
+        }
+
+        TurnOffViewModel.PauseCommand.Execute(null);
+      }
     }
 
     #endregion
