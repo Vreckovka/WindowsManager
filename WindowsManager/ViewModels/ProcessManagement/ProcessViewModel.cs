@@ -102,7 +102,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
     {
       try
       {
-        IsLoading = true;
+        //IsLoading = true;
 
         await Task.Run(() =>
         {

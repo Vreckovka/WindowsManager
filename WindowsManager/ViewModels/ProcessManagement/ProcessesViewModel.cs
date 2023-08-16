@@ -44,7 +44,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
       SetSort(SortBy.IsFavorite);
 
-      Observable.Interval(TimeSpan.FromSeconds(1)).ObserveOnDispatcher().Subscribe((x) => UpdateProcesses()).DisposeWith(this);
+      Observable.Interval(TimeSpan.FromSeconds(5)).ObserveOnDispatcher().Subscribe((x) => UpdateProcesses()).DisposeWith(this);
 
       MainProcessesFiltered = MainProcesses;
 
@@ -170,6 +170,8 @@ namespace WindowsManager.ViewModels.ProcessManagement
 
     private void UpdateProcesses()
     {
+      MainProcesses.DisableNotification();
+
       var allProcessesList = Process.GetProcesses();
       var allProcesses = allProcessesList.GroupBy(x => x.ProcessName).ToList();
 
@@ -204,11 +206,14 @@ namespace WindowsManager.ViewModels.ProcessManagement
       SubscribeToFavorites();
       SetSort(acutalSortBy);
 
-      existing.ForEach(x =>
-    {
-      var newVersion = allProcesessesList.Single(p => p.Name == x.Name);
-      x.ChildProcesses = newVersion.ChildProcesses;
-    });
+      existing.ForEach(x => {
+        var newVersion = allProcesessesList.Single(p => p.Name == x.Name);
+
+        x.ChildProcesses = newVersion.ChildProcesses;
+      });
+
+      MainProcesses.SortView();
+      MainProcesses.EnableNotification();
     }
 
     #endregion

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -50,19 +51,19 @@ namespace WindowsManager.ViewModels.ScreenManagement
     private BrightnessController brightnessController;
     private ReplaySubject<int> brightnessSubject = new ReplaySubject<int>(1);
 
-    private string filePath;
+    private string monitorDataFilePath;
 
     public ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
 
-    public ScreenViewModel(ScreenModel model, string fileName, TurnOffViewModel turnOffViewModel) : base(model)
+    public ScreenViewModel(ScreenModel model, string monitorDataFileName, TurnOffViewModel turnOffViewModel) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
 
       automaticTurnOffTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
       dimmerTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
 
-      filePath = fileName;
+      monitorDataFilePath = monitorDataFileName;
       TurnOffViewModel = turnOffViewModel;
     }
 
@@ -90,7 +91,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
             lastSavedTime = totalDimmTime.TotalSeconds;
           }
 
-          if (totalDimmTime.TotalSeconds - lastSavedTime>= 30 )
+          if (totalDimmTime.TotalSeconds - lastSavedTime >= 30)
           {
             Save();
             lastSavedTime = totalDimmTime.TotalSeconds;
@@ -169,7 +170,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-    
+
     #region ShouldByValue
 
     public bool ShouldByValue
@@ -267,7 +268,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
           if (Model.TurnOffLimit == 0)
           {
-            File.Delete(filePath);
+            File.Delete(monitorDataFilePath);
           }
           else
           {
@@ -438,7 +439,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-    
+
     #region TotalSaved
 
     public double TotalSaved
@@ -451,7 +452,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-    
+
     #region DaysOfUsingSoftware
 
     public int DaysOfUsingSoftware
@@ -461,7 +462,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
-    
+
     #region DimmerOpacity
 
     public double DimmerOpacity
@@ -518,14 +519,14 @@ namespace WindowsManager.ViewModels.ScreenManagement
         brightnessSubject.Throttle(TimeSpan.FromSeconds(0.5)).Subscribe(x => { brightnessController.SetBrightness(x); }).DisposeWith(this);
       }
 
-      Load();
+      Load(monitorDataFilePath, true);
     }
 
     #endregion
 
     #region DimmOrUnDimm
 
-    private DimmerWindow dimmer;
+    private DimmerWindow dimmerWindow;
     public void DimmOrUnDimm()
     {
       if (!IsDimmed)
@@ -544,32 +545,33 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void Dimm()
     {
-      dimmer = new DimmerWindow()
+      dimmerWindow = new DimmerWindow()
       {
         Width = 100,
         Height = 100,
         ShowInTaskbar = false,
         Topmost = true,
-        DataContext = this
+        DataContext = this,
+        ShowActivated = true
       };
 
       var screen = Model.Screen;
 
-      dimmer.Left = screen.Bounds.X + (screen.Bounds.Width / 2) - (dimmer.Width / 2);
-      dimmer.Top = screen.Bounds.Y + (screen.Bounds.Height / 2) - (dimmer.Height / 2);
+      dimmerWindow.Left = screen.Bounds.X + (screen.Bounds.Width / 2) - (dimmerWindow.Width / 2);
+      dimmerWindow.Top = screen.Bounds.Y + (screen.Bounds.Height / 2) - (dimmerWindow.Height / 2);
 
       if (Brightness != null)
       {
         brightnessController.SetBrightness(0);
       }
 
-      dimmer.Loaded += Dimmer_Loaded;
-      dimmer.Closed += Dimmer_Closed;
+      dimmerWindow.Loaded += DimmerWindowLoaded;
+      dimmerWindow.Closed += DimmerWindowClosed;
 
       if (!IsSpeedOn)
         DimmerOpacity = 1;
 
-      dimmer.Show();
+      dimmerWindow.Show();
     }
 
     #endregion
@@ -578,10 +580,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void UnDimm()
     {
-      dimmer.Loaded -= Dimmer_Loaded;
-      dimmer.Closed -= Dimmer_Closed;
+      dimmerWindow.Loaded -= DimmerWindowLoaded;
+      dimmerWindow.Closed -= DimmerWindowClosed;
 
-      dimmer.Close();
+      dimmerWindow.Close();
 
       if (Brightness != null)
       {
@@ -595,7 +597,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #region Dimmer_Loaded
 
-    private void Dimmer_Loaded(object sender, RoutedEventArgs e)
+    private void DimmerWindowLoaded(object sender, RoutedEventArgs e)
     {
       ((Window)sender).WindowState = WindowState.Maximized;
 
@@ -606,7 +608,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #region Dimmer_Closed
 
-    private void Dimmer_Closed(object sender, System.EventArgs e)
+    private void DimmerWindowClosed(object sender, System.EventArgs e)
     {
       UnDimm();
     }
@@ -756,12 +758,12 @@ namespace WindowsManager.ViewModels.ScreenManagement
         {
           await semaphoreSlim.WaitAsync();
 
-          if (string.IsNullOrEmpty(filePath))
+          if (string.IsNullOrEmpty(monitorDataFilePath))
           {
             return;
           }
 
-          var fileExists = File.Exists(filePath);
+          var fileExists = File.Exists(monitorDataFilePath);
 
           if ((fileExists && wasLoaded) || !fileExists)
           {
@@ -769,13 +771,13 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
             if (!json.Contains('\0') && !string.IsNullOrEmpty(json))
             {
-              filePath.EnsureDirectoryExists();
+              monitorDataFilePath.EnsureDirectoryExists();
 
               var serialized = JsonSerializer.Deserialize<ScreenModel>(json);
 
               if (serialized != null)
               {
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(monitorDataFilePath, json);
               }
             }
           }
@@ -794,7 +796,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private bool wasLoaded;
     private object batton = new object();
-    private void Load()
+    private void Load(string filePath, bool loadBackup)
     {
       lock (batton)
       {
@@ -841,11 +843,28 @@ namespace WindowsManager.ViewModels.ScreenManagement
         }
         catch (JsonException ex)
         {
+          if (loadBackup)
+            LoadBackup();
         }
       }
     }
 
     #endregion
+
+    private void LoadBackup()
+    {
+      var fileName = Path.GetFileName(monitorDataFilePath);
+      var backups = new DirectoryInfo(Path.GetDirectoryName(monitorDataFilePath) + "//Backup")
+        .GetDirectories().OrderByDescending(x => x.CreationTime);
+
+      foreach (var backup in backups)
+      {
+        Load(backup.FullName + "//" + fileName, false);
+
+        if (wasLoaded)
+          break;
+      }
+    }
 
     public void RaiseTotalSaved()
     {

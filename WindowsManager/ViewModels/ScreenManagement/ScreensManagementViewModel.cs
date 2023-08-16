@@ -39,7 +39,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
     private readonly TurnOffViewModel turnOffViewModel;
 
     private string filePath;
-    private string folderPath = "Data\\Monitors";
+    //private string folderPath = "Data\\Monitors";
+    private string folderPath = "D:\\Moje applikacie\\Builds\\WindowsManager\\Data\\Monitors";
 
     public ScreensManagementViewModel(
       IRegionProvider regionProvider, 
@@ -49,6 +50,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
       this.ruleManagerViewModel = ruleManagerViewModel ?? throw new ArgumentNullException(nameof(ruleManagerViewModel));
       this.turnOffViewModel = turnOffViewModel ?? throw new ArgumentNullException(nameof(turnOffViewModel));
       filePath = folderPath + "\\monitors_data.txt";
+      
 
       ruleManagerViewModel.Rules.ItemUpdated
         .Where(x => x.EventArgs.PropertyName == nameof(RuleViewModel.IsRuleEnabled))

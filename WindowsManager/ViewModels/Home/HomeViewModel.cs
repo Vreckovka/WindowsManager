@@ -21,6 +21,7 @@ using Logger;
 using TorrentAPI;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
+using VCore.Standard.Helpers;
 using VCore.WPF;
 using VCore.WPF.Interfaces.Managers;
 using VCore.WPF.Misc;
@@ -130,17 +131,18 @@ namespace WindowsManager.ViewModels.Home
     {
       if(TurnOffViewModel.TimeLeft == null)
       {
-        var result = windowManager.ShowQuestionPrompt(afterText: "Start turn off ?");
+        //var result = windowManager.ShowQuestionPrompt(afterText: "Start turn off ?");
 
         var activeScreen = ScreensManagementViewModel.Screens.FirstOrDefault(x => x.IsActive);
 
         if (activeScreen != null)
         {
-          activeScreen.DimmerOpacity = 0.75;
+          activeScreen.DimmerOpacity = 0.80;
         }
 
-        if (result == VCore.WPF.ViewModels.Prompt.PromptResult.Ok)
+        //if (result == VCore.WPF.ViewModels.Prompt.PromptResult.Ok)
         {
+          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = false);
           ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = true);
           TurnOffViewModel.StartCommand.Execute(null);
         }
