@@ -27,7 +27,7 @@ namespace WindowsManager.ViewModels.Torrents
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
     public override string Header => "Torrents";
-    public RxObservableCollection<RargbtTorrentViewModel> Torrents { get; } = new RxObservableCollection<RargbtTorrentViewModel>();
+    public RxObservableCollection<TorrentViewModel> Torrents { get; } = new RxObservableCollection<TorrentViewModel>();
 
 
     public override void Initialize()
@@ -58,7 +58,8 @@ namespace WindowsManager.ViewModels.Torrents
             Torrents.AddRange(torrents);
           });
 
-          await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
+          // await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
+          await torrentProvider.LoadCsfdForTorrents(torrents);
         }
       });
     }

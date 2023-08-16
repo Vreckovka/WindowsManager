@@ -5,14 +5,18 @@ using VCore.Standard;
 
 namespace TorrentAPI.Domain
 {
-  public class RargbtTorrent
+  public class Torrent
   {
     public string Title { get; set; }
-    public string Category { get; set; }
-    public string Download { get; set; }
+    public long Size { get; set; }
     public int Seeders { get; set; }
     public int Leechers { get; set; }
-    public long Size { get; set; }
+    public DateTime Created { get; set; }
+  }
+  public class RargbtTorrent : Torrent
+  {
+    public string Category { get; set; }
+    public string Download { get; set; }
     public string PUpdate { get; set; }
     [JsonProperty("episode_info")]
     public EpisodeInfo EpisodeInfo { get; set; }

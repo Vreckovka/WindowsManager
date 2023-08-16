@@ -47,7 +47,7 @@ namespace WindowsManager
         .WithConstructorArgument("appID", Assembly.GetExecutingAssembly().GetName().Name);
 
 
-      Kernel.Bind<ITorrentProvider>().To<RargbtTorrentProvider>().InSingletonScope();
+      Kernel.Bind<ITorrentProvider>().To<X1337TorrentProvider>().InSingletonScope();
       Kernel.Bind<IStatusManager>().To<BaseStatusManager>();
       Kernel.Load<AudioStorageNinjectModule>();
     }

@@ -4,25 +4,22 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using Logger;
 using TorrentAPI;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
 using VPlayer.AudioStorage.Scrappers.CSFD;
-using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
-using VPlayer.Core.ViewModels.TvShows;
 
 namespace WindowsManager.ViewModels.Torrents
 {
-  public class RargbtTorrentProvider : ITorrentProvider
+  public class RargbtTorrentProvider : BaseTorrentProvider
   {
     #region Fields
 
     private readonly IRarbgApiClient rarbgApiClient;
     private readonly ILogger logger;
-    private readonly IViewModelsFactory viewModelsFactory;
-    private readonly ICSFDWebsiteScrapper iCsfdWebsiteScrapper;
+
+   
     private IEnumerable<RargbtTorrentViewModel> bestTorrents;
 
     #endregion
@@ -33,12 +30,11 @@ namespace WindowsManager.ViewModels.Torrents
       IRarbgApiClient rarbgApiClient,
       ILogger logger,
       IViewModelsFactory viewModelsFactory,
-      ICSFDWebsiteScrapper iCsfdWebsiteScrapper)
+      ICSFDWebsiteScrapper iCsfdWebsiteScrapper
+      ) : base(iCsfdWebsiteScrapper, viewModelsFactory, logger)
     {
       this.rarbgApiClient = rarbgApiClient ?? throw new ArgumentNullException(nameof(rarbgApiClient));
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-      this.viewModelsFactory = viewModelsFactory ?? throw new ArgumentNullException(nameof(viewModelsFactory));
-      this.iCsfdWebsiteScrapper = iCsfdWebsiteScrapper ?? throw new ArgumentNullException(nameof(iCsfdWebsiteScrapper));
     }
 
     #endregion
@@ -49,7 +45,7 @@ namespace WindowsManager.ViewModels.Torrents
 
     private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
-    public async Task<IEnumerable<RargbtTorrentViewModel>> LoadBestTorrents(bool forceLoad = false)
+    public override async Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false)
     {
       await semaphoreSlim.WaitAsync();
 
@@ -248,50 +244,9 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
-    public void CancelDownloads()
-    {
-      cancellationTokens.ForEach(x => x.Cancel());
-    }
+  
 
-    #region LoadCsfdForTorrents
-
-    private List<CancellationTokenSource> cancellationTokens = new List<CancellationTokenSource>();
-    public async Task LoadCsfdForTorrents(IEnumerable<VideoRargbtTorrentViewModel> videoRargbtTorrentViewModels)
-    {
-      CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-
-      CancelDownloads();
-      cancellationTokens.Add(cancellationTokenSource);
-
-      foreach (VideoRargbtTorrentViewModel videoRargbt in videoRargbtTorrentViewModels)
-      {
-        try
-        {
-          var data = await iCsfdWebsiteScrapper.GetBestFind(videoRargbt.VideoRargbtTorrent.ParsedName, cancellationTokenSource.Token);
-
-          if (data is CSFDTVShow cSFDTVShow &&
-              cSFDTVShow.Seasons != null &&
-              cSFDTVShow.Seasons.Count(x => x.SeasonEpisodes != null) == 1 &&
-              cSFDTVShow.Seasons.First(x => x.SeasonEpisodes != null).SeasonEpisodes.Count == 1)
-          {
-            data = cSFDTVShow.Seasons.First(x => x.SeasonEpisodes != null).SeasonEpisodes[0];
-          }
-
-          Application.Current.Dispatcher.Invoke(() =>
-          {
-            videoRargbt.ItemExtraData = viewModelsFactory.Create<CSFDItemViewModel>(data);
-          });
-        }
-        catch (Exception ex)
-        {
-          logger.Log(ex);
-        }
-      }
-
-    }
-
-    #endregion
-
+    
     #endregion
   }
 }

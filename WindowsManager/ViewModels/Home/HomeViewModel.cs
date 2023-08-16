@@ -76,9 +76,9 @@ namespace WindowsManager.ViewModels.Home
 
     #region RargbtTorrrents
 
-    private IEnumerable<RargbtTorrentViewModel> rargbtTorrrents;
+    private IEnumerable<TorrentViewModel> rargbtTorrrents;
 
-    public IEnumerable<RargbtTorrentViewModel> RargbtTorrrents
+    public IEnumerable<TorrentViewModel> RargbtTorrrents
     {
       get { return rargbtTorrrents; }
       set
