@@ -167,14 +167,19 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="0,2" Orientation="Horizontal">
-                                        <TextBlock Width="200"
-                                                   Margin="0,0,10,0"
-                                                   FontSize="15"
-                                                   FontWeight="Bold"
-                                                   Foreground="White"
-                                                   Text="{Binding ParsedName}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   ToolTip="{Binding ParsedName}" />
+                                        <controls:PathButton Margin="0,0,10,0"
+                                                             HorizontalAlignment="Right"
+                                                             BorderThickness="0"
+                                                             Command="{Binding ElementName=MainBorder, Path=DataContext.Download}"
+                                                             Cursor="Hand"
+                                                             FontSize="15"
+                                                             FontWeight="Bold"
+                                                             GlyphFontFamily="{StaticResource FontAwesome6Pro_Solid}"
+                                                             IconDefaultColor="#85ffffff"
+                                                             IconHoverColor="White"
+                                                             IconMargin="0"
+                                                             Style="{StaticResource down-to-line}"
+                                                             ToolTip="Download" />
 
                                         <TextBlock Width="55"
                                                    FontSize="15"
@@ -184,6 +189,7 @@
 
                                         <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
                                             <Button Width="115"
+                                                    Margin="0,0,15,0"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Command="{Binding ElementName=MainBorder, Path=DataContext.OpenInfoPage}"
@@ -192,7 +198,7 @@
                                                     Cursor="Hand"
                                                     FontSize="15"
                                                     FontWeight="Bold"
-                                                    ToolTip="{Binding InfoPageFakeUrl}">
+                                                    ToolTip="{Binding InfoPage}">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
                                                         <Setter Property="Template">
@@ -214,19 +220,7 @@
                                                 </Button.Style>
                                             </Button>
 
-                                            <controls:PathButton Margin="0,0,10,0"
-                                                                 HorizontalAlignment="Right"
-                                                                 BorderThickness="0"
-                                                                 Command="{Binding ElementName=MainBorder, Path=DataContext.Download}"
-                                                                 Cursor="Hand"
-                                                                 FontSize="15"
-                                                                 FontWeight="Bold"
-                                                                 GlyphFontFamily="{StaticResource FontAwesome6Pro_Solid}"
-                                                                 IconDefaultColor="#85ffffff"
-                                                                 IconHoverColor="White"
-                                                                 IconMargin="0"
-                                                                 Style="{StaticResource down-to-line}"
-                                                                 ToolTip="Download" />
+
                                         </StackPanel>
 
                                         <StackPanel Margin="5,0,0,0" Orientation="Horizontal">

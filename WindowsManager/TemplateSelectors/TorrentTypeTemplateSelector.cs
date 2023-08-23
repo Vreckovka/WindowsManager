@@ -7,6 +7,7 @@ using WindowsManager.ViewModels;
 using WindowsManager.ViewModels.Home;
 using WindowsManager.ViewModels.Home.Scrapers;
 using WindowsManager.ViewModels.Torrents;
+using TorrentAPI.Domain;
 
 namespace WindowsManager.TemplateSelectors
 {
@@ -17,7 +18,7 @@ namespace WindowsManager.TemplateSelectors
 
     public override DataTemplate SelectTemplate(object item, DependencyObject container)
     {
-      if (item is VideoRargbtTorrentViewModel vm)
+      if (item is VideoRargbtTorrentViewModel vm || item is VideoTorrent || item is VideoTorrentViewModel)
       {
         return Video;
       }

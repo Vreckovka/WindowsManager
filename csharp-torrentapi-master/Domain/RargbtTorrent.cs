@@ -12,20 +12,25 @@ namespace TorrentAPI.Domain
     public int Seeders { get; set; }
     public int Leechers { get; set; }
     public DateTime Created { get; set; }
+    public string CreatedString { get; set; }
+
+    public TorrentCategory CategoryObject { get; set; }
+    public int OrderNumber { get; set; }
+    public string InfoPageShort { get; set; }
+    public string InfoPage { get; set; }
+    public string Download { get; set; }
+
   }
   public class RargbtTorrent : Torrent
   {
     public string Category { get; set; }
-    public string Download { get; set; }
     public string PUpdate { get; set; }
     [JsonProperty("episode_info")]
     public EpisodeInfo EpisodeInfo { get; set; }
     public int Ranked { get; set; }
     [JsonProperty("info_page")]
-    public string InfoPage { get; set; }
-    public string InfoPageShort { get; set; }
     public string InfoPageParameter { get; set; }
-    public Category CategoryObject { get; set; }
+    public new RargbtCategory CategoryObject { get; set; }
 
     #region InfoPageFakeUrl
 
@@ -66,6 +71,13 @@ namespace TorrentAPI.Domain
     public string ParsedName { get; set; }
     public string Quality { get; set; }
     public IEnumerable<VideoRargbtTorrent> Qualities { get; set; }
+  }
+
+  public class VideoTorrent : Torrent
+  {
+    public string ParsedName { get; set; }
+    public string Quality { get; set; }
+    public IEnumerable<VideoTorrent> Qualities { get; set; }
   }
 
 

@@ -1,9 +1,10 @@
 ﻿using SoundManagement;
 using VCore.Standard;
+using VCore.Standard.ViewModels;
 
 namespace WindowsManager.ViewModels
 {
-  public class BlankSoundDeviceViewModel : ViewModel<BlankSoundDevice>
+  public class BlankSoundDeviceViewModel : ListViewItemViewModel<BlankSoundDevice>
   {
     public BlankSoundDeviceViewModel(BlankSoundDevice model) : base(model)
     {
@@ -25,6 +26,7 @@ namespace WindowsManager.ViewModels
     }
 
     #endregion
+
 
     #region IsDefault
 

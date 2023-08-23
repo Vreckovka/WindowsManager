@@ -19,6 +19,8 @@ using WindowsManager.Windows;
 using VCore;
 using VCore.Standard;
 using VCore.Standard.Helpers;
+using VCore.Standard.ViewModels;
+using VCore.WPF;
 using VCore.WPF.Misc;
 
 namespace WindowsManager.ViewModels.ScreenManagement
@@ -46,7 +48,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
   }
 
-  public class ScreenViewModel : ViewModel<ScreenModel>
+  public class ScreenViewModel : ListViewItemViewModel<ScreenModel>
   {
     private BrightnessController brightnessController;
     private ReplaySubject<int> brightnessSubject = new ReplaySubject<int>(1);
@@ -667,7 +669,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnTurnOffTimerTick(long index)
     {
-      System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+      VSynchronizationContext.PostOnUIThread(() =>
       {
         TimeSinceActive = automaticTurnOffTimer.ActualTime;
 
@@ -725,7 +727,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnIsDimmedTimerTick(long index)
     {
-      System.Windows.Application.Current.Dispatcher.Invoke(() =>
+     VSynchronizationContext.PostOnUIThread(() =>
       {
         if (dimmerTimer.ActualTime != null)
         {

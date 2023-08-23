@@ -42,6 +42,15 @@
                             <controls:VirtualizingWrapPanel Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.Template>
+                        <ControlTemplate>
+                            <ScrollViewer>
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border x:Name="ParentBorder"
@@ -65,25 +74,29 @@
                                               Margin="0,0,10,0"
                                               Background="#08ffffff">
                                             <StackPanel Margin="0,5,0,0" HorizontalAlignment="Center">
-                                                <StackPanel Margin="0,0,0,10"
-                                                            Orientation="Horizontal"
-                                                            ToolTip="{Binding CategoryObject.Name}">
-                                                    <TextBlock FontSize="20"
+                                                <Grid Margin="0,0,0,10" ToolTip="{Binding CategoryObject.Name}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="auto" />
+                                                        <ColumnDefinition />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBlock Margin="0,0,10,0"
+                                                               FontSize="20"
                                                                FontWeight="Bold"
                                                                Foreground="#e8b761"
-                                                               Text="{Binding ElementName=ParentBorder, Path=DataContext.SeedersOrderIndex}" />
+                                                               Text="{Binding ElementName=ParentBorder, Path=DataContext.Model.OrderNumber}" />
 
 
-                                                    <Image Height="25"
-                                                           Margin="5,0,0,0"
+                                                    <Image Grid.Column="1"
+                                                           Height="25"
                                                            HorizontalAlignment="Left"
                                                            VerticalAlignment="Center"
-                                                           Source="{Binding CategoryObject.Url, IsAsync=True, Mode=OneWay}" />
-                                                </StackPanel>
+                                                           Source="{Binding CategoryObject.Url}" />
+                                                </Grid>
 
 
                                                 <Grid>
-                                                    <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.Model.ImagePath, IsAsync=True, Mode=OneWay}" />
+                                                    <Image HorizontalAlignment="Left" Source="{Binding ElementName=ParentBorder, Path=DataContext.ItemExtraData.Model.ImagePath, IsAsync=True, Mode=OneWay, Converter={converters:ImageSourceConverter}}" />
 
 
                                                     <Grid.ToolTip>
@@ -132,7 +145,8 @@
                                                     <TextBlock FontSize="15"
                                                                FontWeight="Bold"
                                                                Foreground="{StaticResource YellowBrush}"
-                                                               Text="{Binding Size, ConverterParameter=N2, Converter={converters:FileSizeConverter}}" />
+                                                               Text="{Binding Size, ConverterParameter=N2, Converter={converters:FileSizeConverter}}"
+                                                               ToolTip="{Binding Size, ConverterParameter=N2, Converter={converters:FileSizeConverter}}" />
 
 
                                                 </StackPanel>
@@ -143,7 +157,8 @@
                                                     <TextBlock FontSize="15"
                                                                FontWeight="Bold"
                                                                Foreground="#959595"
-                                                               Text="{Binding Leechers}" />
+                                                               Text="{Binding Leechers}"
+                                                               ToolTip="{Binding Leechers}" />
                                                 </StackPanel>
 
                                             </StackPanel>
@@ -155,10 +170,11 @@
                                                     <TextBlock Width="60"
                                                                Style="{StaticResource ParameterLabel}"
                                                                Text="Created:" />
-                                                    <TextBlock FontSize="15"
+                                                    <TextBlock FontSize="12"
                                                                FontWeight="Bold"
                                                                Foreground="#ccc"
-                                                               Text="{Binding Created, StringFormat={}{0:dd.MM.yy}}" />
+                                                               Text="{Binding CreatedString}"
+                                                               ToolTip="{Binding CreatedString}" />
                                                 </StackPanel>
 
                                                 <StackPanel Orientation="Horizontal">
@@ -168,7 +184,8 @@
                                                     <TextBlock FontSize="15"
                                                                FontWeight="Bold"
                                                                Foreground="{StaticResource GreenBrush3}"
-                                                               Text="{Binding Seeders}" />
+                                                               Text="{Binding Seeders}"
+                                                               ToolTip="{Binding Seeders}" />
                                                 </StackPanel>
 
 
@@ -187,7 +204,7 @@
                                                         Cursor="Hand"
                                                         FontSize="15"
                                                         FontWeight="Bold"
-                                                        ToolTip="{Binding InfoPageFakeUrl}">
+                                                        ToolTip="{Binding InfoPage}">
                                                     <Button.Style>
                                                         <Style TargetType="Button">
                                                             <Setter Property="Template">
@@ -219,7 +236,6 @@
                                                             Content="{Binding DataContext, ElementName=ParentBorder}"
                                                             ContentTemplateSelector="{StaticResource TorrentTypeTemplateSelector}" />
                                         </Grid>
-
                                     </Grid>
 
 
@@ -395,7 +411,7 @@
 
                         <Border Grid.Column="2"
                                 Margin="-15,0,0,0"
-                                Padding="10 10"
+                                Padding="10,10"
                                 VerticalAlignment="Center"
                                 Background="#10ffffff"
                                 CornerRadius="0"

@@ -140,7 +140,7 @@ namespace WindowsManager.ViewModels.Torrents
             torrent.InfoPageShort = Regex.Match(origInfoPage, @"__(.+)").Groups[1].Value;
           }
 
-          var categories = Category.GetCategories().ToList();
+          var categories = RargbtCategory.GetCategories().ToList();
 
           foreach (var torrent in list)
           {
@@ -229,7 +229,7 @@ namespace WindowsManager.ViewModels.Torrents
 
           for (int i = 0; i < oreders.Count; i++)
           {
-            oreders[i].SeedersOrderIndex = i + 1;
+            oreders[i].Model.OrderNumber = i + 1;
           }
 
           return oreders;

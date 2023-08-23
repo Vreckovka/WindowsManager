@@ -12,8 +12,11 @@ namespace WindowsManager.ViewModels.Torrents
 {
   public class TorrentViewModel : ViewModel<Torrent>
   {
+    private readonly Torrent model;
+
     public TorrentViewModel(Torrent model) : base(model)
     {
+      this.model = model ?? throw new ArgumentNullException(nameof(model));
       Name = model.Title;
     }
 
@@ -26,11 +29,9 @@ namespace WindowsManager.ViewModels.Torrents
       {
         return openInfoPage ??= new ActionCommand<string>(async (parameter) =>
         {
-          if (!string.IsNullOrEmpty(parameter))
+          if (!string.IsNullOrEmpty(model.InfoPage))
           {
-            //var path = await rarbgApiClient.GetInfoPageLink(parameter);
-
-           // OnOpenInBrowser(path);
+            OnOpenInBrowser(model.InfoPage);
           }
         });
       }
@@ -38,19 +39,19 @@ namespace WindowsManager.ViewModels.Torrents
 
     #endregion
 
-    //#region Download
+    #region Download
 
-    //private ActionCommand download;
+    private ActionCommand download;
 
-    //public ICommand Download
-    //{
-    //  get
-    //  {
-    //    return download ??= new ActionCommand(() => OnOpenInBrowser(Model.Download));
-    //  }
-    //}
+    public ICommand Download
+    {
+      get
+      {
+        return download ??= new ActionCommand(() => OnOpenInBrowser(Model.Download),() => !string.IsNullOrEmpty(Model.Download));
+      }
+    }
 
-    //#endregion
+    #endregion
 
     #region OnOpenInBrowser
 
@@ -100,25 +101,6 @@ namespace WindowsManager.ViewModels.Torrents
         if (value != name)
         {
           name = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region SeedersOrderIndex
-
-    private int seedersOrderIndex;
-
-    public int SeedersOrderIndex
-    {
-      get { return seedersOrderIndex; }
-      set
-      {
-        if (value != seedersOrderIndex)
-        {
-          seedersOrderIndex = value;
           RaisePropertyChanged();
         }
       }
@@ -228,104 +210,6 @@ namespace WindowsManager.ViewModels.Torrents
     }
 
     #endregion
-
-    #region CsfdData
-
-    private CSFDItemViewModel itemExtraData;
-
-    public CSFDItemViewModel ItemExtraData
-    {
-      get { return itemExtraData; }
-      set
-      {
-        if (value != itemExtraData)
-        {
-          itemExtraData = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region Name
-
-    private string name;
-
-    public string Name
-    {
-      get { return name; }
-      set
-      {
-        if (value != name)
-        {
-          name = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region SeedersOrderIndex
-
-    private int seedersOrderIndex;
-
-    public int SeedersOrderIndex
-    {
-      get { return seedersOrderIndex; }
-      set
-      {
-        if (value != seedersOrderIndex)
-        {
-          seedersOrderIndex = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region ImageUrl
-
-    private string imageUrl;
-
-    public string ImageUrl
-    {
-      get { return imageUrl; }
-      set
-      {
-        if (value != imageUrl)
-        {
-          imageUrl = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region Created
-
-    private DateTime? created;
-
-    public DateTime? Created
-    {
-      get { return created; }
-      set
-      {
-        if (value != created)
-        {
-          created = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
- 
-
   }
 
   public class VideoRargbtTorrentViewModel : RargbtTorrentViewModel
@@ -335,11 +219,27 @@ namespace WindowsManager.ViewModels.Torrents
       Name = model.ParsedName;
     }
 
-    public VideoRargbtTorrent VideoRargbtTorrent
+    public VideoRargbtTorrent VideoTorrent
     {
       get
       {
         return (VideoRargbtTorrent)Model;
+      }
+    }
+  }
+
+  public class VideoTorrentViewModel : TorrentViewModel
+  {
+    public VideoTorrentViewModel(VideoTorrent model) : base(model)
+    {
+      Name = model.ParsedName;
+    }
+
+    public VideoTorrent VideoTorrent
+    {
+      get
+      {
+        return (VideoTorrent)Model;
       }
     }
   }

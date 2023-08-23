@@ -66,25 +66,30 @@
                                 Background="#10ffffff"
                                 Orientation="Horizontal">
                         <controls1:PathButton x:Name="QualitiesToggleButton"
-                                              Margin="0,0,5,0"
                                               Padding="5"
                                               HorizontalContentAlignment="Left"
                                               BorderHoverColor="AntiqueWhite"
                                               BorderThickness="1"
-                                              Content="Other qualities"
                                               FontSize="14"
                                               ForegroundCheckedColor="#f5a142"
                                               ForegroundDefaultColor="#757575"
                                               IconCheckedColor="#f5a142"
                                               IconHeight="7"
+                                              IconMargin="5 0 10 0"
                                               IconWidth="11"
-                                              PathStyle="{StaticResource angle-down}" />
+                                              PathStyle="{StaticResource angle-down}">
 
-                        <TextBlock Margin="0,0,15,0"
-                                   VerticalAlignment="Center"
-                                   FontSize="17"
-                                   Foreground="#f5a142"
-                                   Text="{Binding Model.Qualities.Count, Mode=OneWay}" />
+                            <TextBlock Margin="0,0,10,0"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       FontSize="16"
+                                       Foreground="#60ffffff">
+                                <Run Text="Other qualities" />
+                                <Run />
+
+                                <Run Foreground="#f5a142" Text="{Binding Model.Qualities.Count, Mode=OneWay}" />
+                            </TextBlock>
+                        </controls1:PathButton>
 
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -118,13 +123,14 @@
     </DataTemplate>
 
     <DataTemplate x:Key="RaragbtOtherDataTemplate">
-        <TextBlock Margin="0,0"
+        <TextBlock Margin="0,0,10,0"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    FontSize="15"
                    FontWeight="Bold"
                    Foreground="#ebd886"
                    Text="{Binding Model.Title}"
+                   TextTrimming="CharacterEllipsis"
                    ToolTip="{Binding Model.Title}" />
 
     </DataTemplate>

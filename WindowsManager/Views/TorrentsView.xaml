@@ -28,10 +28,9 @@
                                         ToolTip="{Binding Model.CategoryObject.Name}">
                                 <TextBlock FontSize="20"
                                            FontWeight="Bold"
-                                           Foreground="#e8b761"
-                                           Text="{Binding ElementName=ParentBorder, Path=DataContext.SeedersOrderIndex}" />
+                                           Foreground="#e8b761" />
 
-
+                                <TextBlock>ss</TextBlock>
                                 <Image Height="25"
                                        Margin="5,0,0,0"
                                        HorizontalAlignment="Left"
@@ -43,15 +42,17 @@
                                     Width="40"
                                     Height="33"
                                     Margin="0,0,10,0">
-                                <Button HorizontalAlignment="Center" Style="{StaticResource CSFDItem}" />
+                                <Button HorizontalAlignment="Center" Style="{StaticResource CSFDItem}">
+                                    <TextBlock>asdsad</TextBlock>
+                                </Button>
 
                                 <Border.Style>
                                     <Style TargetType="Border">
-                                        <Style.Triggers>
+                                        <!--<Style.Triggers>
                                             <DataTrigger Binding="{Binding Model.CategoryObject.IsVideoCategory}" Value="false">
                                                 <Setter Property="Visibility" Value="Hidden" />
                                             </DataTrigger>
-                                        </Style.Triggers>
+                                        </Style.Triggers>-->
                                     </Style>
                                 </Border.Style>
                             </Border>
