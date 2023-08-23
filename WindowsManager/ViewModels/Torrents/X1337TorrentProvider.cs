@@ -82,7 +82,6 @@ namespace WindowsManager.ViewModels.Torrents
              {
                Url = $"{url}/{category}",
                Id = categoryId,
-               Name = X1337Category.GetName(categoryId),
              };
 
              var torrent = categoryObject.IsVideoCategory ? new VideoTorrent() : new Torrent();
