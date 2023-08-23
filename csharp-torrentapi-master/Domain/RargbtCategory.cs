@@ -26,7 +26,7 @@
   {
     public static bool IsVideoCategory(int id)
     {
-      return id == 42 || id == 54 || id == 73 || id == 75 || id == 41 || id == 1 || id == 4;
+      return id == 42 || id == 54 || id == 73 || id == 75 || id == 41 || id == 1 || id == 4 || id == 76 || id == 70 || id == 71;
     }
 
 

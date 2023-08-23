@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TorrentAPI.Domain;
 using VCore.Standard.Factories.ViewModels;
 using VCore.Standard.Helpers;
+using VPlayer.AudioStorage.InfoDownloader;
 using VPlayer.AudioStorage.Scrappers.CSFD;
 
 namespace WindowsManager.ViewModels.Torrents
@@ -180,7 +181,7 @@ namespace WindowsManager.ViewModels.Torrents
            videoTorrent.ParsedName = parsedName;
          }
 
-         var videoGroups = videoTorrents.GroupBy(x => x.ParsedName);
+         var videoGroups = videoTorrents.GroupBy(x => AudioInfoDownloader.GetClearName(x.ParsedName.ToLower()));
 
          foreach (var group in videoGroups)
          {
