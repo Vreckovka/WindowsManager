@@ -18,6 +18,7 @@
                 <Setter Property="FontSize" Value="15" />
                 <Setter Property="Cursor" Value="Hand" />
                 <Setter Property="Command" Value="{Binding ItemExtraData.OpenCsfd}" />
+                <Setter Property="ToolTipService.PlacementRectangle" Value="50,0,0,0" />
 
                 <Setter Property="Template">
                     <Setter.Value>
@@ -151,7 +152,9 @@
 
                 <Setter Property="ToolTip">
                     <Setter.Value>
-                        <ContentControl Content="{Binding ItemExtraData}" ContentTemplate="{StaticResource CsfdTooltip}" />
+                        <AdornerDecorator>
+                            <ContentPresenter Content="{Binding ItemExtraData}" ContentTemplate="{StaticResource CsfdTooltip}" />
+                        </AdornerDecorator>
                     </Setter.Value>
                 </Setter>
             </Style>
@@ -188,8 +191,8 @@
                                                    Text="{Binding Quality}" />
 
                                         <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
-                                            <Button Width="115"
-                                                    Margin="0,0,15,0"
+                                            <Button Width="125"
+                                                    Margin="0,0,0,0"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Command="{Binding ElementName=MainBorder, Path=DataContext.OpenInfoPage}"

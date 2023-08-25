@@ -10,6 +10,7 @@ namespace WindowsManager.ViewModels.Torrents
     Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false);
 
     Task LoadCsfdForTorrents(IEnumerable<TorrentViewModel> videoRargbtTorrentViewModels);
+    Task GetMagnetLinks(IEnumerable<TorrentViewModel> videoRargbtTorrentViewModels);
 
     void CancelDownloads();
   }

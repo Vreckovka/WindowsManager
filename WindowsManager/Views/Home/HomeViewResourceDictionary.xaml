@@ -5,6 +5,7 @@
                     xmlns:domain="clr-namespace:VPlayer.AudioStorage.Scrappers.CSFD.Domain;assembly=VPlayer.AudioStorage"
                     xmlns:templateSelectors="clr-namespace:WindowsManager.TemplateSelectors">
 
+
     <Style x:Key="ParameterLabel" TargetType="TextBlock">
         <Setter Property="Foreground" Value="#656565" />
         <Setter Property="FontSize" Value="14" />
@@ -61,8 +62,9 @@
                                    ToolTip="{Binding Model.ParsedName}" />
                     </StackPanel>
 
-                    <StackPanel Margin="0,10,0,5"
+                    <StackPanel Margin="0,15,0,5"
                                 HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
                                 Background="#10ffffff"
                                 Orientation="Horizontal">
                         <controls1:PathButton x:Name="QualitiesToggleButton"
@@ -82,7 +84,7 @@
                             <TextBlock Margin="0,0,10,0"
                                        VerticalAlignment="Center"
                                        FontFamily="Consolas"
-                                       FontSize="16"
+                                       FontSize="13"
                                        Foreground="#60ffffff">
                                 <Run Text="Other qualities" />
                                 <Run />

@@ -63,6 +63,9 @@ namespace WindowsManager.ViewModels.Torrents
 
     }
 
+    public abstract Task GetMagnetLinks(IEnumerable<TorrentViewModel> videoRargbtTorrentViewModels);
+  
+
     #endregion
 
     public abstract Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false);

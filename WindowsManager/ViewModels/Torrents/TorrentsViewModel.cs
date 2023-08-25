@@ -59,7 +59,8 @@ namespace WindowsManager.ViewModels.Torrents
           });
 
           // await torrentProvider.LoadCsfdForTorrents(torrents.OfType<VideoRargbtTorrentViewModel>());
-          await torrentProvider.LoadCsfdForTorrents(torrents);
+          await torrentProvider.LoadCsfdForTorrents(torrents); 
+          await torrentProvider.GetMagnetLinks(torrents);
         }
       });
     }

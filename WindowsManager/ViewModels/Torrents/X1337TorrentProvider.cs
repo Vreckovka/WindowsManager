@@ -8,8 +8,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TorrentAPI.Domain;
+using VCore;
 using VCore.Standard.Factories.ViewModels;
 using VCore.Standard.Helpers;
+using VCore.WPF;
 using VPlayer.AudioStorage.InfoDownloader;
 using VPlayer.AudioStorage.Scrappers.CSFD;
 
@@ -27,6 +29,26 @@ namespace WindowsManager.ViewModels.Torrents
       this.viewModelsFactory = viewModelsFactory ?? throw new ArgumentNullException(nameof(viewModelsFactory));
     }
 
+    public override Task GetMagnetLinks(IEnumerable<TorrentViewModel> videoRargbtTorrentViewModels)
+    {
+      return Task.Run(() =>
+      {
+        foreach (var torrent in videoRargbtTorrentViewModels)
+        {
+          var html = chromeDriverProvider.SafeNavigate(torrent.Model.InfoPage, out var red);
+
+          var document = new HtmlDocument();
+
+          document.LoadHtml(html);
+
+          var magnetNode = document.DocumentNode.SelectSingleNode("/html/body/main/div/div/div/div[2]/div[1]/ul[1]/li[1]/a");
+
+          torrent.Model.Download = magnetNode.Attributes.SingleOrDefault(x => x.Name == "href")?.Value;
+          VSynchronizationContext.PostOnUIThread(() => torrent.downloadCommand.RaiseCanExecuteChanged());
+        }
+      });
+    }
+
     public override async Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false)
     {
       var torrents = (await GetTorrent()).ToList();
@@ -42,7 +64,7 @@ namespace WindowsManager.ViewModels.Torrents
         .Where(x => x.CategoryObject.IsVideoCategory)
         .Select(x => viewModelsFactory.Create<VideoTorrentViewModel>(x)).ToList();
 
-     
+
 
       list.AddRange(videoTorrents);
       list.AddRange(otherTorrents);
@@ -89,7 +111,7 @@ namespace WindowsManager.ViewModels.Torrents
 
              var urlParameter = torrentNode.ChildNodes[1].ChildNodes[1].Attributes[0].Value;
 
-             torrent.Title = torrentNode.ChildNodes[1].ChildNodes[1].InnerText;
+             torrent.Title = Uri.UnescapeDataString(torrentNode.ChildNodes[1].ChildNodes[1].InnerText);
              torrent.Seeders = int.Parse(torrentNode.ChildNodes[3].InnerText);
              torrent.Leechers = int.Parse(torrentNode.ChildNodes[5].InnerText);
              torrent.Size = FromStringToLongFileSize(torrentNode.ChildNodes[9].ChildNodes[0].InnerText);
@@ -102,9 +124,9 @@ namespace WindowsManager.ViewModels.Torrents
 
              if (torrent.CategoryObject.IsVideoCategory)
              {
-               torrent.CategoryObject.Url =$"https://rargb.to/static/images/categories/cat_new{18}.gif";
-             } 
-             else if(torrent.CategoryObject.Id != 48)
+               torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{18}.gif";
+             }
+             else if (torrent.CategoryObject.Id != 48)
              {
                torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{(int)0x21}.gif";
              }
@@ -139,7 +161,19 @@ namespace WindowsManager.ViewModels.Torrents
 
              if (match.Success)
              {
-               parsedName = match.Groups[1].Value?.Replace(".", " ");
+               var matchName = match.Groups[1].Value.Replace(" ", ".");
+               nameRegex = new Regex(@"(.+)\..*?(\d+)");
+               var nameMatch = nameRegex.Match(matchName);
+
+               if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
+               {
+                 parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
+               }
+               else
+               {
+                 parsedName = match.Groups[1].Value?.Replace(".", " ");
+               }
+
                quality = match.Groups[2].Value?.Replace(".", " ");
              }
              else
@@ -149,7 +183,19 @@ namespace WindowsManager.ViewModels.Torrents
 
                if (match.Success)
                {
-                 parsedName = match.Groups[1].Value?.Replace(".", " ");
+                 var matchName = match.Groups[1].Value.Replace(" ", ".");
+                 nameRegex = new Regex(@"(.+)\..*?(\d+)");
+                 var nameMatch = nameRegex.Match(matchName);
+
+                 if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
+                 {
+                   parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
+                 }
+                 else
+                 {
+                   parsedName = match.Groups[1].Value?.Replace(".", " ");
+                 }
+
                  quality = match.Groups[2].Value?.Replace(".", " ");
                }
                else
@@ -178,10 +224,12 @@ namespace WindowsManager.ViewModels.Torrents
            }
 
            videoTorrent.Quality = quality;
-           videoTorrent.ParsedName = parsedName;
+           videoTorrent.ParsedName = parsedName.Replace("(", "");
          }
 
-         var videoGroups = videoTorrents.GroupBy(x => AudioInfoDownloader.GetClearName(x.ParsedName.ToLower()));
+         var videoGroups = videoTorrents.GroupBy(x => StringHelper.GetClearString(x.ParsedName.ToLower()));
+
+         var duplicates = new List<VideoTorrent>();
 
          foreach (var group in videoGroups)
          {
@@ -189,9 +237,10 @@ namespace WindowsManager.ViewModels.Torrents
            var groupL = group.ToList();
 
            first.Qualities = groupL.Skip(1).Take(groupL.Count - 1);
+           duplicates.AddRange(first.Qualities);
          }
 
-         return torrents.OrderBy(x => x.OrderNumber).AsEnumerable();
+         return torrents.Where(x => !duplicates.Contains(x)).OrderBy(x => x.OrderNumber).AsEnumerable();
        });
 
     }
@@ -227,12 +276,6 @@ namespace WindowsManager.ViewModels.Torrents
 
 
       return (long)(doubleValue * multiplicator);
-    }
-
-
-    public void CancelDownloads()
-    {
-      throw new NotImplementedException();
     }
   }
 }

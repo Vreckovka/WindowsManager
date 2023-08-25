@@ -45,6 +45,11 @@ namespace WindowsManager.ViewModels.Torrents
 
     private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
 
+    public override Task GetMagnetLinks(IEnumerable<TorrentViewModel> videoRargbtTorrentViewModels)
+    {
+      throw new NotImplementedException();
+    }
+
     public override async Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false)
     {
       await semaphoreSlim.WaitAsync();

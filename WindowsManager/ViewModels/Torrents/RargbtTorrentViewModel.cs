@@ -41,13 +41,13 @@ namespace WindowsManager.ViewModels.Torrents
 
     #region Download
 
-    private ActionCommand download;
+    public ActionCommand downloadCommand;
 
     public ICommand Download
     {
       get
       {
-        return download ??= new ActionCommand(() => OnOpenInBrowser(Model.Download),() => !string.IsNullOrEmpty(Model.Download));
+        return downloadCommand ??= new ActionCommand(() => OnOpenInBrowser(Model.Download),() => !string.IsNullOrEmpty(Model.Download));
       }
     }
 

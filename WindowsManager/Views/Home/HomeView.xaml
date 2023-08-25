@@ -45,7 +45,7 @@
 
                     <ItemsControl.Template>
                         <ControlTemplate>
-                            <ScrollViewer>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                                 <ItemsPresenter />
                             </ScrollViewer>
                         </ControlTemplate>
@@ -62,7 +62,7 @@
                                     BorderBrush="#45cccccc"
                                     BorderThickness="1">
                                 <Grid DataContext="{Binding Model}">
-                                    <Grid VerticalAlignment="Top">
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="auto" />
                                             <ColumnDefinition />
@@ -72,6 +72,7 @@
                                         <Grid Grid.Column="0"
                                               Width="80"
                                               Margin="0,0,10,0"
+                                              VerticalAlignment="Stretch"
                                               Background="#08ffffff">
                                             <StackPanel Margin="0,5,0,0" HorizontalAlignment="Center">
                                                 <Grid Margin="0,0,0,10" ToolTip="{Binding CategoryObject.Name}">
