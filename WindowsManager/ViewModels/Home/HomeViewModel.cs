@@ -51,7 +51,7 @@ namespace WindowsManager.ViewModels.Home
     {
       this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
       this.torrentsViewModel = torrentsViewModel ?? throw new ArgumentNullException(nameof(torrentsViewModel));
-   
+
       this.windowManager = windowManager ?? throw new ArgumentNullException(nameof(windowManager));
 
       ScreensManagementViewModel = screensManagementViewModel;
@@ -129,10 +129,10 @@ namespace WindowsManager.ViewModels.Home
 
     private void OnStartTurnOff()
     {
-      if(TurnOffViewModel.TimeLeft == null)
-      {
-        //var result = windowManager.ShowQuestionPrompt(afterText: "Start turn off ?");
+      var dynamicScreens = ScreensManagementViewModel.Screens.Where(x => x.FastMode != FastMode.Pernament).ToList();
 
+      if (TurnOffViewModel.TimeLeft == null)
+      {
         var activeScreen = ScreensManagementViewModel.Screens.FirstOrDefault(x => x.IsActive);
 
         if (activeScreen != null)
@@ -140,18 +140,15 @@ namespace WindowsManager.ViewModels.Home
           activeScreen.DimmerOpacity = 0.80;
         }
 
-        //if (result == VCore.WPF.ViewModels.Prompt.PromptResult.Ok)
-        {
-          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = false);
-          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = true);
-          TurnOffViewModel.StartCommand.Execute(null);
-        }
+        dynamicScreens.ForEach(x => x.FastMode = FastMode.Off);
+        dynamicScreens.ForEach(x => x.FastMode = FastMode.On);
+        TurnOffViewModel.StartCommand.Execute(null);
       }
-      else 
+      else
       {
         if (TurnOffViewModel.IsPaused == true)
         {
-          ScreensManagementViewModel.Screens.ForEach(x => x.IsSpeedOn = true);
+          dynamicScreens.ForEach(x => x.FastMode = FastMode.On);
         }
 
         TurnOffViewModel.PauseCommand.Execute(null);

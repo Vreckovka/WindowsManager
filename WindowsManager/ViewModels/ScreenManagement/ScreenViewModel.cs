@@ -46,6 +46,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
     public Screen Screen { get; set; }
     public double DimmerOpacity { get; set; } = 1;
 
+    public bool IsFastModeOn { get; set; }
+
+  }
+
+  public enum FastMode
+  {
+    Off,
+    On,
+    Pernament
   }
 
   public class ScreenViewModel : ListViewItemViewModel<ScreenModel>
@@ -67,6 +76,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       monitorDataFilePath = monitorDataFileName;
       TurnOffViewModel = turnOffViewModel;
+
     }
 
     #region Properties
@@ -190,20 +200,55 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #endregion
 
-    #region IsSpeedOn
-
-    private bool isSpeedOn;
-
-    public bool IsSpeedOn
+    public bool IsFastMode
     {
-      get { return isSpeedOn; }
+      get
+      {
+        switch (fastMode)
+        {
+          case FastMode.Off:
+            return false;
+          case FastMode.On:
+            return true;
+          case FastMode.Pernament:
+            return true;
+        }
+
+        return false;
+      }
       set
       {
-        if (value != isSpeedOn)
+        switch (fastMode)
         {
-          isSpeedOn = value;
+          case FastMode.Off:
+            FastMode = FastMode.On;
+            break;
+          case FastMode.On:
+            FastMode = FastMode.Pernament;
+            break;
+          case FastMode.Pernament:
+            FastMode = FastMode.Off;
+            break;
+        }
 
-          if (isSpeedOn)
+        RaisePropertyChanged(nameof(FastMode));
+      }
+    }
+
+    #region FastMode
+
+    private FastMode fastMode;
+
+    public FastMode FastMode
+    {
+      get { return fastMode; }
+      set
+      {
+        if (value != fastMode)
+        {
+          fastMode = value;
+
+          if (IsFastMode)
           {
             TurnOffValue = TimeSpan.FromSeconds(15).TotalMinutes;
 
@@ -217,9 +262,23 @@ namespace WindowsManager.ViewModels.ScreenManagement
             TurnOffValue = TurnOffLimit;
 
           RaisePropertyChanged();
+          RaisePropertyChanged(nameof(IsFastMode));
+
+          if (fastMode == FastMode.Pernament)
+          {
+            Model.IsFastModeOn = true;
+            Save();
+          }
+          else if (Model.IsFastModeOn)
+          {
+            Model.IsFastModeOn = false;
+            Save();
+          }
         }
       }
     }
+
+
 
     #endregion
 
@@ -554,7 +613,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         ShowInTaskbar = false,
         Topmost = true,
         DataContext = this,
-        ShowActivated = true
+        ShowActivated = false
       };
 
       var screen = Model.Screen;
@@ -570,7 +629,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
       dimmerWindow.Loaded += DimmerWindowLoaded;
       dimmerWindow.Closed += DimmerWindowClosed;
 
-      if (!IsSpeedOn)
+      if (!IsFastMode)
         DimmerOpacity = 1;
 
       dimmerWindow.Show();
@@ -685,7 +744,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         {
           if (!IsDimmed)
           {
-            if (!IsActive || IsSpeedOn)
+            if (!IsActive || IsFastMode)
               Dimm();
           }
         }
@@ -727,22 +786,22 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnIsDimmedTimerTick(long index)
     {
-     VSynchronizationContext.PostOnUIThread(() =>
-      {
-        if (dimmerTimer.ActualTime != null)
-        {
-          var oldValue = ActualTimerTime;
+      VSynchronizationContext.PostOnUIThread(() =>
+       {
+         if (dimmerTimer.ActualTime != null)
+         {
+           var oldValue = ActualTimerTime;
 
-          ActualTimerTime = TimeSpan.FromMilliseconds(dimmerTimer.ActualTime.Value);
+           ActualTimerTime = TimeSpan.FromMilliseconds(dimmerTimer.ActualTime.Value);
 
-          var diff = ActualTimerTime - oldValue;
+           var diff = ActualTimerTime - oldValue;
 
-          if (diff != null)
-          {
-            TotalDimmTime += diff.Value;
-          }
-        }
-      });
+           if (diff != null)
+           {
+             TotalDimmTime += diff.Value;
+           }
+         }
+       });
     }
 
     #endregion
@@ -817,6 +876,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
               Model = serialized;
               TotalDimmTime = TimeSpan.FromTicks(serialized.TotalDimmTimeTicks);
               TurnOffValue = TurnOffLimit;
+
+              FastMode = Model.IsFastModeOn ? FastMode.Pernament : FastMode.Off;
 
               RaisePropertyChanged(nameof(TurnOffLimit));
               RaisePropertyChanged(nameof(PowerOutput));

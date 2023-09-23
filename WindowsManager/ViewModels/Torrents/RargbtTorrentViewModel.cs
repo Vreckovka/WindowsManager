@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
 using TorrentAPI;
@@ -234,6 +236,8 @@ namespace WindowsManager.ViewModels.Torrents
     {
       Name = model.ParsedName;
     }
+
+    public IEnumerable<VideoTorrentViewModel> Qualities { get; set; } = new List<VideoTorrentViewModel>();
 
     public VideoTorrent VideoTorrent
     {

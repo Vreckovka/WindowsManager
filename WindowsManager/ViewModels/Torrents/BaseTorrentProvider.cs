@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Logger;
 using VCore.Standard.Factories.ViewModels;
+using VCore.WPF;
 using VPlayer.AudioStorage.Scrappers.CSFD;
 using VPlayer.AudioStorage.Scrappers.CSFD.Domain;
 using VPlayer.Core.ViewModels.TvShows;
@@ -50,7 +51,7 @@ namespace WindowsManager.ViewModels.Torrents
             data = cSFDTVShow.Seasons.First(x => x.SeasonEpisodes != null).SeasonEpisodes[0];
           }
 
-          Application.Current.Dispatcher.Invoke(() =>
+          VSynchronizationContext.PostOnUIThread(() =>
           {
             torrent.ItemExtraData = viewModelsFactory.Create<CSFDItemViewModel>(data);
           });

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TorrentAPI.Domain;
@@ -35,18 +36,35 @@ namespace WindowsManager.ViewModels.Torrents
       {
         foreach (var torrent in videoRargbtTorrentViewModels)
         {
-          var html = chromeDriverProvider.SafeNavigate(torrent.Model.InfoPage, out var red);
 
-          var document = new HtmlDocument();
+          torrent.Model.Download = GetMagnetLink(torrent.Model.InfoPage);
 
-          document.LoadHtml(html);
+          if (torrent is VideoTorrentViewModel videoTorrent)
+          {
+            foreach (var qualityTorrent in videoTorrent.Qualities)
+            {
+              qualityTorrent.Model.Download = GetMagnetLink(qualityTorrent.Model.InfoPage);
 
-          var magnetNode = document.DocumentNode.SelectSingleNode("/html/body/main/div/div/div/div[2]/div[1]/ul[1]/li[1]/a");
+              VSynchronizationContext.PostOnUIThread(() => qualityTorrent.downloadCommand?.RaiseCanExecuteChanged());
+            }
+          }
 
-          torrent.Model.Download = magnetNode.Attributes.SingleOrDefault(x => x.Name == "href")?.Value;
-          VSynchronizationContext.PostOnUIThread(() => torrent.downloadCommand.RaiseCanExecuteChanged());
+          VSynchronizationContext.PostOnUIThread(() => torrent.downloadCommand?.RaiseCanExecuteChanged());
         }
       });
+    }
+
+    private string GetMagnetLink(string url)
+    {
+      var html = new WebClient().DownloadString(url);
+
+      var document = new HtmlDocument();
+
+      document.LoadHtml(html);
+
+      var magnetNode = document.DocumentNode.SelectSingleNode("/html/body/main/div/div/div/div[2]/div[1]/ul[1]/li[1]/a");
+
+      return magnetNode.Attributes.SingleOrDefault(x => x.Name == "href")?.Value;
     }
 
     public override async Task<IEnumerable<TorrentViewModel>> LoadBestTorrents(bool forceLoad = false)
@@ -64,7 +82,7 @@ namespace WindowsManager.ViewModels.Torrents
         .Where(x => x.CategoryObject.IsVideoCategory)
         .Select(x => viewModelsFactory.Create<VideoTorrentViewModel>(x)).ToList();
 
-
+      videoTorrents.Where(x => x.VideoTorrent.Qualities.Any()).ForEach(x => { x.Qualities = x.VideoTorrent.Qualities.Select(y => viewModelsFactory.Create<VideoTorrentViewModel>(y)); });
 
       list.AddRange(videoTorrents);
       list.AddRange(otherTorrents);
@@ -77,171 +95,173 @@ namespace WindowsManager.ViewModels.Torrents
       var url = "https://1337x.to";
 
       return Task.Run(() =>
-       {
-         var html = chromeDriverProvider.SafeNavigate($"{url}/top-100", out var rurl);
+      {
+        var link = $"{url}/top-100";
+        var html = new WebClient().DownloadString(link);
+        //var html = chromeDriverProvider.SafeNavigate(link, out var rurl);
 
-         var document = new HtmlDocument();
+        var document = new HtmlDocument();
 
-         document.LoadHtml(html);
+        document.LoadHtml(html);
 
-         var torrentsNodes = document.DocumentNode.SelectNodes("/html/body/main/div/div/div[2]/div/table/tbody/tr");
+        var torrentsNodes = document.DocumentNode.SelectNodes("/html/body/main/div/div/div[2]/div/table/tbody/tr");
 
-         var torrents = torrentsNodes.Select(torrentNode =>
-         {
-           {
-             string category = "";
-             int categoryId = 0;
+        var torrents = torrentsNodes.Select(torrentNode =>
+        {
+          {
+            string category = "";
+            int categoryId = 0;
 
-             try
-             {
-               category = torrentNode.ChildNodes[1].ChildNodes[0].Attributes[0].Value;
-               categoryId = int.Parse(Regex.Match(category, @"\d+").Groups[0].Value);
-             }
-             catch (Exception)
-             {
-             }
+            try
+            {
+              category = torrentNode.ChildNodes[1].ChildNodes[0].Attributes[0].Value;
+              categoryId = int.Parse(Regex.Match(category, @"\d+").Groups[0].Value);
+            }
+            catch (Exception)
+            {
+            }
 
-             var categoryObject = new TorrentCategory()
-             {
-               Url = $"{url}/{category}",
-               Id = categoryId,
-             };
+            var categoryObject = new TorrentCategory()
+            {
+              Url = $"{url}/{category}",
+              Id = categoryId,
+            };
 
-             var torrent = categoryObject.IsVideoCategory ? new VideoTorrent() : new Torrent();
+            var torrent = categoryObject.IsVideoCategory ? new VideoTorrent() : new Torrent();
 
-             var urlParameter = torrentNode.ChildNodes[1].ChildNodes[1].Attributes[0].Value;
+            var urlParameter = torrentNode.ChildNodes[1].ChildNodes[1].Attributes[0].Value;
 
-             torrent.Title = Uri.UnescapeDataString(torrentNode.ChildNodes[1].ChildNodes[1].InnerText);
-             torrent.Seeders = int.Parse(torrentNode.ChildNodes[3].InnerText);
-             torrent.Leechers = int.Parse(torrentNode.ChildNodes[5].InnerText);
-             torrent.Size = FromStringToLongFileSize(torrentNode.ChildNodes[9].ChildNodes[0].InnerText);
-             torrent.InfoPage = $"{url}{urlParameter}";
-             torrent.CreatedString = torrentNode.ChildNodes[7].InnerText;
+            torrent.Title = Uri.UnescapeDataString(torrentNode.ChildNodes[1].ChildNodes[1].InnerText);
+            torrent.Seeders = int.Parse(torrentNode.ChildNodes[3].InnerText);
+            torrent.Leechers = int.Parse(torrentNode.ChildNodes[5].InnerText);
+            torrent.Size = FromStringToLongFileSize(torrentNode.ChildNodes[9].ChildNodes[0].InnerText);
+            torrent.InfoPage = $"{url}{urlParameter}";
+            torrent.CreatedString = torrentNode.ChildNodes[7].InnerText;
 
-             torrent.InfoPageShort = Regex.Match(urlParameter, @"(.+)\/.+\/").Groups[1].Value;
+            torrent.InfoPageShort = Regex.Match(urlParameter, @"(.+)\/.+\/").Groups[1].Value;
 
-             torrent.CategoryObject = categoryObject;
+            torrent.CategoryObject = categoryObject;
 
-             if (torrent.CategoryObject.IsVideoCategory)
-             {
-               torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{18}.gif";
-             }
-             else if (torrent.CategoryObject.Id != 48)
-             {
-               torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{(int)0x21}.gif";
-             }
-             else
-             {
-               torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new4.gif";
-             }
+            if (torrent.CategoryObject.IsVideoCategory)
+            {
+              torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{18}.gif";
+            }
+            else if (torrent.CategoryObject.Id != 48)
+            {
+              torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new{(int)0x21}.gif";
+            }
+            else
+            {
+              torrent.CategoryObject.Url = $"https://rargb.to/static/images/categories/cat_new4.gif";
+            }
 
-             return torrent;
-           }
-         }).ToList();
+            return torrent;
+          }
+        }).ToList();
 
-         var i = 0;
+        var i = 0;
 
-         torrents.ForEach(z =>
-         {
-           z.OrderNumber = ++i;
-         });
+        torrents.ForEach(z =>
+        {
+          z.OrderNumber = ++i;
+        });
 
-         var videoTorrents = torrents.OfType<VideoTorrent>().ToList();
+        var videoTorrents = torrents.OfType<VideoTorrent>().ToList();
 
-         foreach (var videoTorrent in videoTorrents)
-         {
-           var name = videoTorrent.Title;
-           string parsedName = "";
-           string quality = "";
+        foreach (var videoTorrent in videoTorrents)
+        {
+          var name = videoTorrent.Title;
+          string parsedName = "";
+          string quality = "";
 
-           if (!string.IsNullOrEmpty(name))
-           {
-             var nameRegex = new Regex(@"(.+)(\d...p)");
-             var match = nameRegex.Match(name);
+          if (!string.IsNullOrEmpty(name))
+          {
+            var nameRegex = new Regex(@"(.+)(\d...p)");
+            var match = nameRegex.Match(name);
 
-             if (match.Success)
-             {
-               var matchName = match.Groups[1].Value.Replace(" ", ".");
-               nameRegex = new Regex(@"(.+)\..*?(\d+)");
-               var nameMatch = nameRegex.Match(matchName);
+            if (match.Success)
+            {
+              var matchName = match.Groups[1].Value.Replace(" ", ".");
+              nameRegex = new Regex(@"(.+)\..*?(\d+)");
+              var nameMatch = nameRegex.Match(matchName);
 
-               if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
-               {
-                 parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
-               }
-               else
-               {
-                 parsedName = match.Groups[1].Value?.Replace(".", " ");
-               }
+              if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
+              {
+                parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
+              }
+              else
+              {
+                parsedName = match.Groups[1].Value?.Replace(".", " ");
+              }
 
-               quality = match.Groups[2].Value?.Replace(".", " ");
-             }
-             else
-             {
-               nameRegex = new Regex(@"(.+)(\d..p)");
-               match = nameRegex.Match(name);
+              quality = match.Groups[2].Value?.Replace(".", " ");
+            }
+            else
+            {
+              nameRegex = new Regex(@"(.+)(\d..p)");
+              match = nameRegex.Match(name);
 
-               if (match.Success)
-               {
-                 var matchName = match.Groups[1].Value.Replace(" ", ".");
-                 nameRegex = new Regex(@"(.+)\..*?(\d+)");
-                 var nameMatch = nameRegex.Match(matchName);
+              if (match.Success)
+              {
+                var matchName = match.Groups[1].Value.Replace(" ", ".");
+                nameRegex = new Regex(@"(.+)\..*?(\d+)");
+                var nameMatch = nameRegex.Match(matchName);
 
-                 if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
-                 {
-                   parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
-                 }
-                 else
-                 {
-                   parsedName = match.Groups[1].Value?.Replace(".", " ");
-                 }
+                if (nameMatch.Groups[2].Value?.Replace(".", " ").Length == 4)
+                {
+                  parsedName = nameMatch.Groups[1].Value?.Replace(".", " ");
+                }
+                else
+                {
+                  parsedName = match.Groups[1].Value?.Replace(".", " ");
+                }
 
-                 quality = match.Groups[2].Value?.Replace(".", " ");
-               }
-               else
-               {
-                 nameRegex = new Regex(@"(.+)WEBRip");
-                 match = nameRegex.Match(name);
+                quality = match.Groups[2].Value?.Replace(".", " ");
+              }
+              else
+              {
+                nameRegex = new Regex(@"(.+)WEBRip");
+                match = nameRegex.Match(name);
 
-                 if (match.Success)
-                 {
-                   parsedName = match.Groups[1].Value?.Replace(".", " ");
-                   quality = "WEBRip";
-                 }
-                 else
-                 {
-                   nameRegex = new Regex(@"(.+)WEB");
-                   match = nameRegex.Match(name);
+                if (match.Success)
+                {
+                  parsedName = match.Groups[1].Value?.Replace(".", " ");
+                  quality = "WEBRip";
+                }
+                else
+                {
+                  nameRegex = new Regex(@"(.+)WEB");
+                  match = nameRegex.Match(name);
 
-                   if (match.Success)
-                   {
-                     parsedName = match.Groups[1].Value?.Replace(".", " ");
-                     quality = "WEB";
-                   }
-                 }
-               }
-             }
-           }
+                  if (match.Success)
+                  {
+                    parsedName = match.Groups[1].Value?.Replace(".", " ");
+                    quality = "WEB";
+                  }
+                }
+              }
+            }
+          }
 
-           videoTorrent.Quality = quality;
-           videoTorrent.ParsedName = parsedName.Replace("(", "");
-         }
+          videoTorrent.Quality = quality;
+          videoTorrent.ParsedName = parsedName.Replace("(", "");
+        }
 
-         var videoGroups = videoTorrents.GroupBy(x => StringHelper.GetClearString(x.ParsedName.ToLower()));
+        var videoGroups = videoTorrents.GroupBy(x => StringHelper.GetClearString(x.ParsedName.ToLower()));
 
-         var duplicates = new List<VideoTorrent>();
+        var duplicates = new List<VideoTorrent>();
 
-         foreach (var group in videoGroups)
-         {
-           var first = group.First();
-           var groupL = group.ToList();
+        foreach (var group in videoGroups)
+        {
+          var first = group.First();
+          var groupL = group.ToList();
 
-           first.Qualities = groupL.Skip(1).Take(groupL.Count - 1);
-           duplicates.AddRange(first.Qualities);
-         }
+          first.Qualities = groupL.Skip(1).Take(groupL.Count - 1);
+          duplicates.AddRange(first.Qualities);
+        }
 
-         return torrents.Where(x => !duplicates.Contains(x)).OrderBy(x => x.OrderNumber).AsEnumerable();
-       });
+        return torrents.Where(x => !duplicates.Contains(x)).OrderBy(x => x.OrderNumber).AsEnumerable();
+      });
 
     }
 

@@ -8,6 +8,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:screenManagement="clr-namespace:WindowsManager.ViewModels.ScreenManagement"
              xmlns:soundManagement="clr-namespace:SoundManagement;assembly=SoundManagement"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              d:DesignHeight="450"
@@ -635,13 +636,25 @@
                                                                       HorizontalAlignment="Left"
                                                                       Glyph="{StaticResource rabbit-running}"
                                                                       GlyphFontSize="20"
-                                                                      IconCheckedColor="{StaticResource DefaultRedColor}"
                                                                       IconDefaultColor="#353535"
                                                                       IconHeight="20"
-                                                                      IconHoverColor="{StaticResource DefaultRedColor}"
                                                                       IconWidth="25"
-                                                                      IsChecked="{Binding IsSpeedOn, Mode=TwoWay}"
-                                                                      ToolTip="Quick turn off" />
+                                                                      IsChecked="{Binding IsFastMode, Mode=TwoWay}"
+                                                                      ToolTip="Quick turn off">
+                                                    <controls2:PathButton.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
+                                                            <Setter Property="IconCheckedColor" Value="{StaticResource DefaultRedColor}" />
+                                                            <Setter Property="IconHoverColor" Value="{StaticResource DefaultRedColor}" />
+
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding FastMode}" Value="{x:Static screenManagement:FastMode.Pernament}">
+                                                                    <Setter Property="IconCheckedColor" Value="{StaticResource YellowColor}" />
+                                                                    <Setter Property="IconHoverColor" Value="{StaticResource YellowColor}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </controls2:PathButton.Style>
+                                                </controls2:PathButton>
                                             </StackPanel>
 
 

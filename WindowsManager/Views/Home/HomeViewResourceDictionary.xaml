@@ -43,7 +43,7 @@
                 <StackPanel Grid.Column="0">
 
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource ParameterLabel}" Text="Qality:  " />
+                        <TextBlock Style="{StaticResource ParameterLabel}" Text="Quality:  " />
                         <TextBlock FontSize="15"
                                    FontWeight="Bold"
                                    Foreground="#eb86a3"
