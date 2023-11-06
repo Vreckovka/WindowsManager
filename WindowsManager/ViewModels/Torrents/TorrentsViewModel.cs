@@ -34,7 +34,10 @@ namespace WindowsManager.ViewModels.Torrents
     {
       base.Initialize();
 
+#if RELEASE
       LoadTorrents();
+#endif
+
     }
 
     public void LoadTorrents(bool clear = false)
