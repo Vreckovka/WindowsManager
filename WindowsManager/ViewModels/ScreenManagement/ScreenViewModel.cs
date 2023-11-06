@@ -69,33 +69,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
     public ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
 
-    private const int SW_SHOWNOACTIVATE = 4;
-    private const int HWND_TOPMOST = -1;
-    private const uint SWP_NOACTIVATE = 0x0010;
-
-    [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-    static extern bool SetWindowPos(
-      int hWnd,             // Window handle
-      int hWndInsertAfter,  // Placement-order handle
-      int X,                // Horizontal position
-      int Y,                // Vertical position
-      int cx,               // Width
-      int cy,               // Height
-      uint uFlags);         // Window positioning flags
-
-    [DllImport("user32.dll")]
-    static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    static void ShowInactiveTopmost(Window window)
-    {
-      var handle = new WindowInteropHelper(window).Handle;
-
-      ShowWindow(handle, SW_SHOWNOACTIVATE);
-      SetWindowPos(handle.ToInt32(), HWND_TOPMOST,
-        (int)window.Left, (int)window.Top, (int)window.Width, (int)window.Height,
-        SWP_NOACTIVATE);
-    }
-
 
     public ScreenViewModel(ScreenModel model, string monitorDataFileName, TurnOffViewModel turnOffViewModel) : base(model)
     {
@@ -636,15 +609,17 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void Dimm()
     {
+      var screen = Model.Screen;
+
       dimmerWindow = new DimmerWindow()
       {
-        Width = 100,
-        Height = 100,
+        Width = screen.Bounds.Width,
+        Height = screen.Bounds.Height,
         ShowInTaskbar = false,
+        ShowActivated= false,
         DataContext = this,
+        Topmost = true
       };
-
-      var screen = Model.Screen;
 
       dimmerWindow.Left = screen.Bounds.X + (screen.Bounds.Width / 2) - (dimmerWindow.Width / 2);
       dimmerWindow.Top = screen.Bounds.Y + (screen.Bounds.Height / 2) - (dimmerWindow.Height / 2);
@@ -662,7 +637,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       dimmerWindow.Show();
     }
-    
+
     #endregion
 
     #region UnDimm
@@ -688,12 +663,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void DimmerWindowLoaded(object sender, RoutedEventArgs e)
     {
-      var window = ((Window)sender);
-
-      ShowInactiveTopmost(dimmerWindow);
-
-      window.WindowState = WindowState.Maximized;
-
       IsDimmed = true;
     }
 
