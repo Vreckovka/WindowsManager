@@ -56,7 +56,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
   {
     Off,
     On,
-    Pernament
+    Pernament,
+    Immediate
   }
 
   public class ScreenViewModel : ListViewItemViewModel<ScreenModel>
@@ -203,6 +204,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     #endregion
 
+    public bool Force { get; set; }
+
     public bool IsFastMode
     {
       get
@@ -215,26 +218,11 @@ namespace WindowsManager.ViewModels.ScreenManagement
             return true;
           case FastMode.Pernament:
             return true;
+          case FastMode.Immediate:
+            return true;
         }
 
         return false;
-      }
-      set
-      {
-        switch (fastMode)
-        {
-          case FastMode.Off:
-            FastMode = FastMode.On;
-            break;
-          case FastMode.On:
-            FastMode = FastMode.Pernament;
-            break;
-          case FastMode.Pernament:
-            FastMode = FastMode.Off;
-            break;
-        }
-
-        RaisePropertyChanged(nameof(FastMode));
       }
     }
 
@@ -253,16 +241,13 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
           if (IsFastMode)
           {
-            TurnOffValue = TimeSpan.FromSeconds(15).TotalMinutes;
-
-            if (!IsDimmed)
-            {
-              ShouldByValue = true;
-              StartTurnOffTimer();
-            }
+            StartDelayed(force: true);
           }
           else
+          {
             TurnOffValue = TurnOffLimit;
+            StopTurnOffTimer();
+          }
 
           RaisePropertyChanged();
           RaisePropertyChanged(nameof(IsFastMode));
@@ -407,10 +392,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
             StartTurnOffTimer();
 
           }
-          else if (!IsDimmed)
+          else if (!IsDimmed && FastMode != FastMode.Immediate)
           {
             StopTurnOffTimer();
-
           }
 
           if (isActive)
@@ -553,13 +537,18 @@ namespace WindowsManager.ViewModels.ScreenManagement
     {
       get
       {
-        return turnOffCommand ??= new ActionCommand(DimmOrUnDimm, CanTurnOffCommnad);
+        return turnOffCommand ??= new ActionCommand(OnTurnOffCommand, CanTurnOffCommnad);
       }
     }
 
     private bool CanTurnOffCommnad()
     {
       return true;
+    }
+
+    private void OnTurnOffCommand()
+    {
+      Dimm();
     }
 
     #endregion
@@ -616,7 +605,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         Width = screen.Bounds.Width,
         Height = screen.Bounds.Height,
         ShowInTaskbar = false,
-        ShowActivated= false,
+        ShowActivated = false,
         DataContext = this,
         Topmost = true
       };
@@ -654,7 +643,19 @@ namespace WindowsManager.ViewModels.ScreenManagement
         brightnessController.SetBrightness(Brightness.Value);
       }
 
+      if (!IsFastMode)
+      {
+        TurnOffValue = TurnOffLimit;
+        Force = false;
+      }
+       
+      StopTurnOffTimer();
       IsDimmed = false;
+
+      if (FastMode == FastMode.Immediate)
+      {
+        StartDelayed(force: true);
+      }
     }
 
     #endregion
@@ -733,7 +734,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
       {
         TimeSinceActive = automaticTurnOffTimer.ActualTime;
 
-
         var milsLimit = TurnOffValue * 60 * 1000;
         var milis = milsLimit - TimeSinceActive;
 
@@ -745,7 +745,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         {
           if (!IsDimmed)
           {
-            if (!IsActive || IsFastMode)
+            if (!IsActive || IsFastMode || Force)
               Dimm();
           }
         }
@@ -753,6 +753,19 @@ namespace WindowsManager.ViewModels.ScreenManagement
     }
 
     #endregion
+
+    private void StartDelayed(int seconds = 15, bool force = false)
+    {
+      TurnOffValue = TimeSpan.FromSeconds(seconds).TotalMinutes;
+
+      Force = force;
+
+      if ((!IsDimmed && !IsActive) || force)
+      {
+        ShouldByValue = true;
+        StartTurnOffTimer();
+      }
+    }
 
     #endregion
 

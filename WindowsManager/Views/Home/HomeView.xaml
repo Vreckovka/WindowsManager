@@ -630,31 +630,89 @@
                                                                       PathStyle="{StaticResource BulbOff}"
                                                                       ToolTip="Black out" />
 
-                                                <controls2:PathButton Width="auto"
-                                                                      Height="auto"
-                                                                      Margin="0,0,0,0"
-                                                                      HorizontalAlignment="Left"
-                                                                      Glyph="{StaticResource rabbit-running}"
-                                                                      GlyphFontSize="20"
-                                                                      IconDefaultColor="#353535"
-                                                                      IconHeight="20"
-                                                                      IconWidth="25"
-                                                                      IsChecked="{Binding IsFastMode, Mode=TwoWay}"
-                                                                      ToolTip="Quick turn off">
-                                                    <controls2:PathButton.Style>
-                                                        <Style BasedOn="{StaticResource {x:Type controls2:PathButton}}" TargetType="controls2:PathButton">
-                                                            <Setter Property="IconCheckedColor" Value="{StaticResource DefaultRedColor}" />
-                                                            <Setter Property="IconHoverColor" Value="{StaticResource DefaultRedColor}" />
+                                                <ComboBox Width="auto"
+                                                          Height="auto"
+                                                          Margin="0,0,0,0"
+                                                          HorizontalAlignment="Left"
+                                                          ItemsSource="{Binding FastMode, Converter={converters:EnumValueToCollectionConverter}, Mode=OneTime}"
+                                                          SelectedItem="{Binding FastMode}"
+                                                          ToolTip="Quick turn off">
+                                                    <ComboBox.Resources>
+                                                        <DataTemplate x:Key="DimStateTemplate">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Margin="5,5"
+                                                                           HorizontalAlignment="Center"
+                                                                           VerticalAlignment="Center"
+                                                                           FontFamily="{StaticResource FontAwesome6Pro_Regular}"
+                                                                           FontSize="20"
+                                                                           Text="{StaticResource rabbit-running}">
+                                                                    <TextBlock.Style>
+                                                                        <Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+                                                                            <Setter Property="Foreground" Value="#656565" />
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding}" Value="{x:Static screenManagement:FastMode.Pernament}">
+                                                                                    <Setter Property="Foreground" Value="{StaticResource YellowBrush}" />
 
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding FastMode}" Value="{x:Static screenManagement:FastMode.Pernament}">
-                                                                    <Setter Property="IconCheckedColor" Value="{StaticResource YellowColor}" />
-                                                                    <Setter Property="IconHoverColor" Value="{StaticResource YellowColor}" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding}" Value="{x:Static screenManagement:FastMode.On}">
+                                                                                    <Setter Property="Foreground" Value="{StaticResource DefaultRedBrush}" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding}" Value="{x:Static screenManagement:FastMode.Immediate}">
+                                                                                    <Setter Property="Foreground" Value="{StaticResource BlueBrush}" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+
+                                                                <TextBlock Margin="5,0"
+                                                                           VerticalAlignment="Center"
+                                                                           Foreground="#85ffffff"
+                                                                           Text="{Binding}" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                        <Style TargetType="ComboBoxItem">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate>
+                                                                        <Grid Cursor="Hand">
+                                                                            <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource DimStateTemplate}" />
+
+                                                                            <Grid.Style>
+                                                                                <Style TargetType="Grid">
+                                                                                    <Setter Property="Background" Value="Transparent" />
+
+                                                                                    <Style.Triggers>
+                                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                                            <Setter Property="Background" Value="#10ffffff" />
+                                                                                        </Trigger>
+                                                                                    </Style.Triggers>
+                                                                                </Style>
+                                                                            </Grid.Style>
+                                                                        </Grid>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+
+
                                                         </Style>
-                                                    </controls2:PathButton.Style>
-                                                </controls2:PathButton>
+                                                    </ComboBox.Resources>
+
+                                                    <ComboBox.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type ComboBox}}" TargetType="ComboBox">
+                                                            <Setter Property="ItemTemplate">
+                                                                <Setter.Value>
+                                                                    <DataTemplate>
+                                                                        <Grid>
+                                                                            <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource DimStateTemplate}" />
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ComboBox.Style>
+
+                                                </ComboBox>
                                             </StackPanel>
 
 

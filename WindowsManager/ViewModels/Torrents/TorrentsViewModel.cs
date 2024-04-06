@@ -34,9 +34,9 @@ namespace WindowsManager.ViewModels.Torrents
     {
       base.Initialize();
 
-#if RELEASE
+//#if RELEASE
       LoadTorrents();
-#endif
+//#endif
 
     }
 
@@ -52,7 +52,7 @@ namespace WindowsManager.ViewModels.Torrents
           });
         }
 
-        var torrents = (await torrentProvider.LoadBestTorrents())?.ToList();
+        var torrents = (await torrentProvider.LoadBestTorrents())?.OrderByDescending(x => x.Model.Seeders).ToList();
 
         if (torrents != null)
         {

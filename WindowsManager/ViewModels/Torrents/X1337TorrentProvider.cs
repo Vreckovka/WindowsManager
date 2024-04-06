@@ -87,7 +87,7 @@ namespace WindowsManager.ViewModels.Torrents
       list.AddRange(videoTorrents);
       list.AddRange(otherTorrents);
 
-      return list.OrderBy(x => x.Model.OrderNumber);
+      return list;
     }
 
     public Task<IEnumerable<Torrent>> GetTorrent()
@@ -260,7 +260,7 @@ namespace WindowsManager.ViewModels.Torrents
           duplicates.AddRange(first.Qualities);
         }
 
-        return torrents.Where(x => !duplicates.Contains(x)).OrderBy(x => x.OrderNumber).AsEnumerable();
+        return torrents.Where(x => !duplicates.Contains(x)).AsEnumerable();
       });
 
     }
