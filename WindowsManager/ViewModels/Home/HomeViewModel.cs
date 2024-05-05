@@ -141,14 +141,14 @@ namespace WindowsManager.ViewModels.Home
         }
 
         dynamicScreens.ForEach(x => x.FastMode = FastMode.Off);
-        dynamicScreens.ForEach(x => x.FastMode = FastMode.On);
+        dynamicScreens.ForEach(x => x.FastMode = FastMode.Immediate);
         TurnOffViewModel.StartCommand.Execute(null);
       }
       else
       {
         if (TurnOffViewModel.IsPaused == true)
         {
-          dynamicScreens.ForEach(x => x.FastMode = FastMode.On);
+          dynamicScreens.ForEach(x => x.FastMode = FastMode.Immediate);
         }
 
         TurnOffViewModel.PauseCommand.Execute(null);
