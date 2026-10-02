@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AppAssemblyPath Condition="'$(AppAssemblyPath)' == ''">../../WindowsManager/bin/x64/Release/netcoreapp3.1/WindowsManager.dll</AppAssemblyPath>
+    <DependencyPath>../../WindowsManager/bin/x64/Release/netcoreapp3.1</DependencyPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="WindowsManager"><HintPath>$(AppAssemblyPath)</HintPath></Reference>
+    <Reference Include="$(DependencyPath)/*.dll" Exclude="$(DependencyPath)/WindowsManager.dll;$(DependencyPath)/e_sqlite3.dll;$(DependencyPath)/sni.dll;$(DependencyPath)/lib*.dll;$(DependencyPath)/d3d*.dll;$(DependencyPath)/vk*.dll;$(DependencyPath)/vulkan*.dll;$(DependencyPath)/chrome_elf.dll;$(DependencyPath)/CefSharp*.dll;$(DependencyPath)/System.*.dll;$(DependencyPath)/Microsoft.Win32.*.dll" />
+    <Reference Include="$(DependencyPath)/System.Reactive*.dll;$(DependencyPath)/System.Text.Json.dll;$(DependencyPath)/System.Text.Encodings.Web.dll;$(DependencyPath)/System.Windows.Interactivity.dll;$(DependencyPath)/System.Configuration.ConfigurationManager.dll;$(DependencyPath)/System.Runtime.CompilerServices.Unsafe.dll;$(DependencyPath)/System.Collections.Immutable.dll" />
+  </ItemGroup>
+</Project>

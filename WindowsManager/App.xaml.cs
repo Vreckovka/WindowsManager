@@ -65,10 +65,26 @@ namespace WindowsManager
         App.Current.Shutdown();
       }
 #endif
+#if PERFORMANCE_TESTS
+      if (e.Args.Length == 3 && e.Args[0] == "--performance-test")
+        global::Program.Attach(this, e.Args[1], int.Parse(e.Args[2]));
+#endif
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+#if !PERFORMANCE_BASELINE
+      // Windows have already closed when OnExit runs. Give the asynchronous
+      // monitor restore and handle release a bounded chance to finish before
+      // the process terminates its background threads.
+      var screenManager = Kernel?.TryGet<ScreensManagementViewModel>();
+      screenManager?.Dispose();
+      if (screenManager != null)
+      {
+        try { Task.WaitAll(screenManager.Screens.Select(s => s.PendingBrightnessWork).ToArray(), 2000); }
+        catch (AggregateException ex) { System.Diagnostics.Debug.WriteLine(ex); }
+      }
+#endif
       AudioDeviceManager.Instance.Dispose();
 
       base.OnExit(e);

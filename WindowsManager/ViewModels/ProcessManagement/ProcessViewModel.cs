@@ -13,6 +13,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
     public string Name { get; set; }
 
     public Process Process { get; set; }
+    public long MemorySizeBytes { get; set; }
 
 
 
@@ -42,7 +43,7 @@ namespace WindowsManager.ViewModels.ProcessManagement
     {
       get
       {
-        return ChildProcesses.Sum(x => x.Process.WorkingSet64) / 1024 / 1024;
+        return (ChildProcesses?.Sum(x => x.MemorySizeBytes) ?? MemorySizeBytes) / 1048576.0;
       }
     }
 

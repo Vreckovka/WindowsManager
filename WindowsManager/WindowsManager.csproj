@@ -83,4 +83,23 @@
 		</None>
 	</ItemGroup>
 
+  <PropertyGroup Condition="'$(PerformanceTests)' == 'true'">
+    <DefineConstants>$(DefineConstants);PERFORMANCE_TESTS</DefineConstants>
+    <StartupObject>WindowsManager.App</StartupObject>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(PerformanceTests)' == 'true'">
+    <Compile Include="../tests/WindowsManager.Performance/Program.cs" Link="Performance/Program.cs" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(PerformanceRegression)' == 'true'">
+    <DefineConstants>$(DefineConstants);CANDIDATE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(PerformanceBaseline)' == 'true'">
+    <DefineConstants>$(DefineConstants);PERFORMANCE_BASELINE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(PerformanceBaseline)' == 'true'">
+    <Compile Remove="ActionTimer.cs;ViewModels/ScreenManagement/ScreenViewModel.cs;ViewModels/ScreenManagement/ScreensManagementViewModel.cs;ViewModels/ScreenManagement/BrightnessController.cs;ViewModels/ProcessManagement/ProcessesViewModel.cs;ViewModels/ProcessManagement/ProcessViewModel.cs" />
+    <Compile Include="../.performance/baseline-source/ActionTimer.cs;../.performance/baseline-source/ScreenViewModel.cs;../.performance/baseline-source/ScreensManagementViewModel.cs;../.performance/baseline-source/BrightnessController.cs;../.performance/baseline-source/ProcessesViewModel.cs;../.performance/baseline-source/ProcessViewModel.cs" />
+    <Page Remove="Views/ProcessManagement/ProcessesView.xaml" />
+    <Page Include="../.performance/baseline-source/ProcessesView.xaml" Link="Views/ProcessManagement/ProcessesView.xaml" />
+  </ItemGroup>
 </Project>

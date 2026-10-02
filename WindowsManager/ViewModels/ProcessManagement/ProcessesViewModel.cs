@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 using WindowsManager.Modularity;
-using WindowsManager.Views;
 using WindowsManager.Views.ProcessManagement;
 using VCore;
-using VCore.ItemsCollections;
 using VCore.Standard.Helpers;
 using VCore.WPF.Misc;
 using VCore.WPF.Modularity.RegionProviders;
@@ -21,231 +21,223 @@ using VCore.WPF.ViewModels;
 
 namespace WindowsManager.ViewModels.ProcessManagement
 {
-  public enum SortBy
-  {
-    Name,
-    SubCount,
-    Size,
-    IsFavorite,
-    None
-  }
+  public enum SortBy { Name, SubCount, Size, IsFavorite, None }
 
+  // ObservableCollection owns no per-item subscriptions. Departed processes
+  // therefore cannot stay rooted by the collection's notification machinery.
+  public class ProcessCollection : ObservableCollection<ProcessViewModel>
+  {
+    public ObservableCollection<ProcessViewModel> View => this;
+    public void Synchronize(IEnumerable<ProcessViewModel> items)
+    {
+      var desired = items.ToArray();
+      var retained = new HashSet<ProcessViewModel>(desired);
+      for (var i = Count - 1; i >= 0; i--)
+        if (!retained.Contains(this[i])) RemoveAt(i);
+      for (var i = 0; i < desired.Length; i++)
+      {
+        if (i < Count && ReferenceEquals(this[i], desired[i])) continue;
+        var oldIndex = IndexOf(desired[i]);
+        if (oldIndex >= 0) Move(oldIndex, i);
+        else Insert(i, desired[i]);
+      }
+    }
+  }
 
   public class ProcessesViewModel : RegionViewModel<ProcessesView>
   {
-    private List<string> favoriteProcesess = new List<string>();
-    private Subject<string> subject = new Subject<string>();
-    private string favoritesPath = "\\Data\\favorites.txt";
-    private SerialDisposable serialDisposable;
+    private readonly HashSet<string> favoriteProcesses;
+    private readonly Subject<string> searchSubject = new Subject<string>();
+    private readonly Subject<bool> favoritesSubject = new Subject<bool>();
+    private readonly string favoritesPath = Path.Combine(AppContext.BaseDirectory, "Data", "favorites.txt");
+    private readonly DispatcherTimer refreshTimer;
+    private bool updating;
+    private bool disposed;
+    private bool applyingSnapshot;
+    private SortBy actualSortBy = SortBy.IsFavorite;
 
     public ProcessesViewModel(IRegionProvider regionProvider) : base(regionProvider)
     {
-      serialDisposable = new SerialDisposable().DisposeWith(this);
-
-      SetSort(SortBy.IsFavorite);
-
-      Observable.Interval(TimeSpan.FromSeconds(5)).ObserveOnDispatcher().Subscribe((x) => UpdateProcesses()).DisposeWith(this);
-
-      MainProcessesFiltered = MainProcesses;
-
-      subject.ObserveOnDispatcher().Throttle(TimeSpan.FromSeconds(0.2)).Subscribe(x =>
+      var loadPath = favoritesPath;
+      var legacyPath = Path.Combine(Path.GetPathRoot(AppContext.BaseDirectory), "Data", "favorites.txt");
+      if (!File.Exists(loadPath) && File.Exists(legacyPath)) loadPath = legacyPath;
+      try
       {
-        if (string.IsNullOrEmpty(x))
-        {
-          MainProcessesFiltered = MainProcesses;
-        }
-        else
-        {
-          MainProcessesFiltered = new RxObservableCollection<ProcessViewModel>(MainProcesses.Where(p => IsInSearch(p.Name, x)));
-        }
-      });
+        favoriteProcesses = new HashSet<string>(File.Exists(loadPath)
+          ? JsonSerializer.Deserialize<List<string>>(File.ReadAllText(loadPath)) ?? new List<string>()
+          : new List<string>(), StringComparer.Ordinal);
+      }
+      catch (Exception ex) when (ex is IOException || ex is JsonException || ex is UnauthorizedAccessException)
+      {
+        Debug.WriteLine(ex);
+        favoriteProcesses = new HashSet<string>(StringComparer.Ordinal);
+      }
 
-      favoriteProcesess = JsonSerializer.Deserialize<List<string>>(File.ReadAllText(favoritesPath));
-
-      SubscribeToFavorites();
+      refreshTimer = new DispatcherTimer(DispatcherPriority.Background)
+        { Interval = TimeSpan.FromSeconds(5) };
+      refreshTimer.Tick += OnRefreshTick;
+      searchSubject.Throttle(TimeSpan.FromMilliseconds(200)).ObserveOnDispatcher()
+        .Subscribe(_ => ApplyFilter()).DisposeWith(this);
+      favoritesSubject.Throttle(TimeSpan.FromMilliseconds(150)).ObserveOnDispatcher()
+        .Subscribe(_ => SaveFavorites()).DisposeWith(this);
     }
 
     public override string RegionName { get; protected set; } = RegionNames.MainContent;
     public override string Header => "Processes";
-
-    #region SearchString
+    public ProcessCollection MainProcesses { get; } = new ProcessCollection();
+    public ProcessCollection MainProcessesFiltered { get; } = new ProcessCollection();
 
     private string searchString;
-
     public string SearchString
     {
-      get { return searchString; }
+      get => searchString;
       set
       {
-        if (value != searchString)
-        {
-          searchString = value;
-          subject.OnNext(value);
-
-          RaisePropertyChanged();
-        }
+        if (value == searchString) return;
+        searchString = value;
+        RaisePropertyChanged();
+        searchSubject.OnNext(value);
       }
     }
-
-    #endregion
-
-    #region MainProcessesFiltered
-
-    private RxObservableCollection<ProcessViewModel> mainProcessesFiltered = new RxObservableCollection<ProcessViewModel>();
-
-    public RxObservableCollection<ProcessViewModel> MainProcessesFiltered
-    {
-      get { return mainProcessesFiltered; }
-      set
-      {
-        if (value != mainProcessesFiltered)
-        {
-          mainProcessesFiltered = value;
-          RaisePropertyChanged();
-        }
-      }
-    }
-
-    #endregion
-
-    #region MainProcesses
-    public RxObservableCollection<ProcessViewModel> MainProcesses { get; } = new RxObservableCollection<ProcessViewModel>();
-
-    #endregion
-
-    #region SortCommand
 
     private ActionCommand<SortBy> sortCommand;
-
-    public ICommand SortCommand
-    {
-      get
-      {
-        return sortCommand ??= new ActionCommand<SortBy>(OnSortCommand);
-      }
-    }
-
-
+    public ICommand SortCommand => sortCommand ??= new ActionCommand<SortBy>(OnSortCommand);
     private void OnSortCommand(SortBy sortBy)
     {
-      SetSort(sortBy);
+      actualSortBy = sortBy;
+      ApplyFilter();
     }
 
-    #endregion
-
-    #region SetSort
-
-    private SortBy acutalSortBy;
-    private void SetSort(SortBy sortBy)
+    public override void OnActivation(bool firstActivation)
     {
-      MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => 0);
-      acutalSortBy = sortBy;
-
-      switch (sortBy)
-      {
-        case SortBy.Name:
-          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal));
-          break;
-        case SortBy.SubCount:
-          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.ChildProcesses.Count().CompareTo(x.ChildProcesses.Count()));
-          break;
-        case SortBy.Size:
-          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) => y.TotalMemorySize.CompareTo(x.TotalMemorySize));
-          break;
-        case SortBy.IsFavorite:
-          MainProcesses.SortType = new Comparison<ProcessViewModel>((x, y) =>
-          {
-            var result = y.IsFavorite.CompareTo(x.IsFavorite);
-            return result != 0 ? result : y.TotalMemorySize.CompareTo(x.TotalMemorySize);
-          });
-          break;
-        default:
-          throw new ArgumentOutOfRangeException(nameof(sortBy), sortBy, null);
-      }
+      base.OnActivation(firstActivation);
+      if (disposed) return;
+      refreshTimer.Start();
+      UpdateProcesses();
     }
 
-    #endregion
-
-    #region UpdateProcesses
-
-    private void UpdateProcesses()
+    public override void OnDeactived()
     {
-      MainProcesses.DisableNotification();
+      refreshTimer.Stop();
+      base.OnDeactived();
+    }
 
-      var allProcessesList = Process.GetProcesses();
-      var allProcesses = allProcessesList.GroupBy(x => x.ProcessName).ToList();
+    private void OnRefreshTick(object sender, EventArgs e) => UpdateProcesses();
 
-      var allProcesessesList = allProcesses.Select(x => new ProcessViewModel()
+    private async void UpdateProcesses()
+    {
+      if (disposed || updating) return;
+      updating = true;
+      try
       {
-        Name = x.Key,
-        ChildProcesses = x.Select(p => new ProcessViewModel()
+        var snapshot = await Task.Run(ReadProcesses);
+        if (disposed) return;
+        var existing = MainProcesses.ToDictionary(p => p.Name, StringComparer.Ordinal);
+        var rows = new List<ProcessViewModel>();
+        applyingSnapshot = true;
+        try
         {
-          Name = p.ProcessName,
-          Process = p
-        }).ToList()
-      }).ToList();
-
-
-      var removed = MainProcesses.Where(p => !allProcesessesList.Any(l => p.Name == l.Name)).ToList();
-      var newItems = allProcesessesList.Where(p => !MainProcesses.Any(l => p.Name == l.Name)).ToList();
-      var existing = MainProcesses.Where(p => allProcesessesList.Any(l => p.Name == l.Name)).ToList();
-
-      MainProcesses.AddRange(newItems);
-      MainProcesses.RemoveRange(removed);
-
-      if (!string.IsNullOrEmpty(searchString))
-      {
-        MainProcessesFiltered.AddRange(newItems.Where(x => IsInSearch(x.Name, searchString)));
-        MainProcessesFiltered.RemoveRange(removed);
+          foreach (var group in snapshot.GroupBy(p => p.Name))
+          {
+            if (!existing.TryGetValue(group.Key, out var row))
+            {
+              row = new ProcessViewModel { Name = group.Key, IsFavorite = favoriteProcesses.Contains(group.Key) };
+              row.PropertyChanged += OnProcessPropertyChanged;
+            }
+            row.ChildProcesses = group.ToArray();
+            rows.Add(row);
+          }
+          var names = new HashSet<string>(rows.Select(p => p.Name), StringComparer.Ordinal);
+          foreach (var removed in MainProcesses.Where(p => !names.Contains(p.Name)))
+            removed.PropertyChanged -= OnProcessPropertyChanged;
+          MainProcesses.Synchronize(rows);
+          ApplyFilter();
+        }
+        finally { applyingSnapshot = false; }
       }
-
-      serialDisposable.Disposable?.Dispose();
-
-      MainProcesses.Where(x => favoriteProcesess.Contains(x.Name)).ForEach(x => x.IsFavorite = true);
-
-      SubscribeToFavorites();
-      SetSort(acutalSortBy);
-
-      existing.ForEach(x => {
-        var newVersion = allProcesessesList.Single(p => p.Name == x.Name);
-
-        x.ChildProcesses = newVersion.ChildProcesses;
-      });
-
-      MainProcesses.SortView();
-      MainProcesses.EnableNotification();
+      catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
+      {
+        Debug.WriteLine(ex);
+      }
+      finally { updating = false; }
     }
 
-    #endregion
-
-    private bool IsInSearch(string name, string predicate)
+    private static List<ProcessViewModel> ReadProcesses()
     {
-      return name.Similarity(predicate) > 0.8 || name.Contains(predicate) || predicate.Contains(name);
+      var result = new List<ProcessViewModel>();
+      var processes = Process.GetProcesses();
+      try
+      {
+        foreach (var process in processes)
+        {
+          try
+          {
+            result.Add(new ProcessViewModel { Name = process.ProcessName, MemorySizeBytes = process.WorkingSet64 });
+          }
+          catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
+          {
+            // Processes may exit or deny access during a snapshot.
+          }
+        }
+      }
+      finally
+      {
+        foreach (var process in processes) process.Dispose();
+      }
+      return result;
     }
 
-    private void SubscribeToFavorites()
+    private void ApplyFilter()
     {
-      serialDisposable.Disposable = MainProcesses.ItemUpdated
-        .Where(x => x.EventArgs.PropertyName == nameof(ProcessViewModel.IsFavorite))
-        .Throttle(TimeSpan.FromSeconds(0.15))
-        .Subscribe(x => { SaveFavorites(); });
+      IEnumerable<ProcessViewModel> rows = MainProcesses;
+      switch (actualSortBy)
+      {
+        case SortBy.Name: rows = rows.OrderBy(p => p.Name, StringComparer.Ordinal); break;
+        case SortBy.SubCount: rows = rows.OrderByDescending(p => p.ChildProcesses.Count()); break;
+        case SortBy.Size: rows = rows.OrderByDescending(p => p.TotalMemorySize); break;
+        case SortBy.IsFavorite: rows = rows.OrderByDescending(p => p.IsFavorite).ThenByDescending(p => p.TotalMemorySize); break;
+      }
+      var ordered = rows.ToArray();
+      MainProcesses.Synchronize(ordered);
+      MainProcessesFiltered.Synchronize(string.IsNullOrEmpty(searchString)
+        ? ordered : ordered.Where(p => IsInSearch(p.Name, searchString)));
+    }
+
+    private bool IsInSearch(string name, string predicate) =>
+      name.Contains(predicate) || predicate.Contains(name) || name.Similarity(predicate) > 0.8;
+
+    private void OnProcessPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+      if (applyingSnapshot || e.PropertyName != nameof(ProcessViewModel.IsFavorite)) return;
+      var row = (ProcessViewModel)sender;
+      if (row.IsFavorite) favoriteProcesses.Add(row.Name);
+      else favoriteProcesses.Remove(row.Name);
+      ApplyFilter();
+      favoritesSubject.OnNext(true);
     }
 
     private void SaveFavorites()
     {
-      var newFavoriteProcesess = favoriteProcesess.ToList();
+      var json = JsonSerializer.Serialize(favoriteProcesses.OrderBy(p => p).ToArray());
+      // One small write per user change; process refreshes never trigger saves.
+      try
+      {
+        Directory.CreateDirectory(Path.GetDirectoryName(favoritesPath));
+        File.WriteAllText(favoritesPath, json);
+      }
+      catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException) { Debug.WriteLine(ex); }
+    }
 
-      var existingFavoriteProcesses = MainProcesses.Where(x => favoriteProcesess.Contains(x.Name));
-
-      var removed = existingFavoriteProcesses.Where(x => !x.IsFavorite);
-      var added = MainProcesses.Where(x => x.IsFavorite).Where(x => !favoriteProcesess.Contains(x.Name));
-
-      newFavoriteProcesess.RemoveAll(x => removed.Select(x => x.Name).Contains(x));
-      newFavoriteProcesess.AddRange(added.Select(x => x.Name));
-      favoriteProcesess = newFavoriteProcesess;
-
-      Directory.CreateDirectory("Data");
-      File.WriteAllText(favoritesPath, JsonSerializer.Serialize(newFavoriteProcesess));
+    public override void Dispose()
+    {
+      if (disposed) return;
+      disposed = true;
+      refreshTimer.Stop();
+      refreshTimer.Tick -= OnRefreshTick;
+      foreach (var row in MainProcesses) row.PropertyChanged -= OnProcessPropertyChanged;
+      base.Dispose();
+      searchSubject.Dispose();
+      favoritesSubject.Dispose();
     }
   }
 }

@@ -69,14 +69,16 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public ActionTimer automaticTurnOffTimer;
     private ActionTimer dimmerTimer;
+    private bool disposed;
+    private TimeSpan lastDimmElapsed;
 
 
     public ScreenViewModel(ScreenModel model, string monitorDataFileName, TurnOffViewModel turnOffViewModel) : base(model)
     {
       brightnessController = new BrightnessController().DisposeWith(this);
 
-      automaticTurnOffTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
-      dimmerTimer = new ActionTimer(TimeSpan.FromSeconds(0.1));
+      automaticTurnOffTimer = new ActionTimer(TimeSpan.FromSeconds(0.1)).DisposeWith(this);
+      dimmerTimer = new ActionTimer(TimeSpan.FromSeconds(1)).DisposeWith(this);
 
       monitorDataFilePath = monitorDataFileName;
       TurnOffViewModel = turnOffViewModel;
@@ -559,24 +561,33 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public override void Initialize()
     {
+      if (WasInitilized || disposed) return;
       base.Initialize();
 
-      var handle = MonitorHelper.GetHWMonitor(Model.Screen);
-
-      Brightness = brightnessController.Initilize(handle);
-
-      if (Brightness != null)
-      {
-        Brightness = 80;
-
-        brightnessSubject.Throttle(TimeSpan.FromSeconds(0.5)).Subscribe(x => { brightnessController.SetBrightness(x); }).DisposeWith(this);
-      }
+      _ = InitializeBrightnessAsync();
 
       Load(monitorDataFilePath, true);
     }
 
     #endregion
 
+    private async Task InitializeBrightnessAsync()
+    {
+      var handle = MonitorHelper.GetHWMonitor(Model.Screen);
+      try
+      {
+        var value = await Task.Run(() => brightnessController.Initilize(handle));
+        if (disposed) return;
+        Brightness = value;
+        if (value != null)
+          brightnessSubject.Throttle(TimeSpan.FromSeconds(0.5)).ObserveOnDispatcher()
+            .Subscribe(x => brightnessController.RequestBrightness(IsDimmed ? 0 : x)).DisposeWith(this);
+      }
+      catch (Exception ex) when (ex is System.ComponentModel.Win32Exception || ex is ExternalException)
+      {
+        Debug.WriteLine(ex);
+      }
+    }
     #region DimmOrUnDimm
 
     private DimmerWindow dimmerWindow;
@@ -598,6 +609,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void Dimm()
     {
+      if (disposed || dimmerWindow != null) return;
       var screen = Model.Screen;
 
       dimmerWindow = new DimmerWindow()
@@ -615,7 +627,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       if (Brightness != null)
       {
-        brightnessController.SetBrightness(0);
+        brightnessController.RequestBrightness(0);
       }
 
       dimmerWindow.Loaded += DimmerWindowLoaded;
@@ -633,31 +645,39 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void UnDimm()
     {
-      dimmerWindow.Loaded -= DimmerWindowLoaded;
-      dimmerWindow.Closed -= DimmerWindowClosed;
+      CompleteUnDimm(true);
+    }
 
-      dimmerWindow.Close();
+    private void CompleteUnDimm(bool closeWindow)
+    {
+      var window = dimmerWindow;
+      if (window == null) return;
+      dimmerWindow = null;
+      window.Loaded -= DimmerWindowLoaded;
+      window.Closed -= DimmerWindowClosed;
+
+      // Stop accounting before resetting the dimmed state, including the final
+      // fraction of a second between the last tick and the close command.
+      StopIsDimmedTimer();
+      if (closeWindow) window.Close();
+      window.DataContext = null;
 
       if (Brightness != null)
-      {
-        brightnessController.SetBrightness(Brightness.Value);
-      }
+        brightnessController.RequestBrightness(Brightness.Value);
 
       if (!IsFastMode)
       {
         TurnOffValue = TurnOffLimit;
         Force = false;
       }
-       
+
       StopTurnOffTimer();
       IsDimmed = false;
+      Save();
 
-      if (FastMode == FastMode.Immediate)
-      {
+      if (!disposed && FastMode == FastMode.Immediate)
         StartDelayed(force: true);
-      }
     }
-
     #endregion
 
     #region Dimmer_Loaded
@@ -673,7 +693,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void DimmerWindowClosed(object sender, System.EventArgs e)
     {
-      UnDimm();
+      if (ReferenceEquals(sender, dimmerWindow)) CompleteUnDimm(false);
     }
 
     #endregion
@@ -684,7 +704,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public void StartTurnOffTimer()
     {
-      if (IsDimmed)
+      if (disposed || IsDimmed)
       {
         return;
       }
@@ -717,6 +737,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
     public void StopTurnOffTimer()
     {
       automaticTurnOffTimer.StopTimer();
+      isActiveSerialDisposable.Disposable = null;
 
       TimeSinceActive = null;
       ActualTimerTime = null;
@@ -730,28 +751,15 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnTurnOffTimerTick(long index)
     {
-      VSynchronizationContext.PostOnUIThread(() =>
-      {
-        TimeSinceActive = automaticTurnOffTimer.ActualTime;
-
-        var milsLimit = TurnOffValue * 60 * 1000;
-        var milis = milsLimit - TimeSinceActive;
-
-        if (milis != null)
-          ActualTimerTime = TimeSpan.FromMilliseconds(milis.Value);
-
-
-        if (TimeSinceActive > milsLimit)
-        {
-          if (!IsDimmed)
-          {
-            if (!IsActive || IsFastMode || Force)
-              Dimm();
-          }
-        }
-      });
+      if (disposed || !automaticTurnOffTimer.IsRunning) return;
+      TimeSinceActive = automaticTurnOffTimer.ActualTime;
+      var milsLimit = TurnOffValue * 60 * 1000;
+      var remaining = milsLimit - TimeSinceActive;
+      if (remaining != null)
+        ActualTimerTime = TimeSpan.FromSeconds(Math.Max(0, Math.Floor(remaining.Value / 1000)));
+      if (TimeSinceActive > milsLimit && !IsDimmed && (!IsActive || IsFastMode || Force))
+        Dimm();
     }
-
     #endregion
 
     private void StartDelayed(int seconds = 15, bool force = false)
@@ -775,7 +783,8 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void StartIsDimmedTimer()
     {
-      ActualTimerTime = new TimeSpan(0);
+      lastDimmElapsed = TimeSpan.Zero;
+      ActualTimerTime = TimeSpan.Zero;
 
       isDimmedDisposable.Disposable = dimmerTimer.OnTimerTick.Subscribe(OnIsDimmedTimerTick);
 
@@ -789,7 +798,9 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public void StopIsDimmedTimer()
     {
+      UpdateDimmedTime();
       dimmerTimer.StopTimer();
+      isDimmedDisposable.Disposable = null;
 
       ActualTimerTime = null;
     }
@@ -800,24 +811,18 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void OnIsDimmedTimerTick(long index)
     {
-      VSynchronizationContext.PostOnUIThread(() =>
-       {
-         if (dimmerTimer.ActualTime != null)
-         {
-           var oldValue = ActualTimerTime;
-
-           ActualTimerTime = TimeSpan.FromMilliseconds(dimmerTimer.ActualTime.Value);
-
-           var diff = ActualTimerTime - oldValue;
-
-           if (diff != null)
-           {
-             TotalDimmTime += diff.Value;
-           }
-         }
-       });
+      if (!disposed) UpdateDimmedTime();
     }
 
+    private void UpdateDimmedTime()
+    {
+      if (!dimmerTimer.IsRunning) return;
+      var elapsed = dimmerTimer.Elapsed;
+      var difference = elapsed - lastDimmElapsed;
+      lastDimmElapsed = elapsed;
+      ActualTimerTime = elapsed;
+      if (difference > TimeSpan.Zero) TotalDimmTime += difference;
+    }
     #endregion
 
     #endregion
@@ -943,6 +948,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
       }
     }
 
+    public Task PendingBrightnessWork => brightnessController.PendingWork;
+
+    public void RaiseDaysOfUsingSoftware() => RaisePropertyChanged(nameof(DaysOfUsingSoftware));
+
     public void RaiseTotalSaved()
     {
       RaisePropertyChanged(nameof(TotalSaved));
@@ -952,7 +961,13 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public override void Dispose()
     {
+      if (disposed) return;
+      disposed = true;
+      UnDimm();
+      StopTurnOffTimer();
+      StopIsDimmedTimer();
       base.Dispose();
+      brightnessSubject.Dispose();
 
       isActiveSerialDisposable?.Dispose();
       isDimmedDisposable?.Dispose();

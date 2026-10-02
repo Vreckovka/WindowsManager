@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using WindowsManager.Modularity;
 using WindowsManager.ViewModels.ScreenManagement.Rules;
 using WindowsManager.ViewModels.TurnOff;
@@ -39,6 +40,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
     private readonly TurnOffViewModel turnOffViewModel;
 
     private string filePath;
+    private DispatcherTimer screenTimer;
+    private DispatcherTimer rulesTimer;
+    private DispatcherTimer statisticsTimer;
+    private bool disposed;
     //private string folderPath = "Data\\Monitors";
     private string folderPath = "D:\\Moje applikacie\\Builds\\WindowsManager\\Data\\Monitors";
 
@@ -59,7 +64,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
         {
           ((RuleViewModel)x.Sender)?.Model.Revert(Screens.ToArray());
           ruleManagerViewModel.SaveRules();
-        });
+        }).DisposeWith(this);
     }
 
     #region Properties
@@ -212,6 +217,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     public override void Initialize()
     {
+      if (WasInitilized || disposed) return;
       base.Initialize();
 
       var screensArry = System.Windows.Forms.Screen.AllScreens.ToList();
@@ -228,10 +234,10 @@ namespace WindowsManager.ViewModels.ScreenManagement
       if (Screens.Count > 0)
         Screens[0].IsSelected = true;
 
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher()
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsDimmed)).Throttle(TimeSpan.FromMilliseconds(25)).ObserveOnDispatcher()
         .Subscribe(x => OnDimmedChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
 
-      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Throttle(TimeSpan.FromMilliseconds(0.25)).ObserveOnDispatcher()
+      Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.IsActive)).Throttle(TimeSpan.FromMilliseconds(25)).ObserveOnDispatcher()
         .Subscribe(x => OnActiveChanged((ScreenViewModel)x.Sender)).DisposeWith(this);
 
       Screens.ItemUpdated.Where(x => x.EventArgs.PropertyName == nameof(ScreenViewModel.TotalDimmTime)).Subscribe((x) => OnDimmedTimeChagend()).DisposeWith(this);
@@ -247,13 +253,23 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
       UpdateActualScreen();
 
-      Observable.Interval(TimeSpan.FromSeconds(0.2)).ObserveOnDispatcher().Subscribe(x => UpdateActualScreen()).DisposeWith(this);
-      Observable.Interval(TimeSpan.FromSeconds(1)).ObserveOnDispatcher().Subscribe(x => UpdateRules()).DisposeWith(this);
+      screenTimer = new DispatcherTimer(DispatcherPriority.Background)
+        { Interval = TimeSpan.FromMilliseconds(200) };
+      screenTimer.Tick += OnScreenTimerTick;
+      screenTimer.Start();
+      rulesTimer = new DispatcherTimer(DispatcherPriority.Background)
+        { Interval = TimeSpan.FromSeconds(1) };
+      rulesTimer.Tick += OnRulesTimerTick;
+      rulesTimer.Start();
+      statisticsTimer = new DispatcherTimer(DispatcherPriority.Background)
+        { Interval = TimeSpan.FromMinutes(1) };
+      statisticsTimer.Tick += OnStatisticsTimerTick;
+      statisticsTimer.Start();
 
       Application.Current.MainWindow.Closing += MainWindow_Closing;
 
 
-      Task.Run(() => Load());
+      _ = LoadAsync();
       Task.Run(() => CreateBackup());
     }
 
@@ -377,6 +393,7 @@ namespace WindowsManager.ViewModels.ScreenManagement
 
     private void UpdateRules()
     {
+      if (disposed) return;
       ruleManagerViewModel.Rules
         .Where(x => x.Model.Types.Contains(IRuleAction.ScreenActivated))
         .Where(x => x.IsRuleEnabled)
@@ -401,7 +418,6 @@ namespace WindowsManager.ViewModels.ScreenManagement
           actualScreen.IsActive = true;
       }
 
-      RaisePropertyChanged(nameof(TotalDays));
     }
 
     #endregion
@@ -474,13 +490,14 @@ namespace WindowsManager.ViewModels.ScreenManagement
     #region Load
 
     private bool wasLoaded;
-    private void Load()
+    private async Task LoadAsync()
     {
       try
       {
         if (File.Exists(filePath))
         {
-          var data = File.ReadAllText(filePath);
+          var data = await File.ReadAllTextAsync(filePath);
+          if (disposed) return;
 
           LoadedData = JsonSerializer.Deserialize<ScreensManagementData>(data);
 
@@ -501,13 +518,34 @@ namespace WindowsManager.ViewModels.ScreenManagement
           };
         }
       }
-      catch (JsonException ex)
+      catch (Exception ex) when (ex is JsonException || ex is IOException || ex is UnauthorizedAccessException)
       {
       }
     }
 
     #endregion
 
+    private void OnScreenTimerTick(object sender, EventArgs e) => UpdateActualScreen();
+    private void OnRulesTimerTick(object sender, EventArgs e) => UpdateRules();
+    private void OnStatisticsTimerTick(object sender, EventArgs e)
+    {
+      RaisePropertyChanged(nameof(TotalDays));
+      foreach (var screen in Screens) screen.RaiseDaysOfUsingSoftware();
+    }
+
+    public override void Dispose()
+    {
+      if (disposed) return;
+      disposed = true;
+      if (screenTimer != null) { screenTimer.Stop(); screenTimer.Tick -= OnScreenTimerTick; }
+      if (rulesTimer != null) { rulesTimer.Stop(); rulesTimer.Tick -= OnRulesTimerTick; }
+      if (statisticsTimer != null) { statisticsTimer.Stop(); statisticsTimer.Tick -= OnStatisticsTimerTick; }
+      if (Application.Current?.MainWindow != null)
+        Application.Current.MainWindow.Closing -= MainWindow_Closing;
+      foreach (var screen in Screens) screen.Dispose();
+      base.Dispose();
+      Screens.Dispose();
+    }
     #endregion
 
   }
